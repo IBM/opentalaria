@@ -3,6 +3,7 @@ package main
 import (
 	"log/slog"
 	"net/http"
+	"opentalaria/config"
 	"opentalaria/logger"
 	"opentalaria/utils"
 	"os"
@@ -43,6 +44,9 @@ func main() {
 		go http.ListenAndServe(port, nil)
 	}
 
+	// global config object that will be passed to all downstream APIs and methods
+	var config config.Config
+
 	broker, err := NewBroker()
 	if err != nil {
 		slog.Error("Error initializing broker", "err", err)
@@ -54,6 +58,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	server := NewServer(broker)
+	config.Broker = &broker
+
+	server := NewServer(&config)
 	server.Run()
 }

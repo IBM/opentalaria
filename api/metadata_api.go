@@ -1,6 +1,7 @@
 package api
 
 import (
+	"opentalaria/config"
 	"opentalaria/protocol"
 	"opentalaria/utils"
 	"time"
@@ -29,11 +30,11 @@ func (m MetadataAPI) GeneratePayload() ([]byte, error) {
 		return nil, err
 	}
 
-	response := GenerateMetadataResponse(m.GetRequest().Header.RequestApiVersion)
+	response := GenerateMetadataResponse(m.GetRequest().Header.RequestApiVersion, m.Request.Config.Broker)
 	return protocol.Encode(response)
 }
 
-func GenerateMetadataResponse(version int16) *protocol.MetadataResponse {
+func GenerateMetadataResponse(version int16, broker *config.Broker) *protocol.MetadataResponse {
 	// For now the returned data is mock, just so we can continue developing the rest of the APIs.
 	// Once we have a more robust project architecture, this struct will be populated with the real
 	// cluster metadata.
@@ -43,6 +44,8 @@ func GenerateMetadataResponse(version int16) *protocol.MetadataResponse {
 	// TODO: handle throttle time
 	response.ThrottleTimeMs = 0
 
+	// TODO: we will have to handle multiple advertised listeners, this implementation is very naive and assumes OpenTalaria won't be run in cluster mode
+	// Since cluster mode is not supported for now, we take the first AdvertisedListener as broker config.
 	response.Brokers = append(response.Brokers, protocol.MetadataResponseBroker{
 		NodeID: 1,
 		Host:   "localhost",

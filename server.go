@@ -9,6 +9,7 @@ import (
 	"math"
 	"net"
 	"opentalaria/api"
+	"opentalaria/config"
 	"opentalaria/protocol"
 	"opentalaria/utils"
 	"runtime"
@@ -18,18 +19,20 @@ import (
 )
 
 type Server struct {
-	host string
-	port string
+	host   string
+	port   string
+	config *config.Config
 }
 
 type Client struct {
-	conn net.Conn
+	conn   net.Conn
+	config *config.Config
 }
 
-func NewServer(broker Broker) *Server {
+func NewServer(config *config.Config) *Server {
 	var host, port string
-	if len(broker.Listeners) > 0 {
-		listener := broker.Listeners[0]
+	if len(config.Broker.Listeners) > 0 {
+		listener := config.Broker.Listeners[0]
 		host = listener.Host
 		port = strconv.Itoa(int(listener.Port))
 	} else {
@@ -39,8 +42,9 @@ func NewServer(broker Broker) *Server {
 	}
 
 	return &Server{
-		host: host,
-		port: port,
+		host:   host,
+		port:   port,
+		config: config,
 	}
 }
 
@@ -96,7 +100,8 @@ func (server *Server) Run() {
 		}
 
 		client := &Client{
-			conn: conn,
+			conn:   conn,
+			config: server.config,
 		}
 
 		if err := sem.Acquire(ctx, 1); err != nil {
@@ -154,7 +159,10 @@ Exit:
 		var apiHandler api.API
 		switch header.RequestApiKey {
 		case (&protocol.ApiVersionsRequest{}).GetKey():
-			req, err := makeRequest(messageBytes, client.conn, (&protocol.ApiVersionsRequest{Version: header.RequestApiVersion}).GetHeaderVersion())
+			req, err := makeRequest(messageBytes,
+				client.conn,
+				(&protocol.ApiVersionsRequest{Version: header.RequestApiVersion}).GetHeaderVersion(),
+				client.config)
 			if err != nil {
 				slog.Error("error creating request", "err", err)
 				// This break exits the outer for loop and closes the socket connection.
@@ -163,14 +171,20 @@ Exit:
 			}
 			apiHandler = api.APIVersionsAPI{Request: req}
 		case (&protocol.MetadataRequest{}).GetKey():
-			req, err := makeRequest(messageBytes, client.conn, (&protocol.MetadataRequest{Version: header.RequestApiVersion}).GetHeaderVersion())
+			req, err := makeRequest(messageBytes,
+				client.conn,
+				(&protocol.MetadataRequest{Version: header.RequestApiVersion}).GetHeaderVersion(),
+				client.config)
 			if err != nil {
 				slog.Error("error creating request", "err", err)
 				break Exit
 			}
 			apiHandler = api.MetadataAPI{Request: req}
 		case (&protocol.ProduceRequest{}).GetKey():
-			req, err := makeRequest(messageBytes, client.conn, (&protocol.ProduceRequest{Version: header.RequestApiVersion}).GetHeaderVersion())
+			req, err := makeRequest(messageBytes,
+				client.conn,
+				(&protocol.ProduceRequest{Version: header.RequestApiVersion}).GetHeaderVersion(),
+				client.config)
 			if err != nil {
 				slog.Error("error creating request", "err", err)
 				break Exit
@@ -188,7 +202,7 @@ Exit:
 	}
 }
 
-func makeRequest(msg []byte, conn net.Conn, headerVersion int16) (api.Request, error) {
+func makeRequest(msg []byte, conn net.Conn, headerVersion int16, config *config.Config) (api.Request, error) {
 	// parse the full header, based on API key and version
 	header := &protocol.RequestHeader{}
 	headerSize, err := protocol.VersionedDecode(msg, header, headerVersion)
@@ -200,5 +214,6 @@ func makeRequest(msg []byte, conn net.Conn, headerVersion int16) (api.Request, e
 		Header:  *header,
 		Message: msg[headerSize:],
 		Conn:    conn,
+		Config:  config,
 	}, nil
 }
