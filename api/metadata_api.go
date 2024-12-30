@@ -30,11 +30,11 @@ func (m MetadataAPI) GeneratePayload() ([]byte, error) {
 		return nil, err
 	}
 
-	response := GenerateMetadataResponse(m.GetRequest().Header.RequestApiVersion, m.Request.Config.Broker)
+	response := GenerateMetadataResponse(m.GetRequest().Header.RequestApiVersion, m.Request.Config)
 	return protocol.Encode(response)
 }
 
-func GenerateMetadataResponse(version int16, broker *config.Broker) *protocol.MetadataResponse {
+func GenerateMetadataResponse(version int16, config *config.Config) *protocol.MetadataResponse {
 	// For now the returned data is mock, just so we can continue developing the rest of the APIs.
 	// Once we have a more robust project architecture, this struct will be populated with the real
 	// cluster metadata.
@@ -46,7 +46,7 @@ func GenerateMetadataResponse(version int16, broker *config.Broker) *protocol.Me
 
 	// TODO: we will have to handle multiple advertised listeners, this implementation is very naive and assumes OpenTalaria won't be run in cluster mode
 	// Since cluster mode is not supported for now, we take the first AdvertisedListener as broker config.
-	listener := broker.AdvertisedListeners[0]
+	listener := config.Broker.AdvertisedListeners[0]
 	response.Brokers = append(response.Brokers, protocol.MetadataResponseBroker{
 		NodeID: 1,
 		Host:   listener.Host,
@@ -54,8 +54,7 @@ func GenerateMetadataResponse(version int16, broker *config.Broker) *protocol.Me
 		Rack:   nil, // for now OpenTalaria does not support rack awareness.
 	})
 
-	clusterId := "aaabbbfff"
-	response.ClusterID = &clusterId
+	response.ClusterID = &config.Cluster.ClusterID
 	response.ControllerID = 1
 	topicName := "test-topic"
 

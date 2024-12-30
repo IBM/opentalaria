@@ -45,21 +45,12 @@ func main() {
 	}
 
 	// global config object that will be passed to all downstream APIs and methods
-	var conf config.Config
-
-	broker, err := config.NewBroker()
+	conf, err := config.NewConfig()
 	if err != nil {
 		slog.Error("Error initializing broker", "err", err)
 		os.Exit(1)
 	}
 
-	if len(broker.Listeners) > 1 {
-		slog.Error("OpenTalaria does not support more than one listener for now. See https://github.com/IBM/opentalaria/issues/18")
-		os.Exit(1)
-	}
-
-	conf.Broker = &broker
-
-	server := NewServer(&conf)
+	server := NewServer(conf)
 	server.Run()
 }
