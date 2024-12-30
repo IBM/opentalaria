@@ -1,7 +1,6 @@
 package config
 
 import (
-	"errors"
 	"opentalaria/utils"
 
 	"github.com/google/uuid"
@@ -24,11 +23,7 @@ func NewConfig() (*Config, error) {
 		return &Config{}, err
 	}
 
-	if len(broker.Listeners) > 1 {
-		return &Config{}, errors.New("OpenTalaria does not support more than one listener for now. See https://github.com/IBM/opentalaria/issues/18")
-	}
-
-	config.Broker = &broker
+	config.Broker = broker
 
 	clusterId, ok := utils.GetEnvVar("KAFKA_CLUSTER_ID", "")
 	if !ok {

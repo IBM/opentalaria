@@ -40,12 +40,12 @@ var (
 
 // NewBroker returns a new instance of Broker.
 // For now OpenTalaria does not support rack awareness, but this will change in the future.
-func NewBroker() (Broker, error) {
+func NewBroker() (*Broker, error) {
 	broker := Broker{}
 
 	listenerStr, ok := utils.GetEnvVar("listeners", "")
 	if !ok {
-		return Broker{}, errors.New("no listeners set")
+		return &Broker{}, errors.New("no listeners set")
 	}
 	listeners := strings.Split(strings.ReplaceAll(listenerStr, " ", ""), ",")
 
@@ -59,36 +59,36 @@ func NewBroker() (Broker, error) {
 
 	listenersArray, err := parseListeners(listeners, false)
 	if err != nil {
-		return Broker{}, err
+		return &Broker{}, err
 	}
 	broker.Listeners = append(broker.Listeners, listenersArray...)
 
 	err = validateListeners(&broker)
 	if err != nil {
-		return Broker{}, err
+		return &Broker{}, err
 	}
 
 	advertisedListenersArr, err := parseListeners(advertisedListeners, true)
 	if err != nil {
-		return Broker{}, err
+		return &Broker{}, err
 	}
 	broker.AdvertisedListeners = append(broker.AdvertisedListeners, advertisedListenersArr...)
 
 	err = validateAdvertisedListeners(&broker)
 	if err != nil {
-		return Broker{}, err
+		return &Broker{}, err
 	}
 
 	brokerIdSetting, _ := utils.GetEnvVar("broker.id", "-1")
 
 	brokerId, err := strconv.Atoi(brokerIdSetting)
 	if err != nil {
-		return broker, fmt.Errorf("error parsing broker.id: %s", err)
+		return &broker, fmt.Errorf("error parsing broker.id: %s", err)
 	}
 
 	// validate Broker ID
 	if brokerId > RESERVED_BROKER_MAX_ID {
-		return broker, fmt.Errorf("the configured node ID is greater than `reserved.broker.max.id`. Please adjust the `reserved.broker.max.id` setting. [%d > %d]",
+		return &Broker{}, fmt.Errorf("the configured node ID is greater than `reserved.broker.max.id`. Please adjust the `reserved.broker.max.id` setting. [%d > %d]",
 			brokerId,
 			RESERVED_BROKER_MAX_ID)
 	}
@@ -99,7 +99,11 @@ func NewBroker() (Broker, error) {
 
 	broker.BrokerID = int32(brokerId)
 
-	return broker, nil
+	if len(broker.Listeners) > 1 {
+		return &Broker{}, errors.New("OpenTalaria does not support more than one listener for now. See https://github.com/IBM/opentalaria/issues/18")
+	}
+
+	return &broker, nil
 }
 
 func parseListeners(listeners []string, advertised bool) ([]Listener, error) {
