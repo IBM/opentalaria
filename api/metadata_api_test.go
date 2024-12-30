@@ -1,6 +1,7 @@
 package api
 
 import (
+	"opentalaria/config"
 	"opentalaria/protocol"
 	"reflect"
 	"testing"
@@ -141,9 +142,13 @@ func TestMetadataAPI_GetHeaderVersion(t *testing.T) {
 }
 
 func TestMetadataAPI_GeneratePayload(t *testing.T) {
+	// This test is not very flexible, if the mock objects are changed in the config package, the expected payload has to be regenerated.
 	type fields struct {
 		Request Request
 	}
+
+	config := config.MockConfig()
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -155,9 +160,10 @@ func TestMetadataAPI_GeneratePayload(t *testing.T) {
 			fields: fields{
 				Request: Request{
 					Header: getMockHeader(1, 3, 0, 0),
+					Config: config,
 				},
 			},
-			want:    []byte{0, 0, 0, 1, 0, 0, 0, 1, 0, 9, 108, 111, 99, 97, 108, 104, 111, 115, 116, 0, 0, 35, 132, 0, 0, 0, 1, 0, 0, 0, 10, 116, 101, 115, 116, 45, 116, 111, 112, 105, 99, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+			want:    []byte{0, 0, 0, 1, 0, 0, 0, 1, 0, 9, 49, 50, 55, 46, 48, 46, 48, 46, 49, 0, 0, 35, 132, 0, 0, 0, 1, 0, 0, 0, 10, 116, 101, 115, 116, 45, 116, 111, 112, 105, 99, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
 			wantErr: false,
 		},
 	}

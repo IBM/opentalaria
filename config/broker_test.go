@@ -1,7 +1,6 @@
-package main
+package config
 
 import (
-	"opentalaria/config"
 	"reflect"
 	"testing"
 )
@@ -14,7 +13,7 @@ func Test_parseListener(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    config.Listener
+		want    Listener
 		wantErr bool
 	}{
 		{
@@ -23,10 +22,10 @@ func Test_parseListener(t *testing.T) {
 				l:           "SSL://:9092",
 				securityMap: "",
 			},
-			want: config.Listener{
+			want: Listener{
 				Host:             "",
 				Port:             9092,
-				SecurityProtocol: config.SSL,
+				SecurityProtocol: SSL,
 				ListenerName:     "ssl",
 			},
 			wantErr: false,
@@ -37,10 +36,10 @@ func Test_parseListener(t *testing.T) {
 				l:           "PLAINTEXT://localhost:9092",
 				securityMap: "",
 			},
-			want: config.Listener{
+			want: Listener{
 				Host:             "localhost",
 				Port:             9092,
-				SecurityProtocol: config.PLAINTEXT,
+				SecurityProtocol: PLAINTEXT,
 				ListenerName:     "plaintext",
 			},
 			wantErr: false,
@@ -51,10 +50,10 @@ func Test_parseListener(t *testing.T) {
 				l:           "CUSTOM://localhost:9092",
 				securityMap: "CUSTOM:PLAINTEXT",
 			},
-			want: config.Listener{
+			want: Listener{
 				Host:             "localhost",
 				Port:             9092,
-				SecurityProtocol: config.PLAINTEXT,
+				SecurityProtocol: PLAINTEXT,
 				ListenerName:     "custom",
 			},
 			wantErr: false,
@@ -65,7 +64,7 @@ func Test_parseListener(t *testing.T) {
 				l:           "CUSTOM://localhost:9092",
 				securityMap: "",
 			},
-			want:    config.Listener{},
+			want:    Listener{},
 			wantErr: true,
 		},
 		{
@@ -74,7 +73,7 @@ func Test_parseListener(t *testing.T) {
 				l:           "CUSTOM://localhost:9092",
 				securityMap: "CUSTOM:CUSTOM",
 			},
-			want:    config.Listener{},
+			want:    Listener{},
 			wantErr: true,
 		},
 		{
@@ -83,7 +82,7 @@ func Test_parseListener(t *testing.T) {
 				l:           "CUSTOM://localhost",
 				securityMap: "",
 			},
-			want:    config.Listener{},
+			want:    Listener{},
 			wantErr: true,
 		},
 		{
@@ -92,7 +91,7 @@ func Test_parseListener(t *testing.T) {
 				l:           "CUSTOM://localhost:aaaa",
 				securityMap: "",
 			},
-			want:    config.Listener{},
+			want:    Listener{},
 			wantErr: true,
 		},
 	}
@@ -100,7 +99,7 @@ func Test_parseListener(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Setenv("listener.security.protocol.map", tt.args.securityMap)
 
-			got, err := parseListener(tt.args.l)
+			got, err := parseListener(tt.args.l, false)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parseListener() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -116,8 +115,8 @@ func TestBroker_validateListeners(t *testing.T) {
 	type fields struct {
 		BrokerID            int32
 		Rack                *string
-		Listeners           []config.Listener
-		AdvertisedListeners []config.Listener
+		Listeners           []Listener
+		AdvertisedListeners []Listener
 	}
 	tests := []struct {
 		name    string
@@ -128,12 +127,12 @@ func TestBroker_validateListeners(t *testing.T) {
 			name: "One listener",
 			fields: fields{
 				BrokerID: 0,
-				Listeners: []config.Listener{
+				Listeners: []Listener{
 					{
 						ListenerName:     "client",
 						Host:             "",
 						Port:             1234,
-						SecurityProtocol: config.PLAINTEXT,
+						SecurityProtocol: PLAINTEXT,
 					},
 				},
 			},
@@ -143,12 +142,12 @@ func TestBroker_validateListeners(t *testing.T) {
 			name: "Two listeners, different ports",
 			fields: fields{
 				BrokerID: 0,
-				Listeners: []config.Listener{
+				Listeners: []Listener{
 					{
 						ListenerName:     "client",
 						Host:             "",
 						Port:             5432,
-						SecurityProtocol: config.SSL,
+						SecurityProtocol: SSL,
 					},
 				},
 			},
@@ -158,18 +157,18 @@ func TestBroker_validateListeners(t *testing.T) {
 			name: "Two listeners, same ports",
 			fields: fields{
 				BrokerID: 0,
-				Listeners: []config.Listener{
+				Listeners: []Listener{
 					{
 						ListenerName:     "client",
 						Host:             "",
 						Port:             5432,
-						SecurityProtocol: config.SSL,
+						SecurityProtocol: SSL,
 					},
 					{
 						ListenerName:     "broker",
 						Host:             "",
 						Port:             5432,
-						SecurityProtocol: config.SSL,
+						SecurityProtocol: SSL,
 					},
 				},
 			},
@@ -179,18 +178,18 @@ func TestBroker_validateListeners(t *testing.T) {
 			name: "Two listeners, same ports, same name",
 			fields: fields{
 				BrokerID: 0,
-				Listeners: []config.Listener{
+				Listeners: []Listener{
 					{
 						ListenerName:     "client",
 						Host:             "",
 						Port:             5432,
-						SecurityProtocol: config.PLAINTEXT,
+						SecurityProtocol: PLAINTEXT,
 					},
 					{
 						ListenerName:     "client",
 						Host:             "",
 						Port:             5432,
-						SecurityProtocol: config.SSL,
+						SecurityProtocol: SSL,
 					},
 				},
 			},
@@ -200,18 +199,18 @@ func TestBroker_validateListeners(t *testing.T) {
 			name: "Two listeners, different ports, same name",
 			fields: fields{
 				BrokerID: 0,
-				Listeners: []config.Listener{
+				Listeners: []Listener{
 					{
 						ListenerName:     "client",
 						Host:             "",
 						Port:             5432,
-						SecurityProtocol: config.PLAINTEXT,
+						SecurityProtocol: PLAINTEXT,
 					},
 					{
 						ListenerName:     "client",
 						Host:             "",
 						Port:             1234,
-						SecurityProtocol: config.SSL,
+						SecurityProtocol: SSL,
 					},
 				},
 			},
@@ -221,18 +220,18 @@ func TestBroker_validateListeners(t *testing.T) {
 			name: "Two listeners, same ports, same name, ipv4 and ipv6",
 			fields: fields{
 				BrokerID: 0,
-				Listeners: []config.Listener{
+				Listeners: []Listener{
 					{
 						ListenerName:     "client",
 						Host:             "127.0.0.1",
 						Port:             5432,
-						SecurityProtocol: config.PLAINTEXT,
+						SecurityProtocol: PLAINTEXT,
 					},
 					{
 						ListenerName:     "client",
 						Host:             "::FFFF:C0A8:1",
 						Port:             5432,
-						SecurityProtocol: config.SSL,
+						SecurityProtocol: SSL,
 					},
 				},
 			},
@@ -241,7 +240,7 @@ func TestBroker_validateListeners(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			b := &config.Broker{
+			b := &Broker{
 				BrokerID:            tt.fields.BrokerID,
 				Rack:                tt.fields.Rack,
 				Listeners:           tt.fields.Listeners,
@@ -258,8 +257,8 @@ func TestBroker_validateAdvertisedListeners(t *testing.T) {
 	type fields struct {
 		BrokerID            int32
 		Rack                *string
-		Listeners           []config.Listener
-		AdvertisedListeners []config.Listener
+		Listeners           []Listener
+		AdvertisedListeners []Listener
 	}
 	tests := []struct {
 		name    string
@@ -270,12 +269,12 @@ func TestBroker_validateAdvertisedListeners(t *testing.T) {
 			name: "One listener",
 			fields: fields{
 				BrokerID: 0,
-				AdvertisedListeners: []config.Listener{
+				AdvertisedListeners: []Listener{
 					{
 						ListenerName:     "client",
 						Host:             "127.0.0.1",
 						Port:             1234,
-						SecurityProtocol: config.PLAINTEXT,
+						SecurityProtocol: PLAINTEXT,
 					},
 				},
 			},
@@ -285,12 +284,12 @@ func TestBroker_validateAdvertisedListeners(t *testing.T) {
 			name: "One listener with hostname",
 			fields: fields{
 				BrokerID: 0,
-				AdvertisedListeners: []config.Listener{
+				AdvertisedListeners: []Listener{
 					{
 						ListenerName:     "client",
 						Host:             "example.com",
 						Port:             1234,
-						SecurityProtocol: config.PLAINTEXT,
+						SecurityProtocol: PLAINTEXT,
 					},
 				},
 			},
@@ -300,18 +299,18 @@ func TestBroker_validateAdvertisedListeners(t *testing.T) {
 			name: "Two listeners with hostname",
 			fields: fields{
 				BrokerID: 0,
-				AdvertisedListeners: []config.Listener{
+				AdvertisedListeners: []Listener{
 					{
 						ListenerName:     "client",
 						Host:             "example.com",
 						Port:             1234,
-						SecurityProtocol: config.PLAINTEXT,
+						SecurityProtocol: PLAINTEXT,
 					},
 					{
 						ListenerName:     "broker",
 						Host:             "example.com",
 						Port:             1234,
-						SecurityProtocol: config.PLAINTEXT,
+						SecurityProtocol: PLAINTEXT,
 					},
 				},
 			},
@@ -321,12 +320,12 @@ func TestBroker_validateAdvertisedListeners(t *testing.T) {
 			name: "Invalid binding, 0.0.0.0",
 			fields: fields{
 				BrokerID: 0,
-				AdvertisedListeners: []config.Listener{
+				AdvertisedListeners: []Listener{
 					{
 						ListenerName:     "client",
 						Host:             "0.0.0.0",
 						Port:             1234,
-						SecurityProtocol: config.PLAINTEXT,
+						SecurityProtocol: PLAINTEXT,
 					},
 				},
 			},
@@ -336,12 +335,12 @@ func TestBroker_validateAdvertisedListeners(t *testing.T) {
 			name: "Invalid binding, empty host",
 			fields: fields{
 				BrokerID: 0,
-				AdvertisedListeners: []config.Listener{
+				AdvertisedListeners: []Listener{
 					{
 						ListenerName:     "client",
 						Host:             "",
 						Port:             1234,
-						SecurityProtocol: config.PLAINTEXT,
+						SecurityProtocol: PLAINTEXT,
 					},
 				},
 			},
@@ -350,7 +349,7 @@ func TestBroker_validateAdvertisedListeners(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			b := &config.Broker{
+			b := &Broker{
 				BrokerID:            tt.fields.BrokerID,
 				Rack:                tt.fields.Rack,
 				Listeners:           tt.fields.Listeners,

@@ -45,9 +45,9 @@ func main() {
 	}
 
 	// global config object that will be passed to all downstream APIs and methods
-	var config config.Config
+	var conf config.Config
 
-	broker, err := NewBroker()
+	broker, err := config.NewBroker()
 	if err != nil {
 		slog.Error("Error initializing broker", "err", err)
 		os.Exit(1)
@@ -58,8 +58,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	config.Broker = &broker
+	conf.Broker = &broker
 
-	server := NewServer(&config)
+	server := NewServer(&conf)
 	server.Run()
 }
