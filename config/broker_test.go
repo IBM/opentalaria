@@ -1,7 +1,6 @@
-package main
+package config
 
 import (
-	"opentalaria/utils"
 	"reflect"
 	"testing"
 )
@@ -26,7 +25,7 @@ func Test_parseListener(t *testing.T) {
 			want: Listener{
 				Host:             "",
 				Port:             9092,
-				SecurityProtocol: utils.SSL,
+				SecurityProtocol: SSL,
 				ListenerName:     "ssl",
 			},
 			wantErr: false,
@@ -40,7 +39,7 @@ func Test_parseListener(t *testing.T) {
 			want: Listener{
 				Host:             "localhost",
 				Port:             9092,
-				SecurityProtocol: utils.PLAINTEXT,
+				SecurityProtocol: PLAINTEXT,
 				ListenerName:     "plaintext",
 			},
 			wantErr: false,
@@ -54,7 +53,7 @@ func Test_parseListener(t *testing.T) {
 			want: Listener{
 				Host:             "localhost",
 				Port:             9092,
-				SecurityProtocol: utils.PLAINTEXT,
+				SecurityProtocol: PLAINTEXT,
 				ListenerName:     "custom",
 			},
 			wantErr: false,
@@ -100,7 +99,7 @@ func Test_parseListener(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Setenv("listener.security.protocol.map", tt.args.securityMap)
 
-			got, err := parseListener(tt.args.l)
+			got, err := parseListener(tt.args.l, false)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parseListener() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -133,7 +132,7 @@ func TestBroker_validateListeners(t *testing.T) {
 						ListenerName:     "client",
 						Host:             "",
 						Port:             1234,
-						SecurityProtocol: utils.PLAINTEXT,
+						SecurityProtocol: PLAINTEXT,
 					},
 				},
 			},
@@ -148,7 +147,7 @@ func TestBroker_validateListeners(t *testing.T) {
 						ListenerName:     "client",
 						Host:             "",
 						Port:             5432,
-						SecurityProtocol: utils.SSL,
+						SecurityProtocol: SSL,
 					},
 				},
 			},
@@ -163,13 +162,13 @@ func TestBroker_validateListeners(t *testing.T) {
 						ListenerName:     "client",
 						Host:             "",
 						Port:             5432,
-						SecurityProtocol: utils.SSL,
+						SecurityProtocol: SSL,
 					},
 					{
 						ListenerName:     "broker",
 						Host:             "",
 						Port:             5432,
-						SecurityProtocol: utils.SSL,
+						SecurityProtocol: SSL,
 					},
 				},
 			},
@@ -184,13 +183,13 @@ func TestBroker_validateListeners(t *testing.T) {
 						ListenerName:     "client",
 						Host:             "",
 						Port:             5432,
-						SecurityProtocol: utils.PLAINTEXT,
+						SecurityProtocol: PLAINTEXT,
 					},
 					{
 						ListenerName:     "client",
 						Host:             "",
 						Port:             5432,
-						SecurityProtocol: utils.SSL,
+						SecurityProtocol: SSL,
 					},
 				},
 			},
@@ -205,13 +204,13 @@ func TestBroker_validateListeners(t *testing.T) {
 						ListenerName:     "client",
 						Host:             "",
 						Port:             5432,
-						SecurityProtocol: utils.PLAINTEXT,
+						SecurityProtocol: PLAINTEXT,
 					},
 					{
 						ListenerName:     "client",
 						Host:             "",
 						Port:             1234,
-						SecurityProtocol: utils.SSL,
+						SecurityProtocol: SSL,
 					},
 				},
 			},
@@ -226,13 +225,13 @@ func TestBroker_validateListeners(t *testing.T) {
 						ListenerName:     "client",
 						Host:             "127.0.0.1",
 						Port:             5432,
-						SecurityProtocol: utils.PLAINTEXT,
+						SecurityProtocol: PLAINTEXT,
 					},
 					{
 						ListenerName:     "client",
 						Host:             "::FFFF:C0A8:1",
 						Port:             5432,
-						SecurityProtocol: utils.SSL,
+						SecurityProtocol: SSL,
 					},
 				},
 			},
@@ -247,7 +246,7 @@ func TestBroker_validateListeners(t *testing.T) {
 				Listeners:           tt.fields.Listeners,
 				AdvertisedListeners: tt.fields.AdvertisedListeners,
 			}
-			if err := b.validateListeners(); (err != nil) != tt.wantErr {
+			if err := validateListeners(b); (err != nil) != tt.wantErr {
 				t.Errorf("Broker.validateListeners() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -275,7 +274,7 @@ func TestBroker_validateAdvertisedListeners(t *testing.T) {
 						ListenerName:     "client",
 						Host:             "127.0.0.1",
 						Port:             1234,
-						SecurityProtocol: utils.PLAINTEXT,
+						SecurityProtocol: PLAINTEXT,
 					},
 				},
 			},
@@ -290,7 +289,7 @@ func TestBroker_validateAdvertisedListeners(t *testing.T) {
 						ListenerName:     "client",
 						Host:             "example.com",
 						Port:             1234,
-						SecurityProtocol: utils.PLAINTEXT,
+						SecurityProtocol: PLAINTEXT,
 					},
 				},
 			},
@@ -305,13 +304,13 @@ func TestBroker_validateAdvertisedListeners(t *testing.T) {
 						ListenerName:     "client",
 						Host:             "example.com",
 						Port:             1234,
-						SecurityProtocol: utils.PLAINTEXT,
+						SecurityProtocol: PLAINTEXT,
 					},
 					{
 						ListenerName:     "broker",
 						Host:             "example.com",
 						Port:             1234,
-						SecurityProtocol: utils.PLAINTEXT,
+						SecurityProtocol: PLAINTEXT,
 					},
 				},
 			},
@@ -326,7 +325,7 @@ func TestBroker_validateAdvertisedListeners(t *testing.T) {
 						ListenerName:     "client",
 						Host:             "0.0.0.0",
 						Port:             1234,
-						SecurityProtocol: utils.PLAINTEXT,
+						SecurityProtocol: PLAINTEXT,
 					},
 				},
 			},
@@ -341,7 +340,7 @@ func TestBroker_validateAdvertisedListeners(t *testing.T) {
 						ListenerName:     "client",
 						Host:             "",
 						Port:             1234,
-						SecurityProtocol: utils.PLAINTEXT,
+						SecurityProtocol: PLAINTEXT,
 					},
 				},
 			},
@@ -356,7 +355,7 @@ func TestBroker_validateAdvertisedListeners(t *testing.T) {
 				Listeners:           tt.fields.Listeners,
 				AdvertisedListeners: tt.fields.AdvertisedListeners,
 			}
-			if err := b.validateAdvertisedListeners(); (err != nil) != tt.wantErr {
+			if err := validateAdvertisedListeners(b); (err != nil) != tt.wantErr {
 				t.Errorf("Broker.validateAdvertisedListeners() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

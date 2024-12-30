@@ -3,6 +3,7 @@ package main
 import (
 	"log/slog"
 	"net/http"
+	"opentalaria/config"
 	"opentalaria/logger"
 	"opentalaria/utils"
 	"os"
@@ -43,17 +44,13 @@ func main() {
 		go http.ListenAndServe(port, nil)
 	}
 
-	broker, err := NewBroker()
+	// global config object that will be passed to all downstream APIs and methods
+	conf, err := config.NewConfig()
 	if err != nil {
 		slog.Error("Error initializing broker", "err", err)
 		os.Exit(1)
 	}
 
-	if len(broker.Listeners) > 1 {
-		slog.Error("OpenTalaria does not support more than one listener for now. See https://github.com/IBM/opentalaria/issues/18")
-		os.Exit(1)
-	}
-
-	server := NewServer(broker)
+	server := NewServer(conf)
 	server.Run()
 }
