@@ -1,14 +1,23 @@
 package config
 
 import (
-	"opentalaria/utils"
+	"log/slog"
+	"strings"
 
 	"github.com/google/uuid"
+	"github.com/spf13/viper"
 )
 
 type Config struct {
+	OTProfile       OTProfile
+	LogLevel        slog.Level
+	LogFormat       string
+	DebugServerPort int
+
 	Broker  *Broker
 	Cluster *Cluster
+
+	Env *viper.Viper
 }
 
 type Cluster struct {
@@ -18,15 +27,39 @@ type Cluster struct {
 func NewConfig() (*Config, error) {
 	config := Config{}
 
-	broker, err := NewBroker()
+	// init viper
+	env := viper.New()
+
+	env.AutomaticEnv()
+	env.SetEnvPrefix("ot")
+	env.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	// TODO: set this via a flag
+	env.SetConfigFile("server.properties")
+	env.AddConfigPath(".")
+
+	setDefaults(env)
+
+	err := env.ReadInConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	config.Env = env
+
+	config.loadProfile()
+	config.loadLogLevel()
+	config.LogFormat = env.GetString("log.format")
+	config.DebugServerPort = env.GetInt("debug.server.port")
+
+	broker, err := NewBroker(env)
 	if err != nil {
 		return &Config{}, err
 	}
 
 	config.Broker = broker
 
-	clusterId, ok := utils.GetEnvVar("OT_CLUSTER_ID", "")
-	if !ok {
+	clusterId := env.GetString("cluster.id")
+	if clusterId == "" {
 		uid, err := uuid.NewV6()
 		if err != nil {
 			return &Config{}, err
@@ -40,6 +73,15 @@ func NewConfig() (*Config, error) {
 	}
 
 	return &config, nil
+}
+
+// setDefaults sets the default values for properties that are not set.
+func setDefaults(env *viper.Viper) {
+	env.SetDefault("log.level", "warn")
+	env.SetDefault("log.format", "text")
+	env.SetDefault("debug.server.port", 9090)
+	env.SetDefault("broker.id", -1)
+	env.SetDefault("reserved.broker.max.id", 1000)
 }
 
 /**

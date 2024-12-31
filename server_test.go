@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"opentalaria/config"
 	"os"
 	"sync"
 	"testing"
@@ -22,21 +23,19 @@ func (mc *MockClient) handleRequest() {
 }
 
 func TestServer_Run(t *testing.T) {
-	os.Setenv("MAX_CONNECTIONS", "20")
-	defer os.Unsetenv("MAX_CONNECTIONS")
+	os.Setenv("OT_MAX_CONNECTIONS", "20")
+	defer os.Unsetenv("OT_MAX_CONNECTIONS")
 
-	os.Setenv("BROKER_HOST", "0.0.0.0")
-	defer os.Unsetenv("BROKER_HOST")
-
-	os.Setenv("BROKER_PORT", "9092")
-	defer os.Unsetenv("BROKER_PORT")
+	os.Setenv("OT_LISTENERS", "PLAINTEXT://:9092")
 
 	// Mock server and client
 	mockClient := &MockClient{}
-	server := &Server{
-		host: "0.0.0.0",
-		port: "9092",
+	conf, err := config.NewConfig()
+	if err != nil {
+		t.Error(err)
 	}
+
+	server := NewServer(conf)
 
 	// Create a context with cancellation
 	_, cancel := context.WithCancel(context.Background())

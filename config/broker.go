@@ -10,6 +10,8 @@ import (
 	"opentalaria/utils"
 	"strconv"
 	"strings"
+
+	"github.com/spf13/viper"
 )
 
 type Broker struct {
@@ -31,27 +33,27 @@ type Listener struct {
 	ListenerName     string
 }
 
-var (
-	// by default in KRaft mode, generated broker IDs start from reserved.broker.max.id + 1,
-	// where reserved.broker.max.id=1000 if the property is not set.
-	// KRaft mode is the default Kafka mode, since Kafka v3.3.1, so OpenTalaria will implement default settings in KRaft mode.
-	RESERVED_BROKER_MAX_ID = 1000
-)
+// var (
+// 	// by default in KRaft mode, generated broker IDs start from reserved.broker.max.id + 1,
+// 	// where reserved.broker.max.id=1000 if the property is not set.
+// 	// KRaft mode is the default Kafka mode, since Kafka v3.3.1, so OpenTalaria will implement default settings in KRaft mode.
+// 	RESERVED_BROKER_MAX_ID = 1000
+// )
 
 // NewBroker returns a new instance of Broker.
 // For now OpenTalaria does not support rack awareness, but this will change in the future.
-func NewBroker() (*Broker, error) {
+func NewBroker(env *viper.Viper) (*Broker, error) {
 	broker := Broker{}
 
-	listenerStr, ok := utils.GetEnvVar("listeners", "")
-	if !ok {
+	listenerStr := env.GetString("listeners")
+	if listenerStr == "" {
 		return &Broker{}, errors.New("no listeners set")
 	}
 	listeners := strings.Split(strings.ReplaceAll(listenerStr, " ", ""), ",")
 
 	var advertisedListeners []string
-	advListenerStr, ok := utils.GetEnvVar("advertised.listeners", "")
-	if !ok {
+	advListenerStr := env.GetString("advertised.listeners")
+	if advListenerStr == "" {
 		advertisedListeners = listeners
 	} else {
 		advertisedListeners = strings.Split(strings.ReplaceAll(advListenerStr, " ", ""), ",")
@@ -79,22 +81,18 @@ func NewBroker() (*Broker, error) {
 		return &Broker{}, err
 	}
 
-	brokerIdSetting, _ := utils.GetEnvVar("broker.id", "-1")
-
-	brokerId, err := strconv.Atoi(brokerIdSetting)
-	if err != nil {
-		return &broker, fmt.Errorf("error parsing broker.id: %s", err)
-	}
+	brokerId := env.GetInt("broker.id")
+	reservedBrokerMaxId := env.GetInt("reserved.max.broker.id")
 
 	// validate Broker ID
-	if brokerId > RESERVED_BROKER_MAX_ID {
+	if brokerId > reservedBrokerMaxId {
 		return &Broker{}, fmt.Errorf("the configured node ID is greater than `reserved.broker.max.id`. Please adjust the `reserved.broker.max.id` setting. [%d > %d]",
 			brokerId,
-			RESERVED_BROKER_MAX_ID)
+			reservedBrokerMaxId)
 	}
 
 	if brokerId == -1 {
-		brokerId = RESERVED_BROKER_MAX_ID + 1
+		brokerId = reservedBrokerMaxId + 1
 	}
 
 	broker.BrokerID = int32(brokerId)

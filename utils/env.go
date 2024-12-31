@@ -1,52 +1,10 @@
 package utils
 
 import (
-	"log"
-	"log/slog"
 	"os"
-	"strings"
 )
 
-type OTProfile int
-
-const (
-	Localdev OTProfile = iota
-	Dev
-	Prod
-	Unknown
-)
-
-func GetProfile() OTProfile {
-	switch os.Getenv("OT_PROFILE") {
-	case "localdev":
-		return Localdev
-	case "dev":
-		return Dev
-	case "prod":
-		return Prod
-	default:
-		return Unknown
-	}
-}
-
-func GetLogLevel() slog.Level {
-	switch strings.ToLower(os.Getenv("OT_LOG_LEVEL")) {
-	case "debug":
-		return slog.LevelDebug
-	case "info":
-		return slog.LevelInfo
-	case "warn":
-		return slog.LevelWarn
-	case "error":
-		return slog.LevelError
-	default:
-		log.Println("no log level set or value is invalid, setting default WARN level")
-		return slog.LevelWarn
-
-	}
-}
-
-// GetEnvVar retrieves an environment variable or returns a default value if it is not set.
+// GetEnvVar retrieves a property from the Viper object or returns a default value if it is not set.
 //
 // Params:
 //

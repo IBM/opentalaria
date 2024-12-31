@@ -35,10 +35,6 @@ func NewServer(config *config.Config) *Server {
 		listener := config.Broker.Listeners[0]
 		host = listener.Host
 		port = strconv.Itoa(int(listener.Port))
-	} else {
-		// if no listener is set, bind to PLAINTEXT://0.0.0.0:9092 by default.
-		host = "0.0.0.0"
-		port = "9092"
 	}
 
 	return &Server{
@@ -73,8 +69,8 @@ func (server *Server) Run() {
 	slog.Debug("number of available CPU's ", "GOMAXPROCS", numberOfCpu)
 
 	var conCapacity int64
-	conPoolStr, ok := utils.GetEnvVar("max.connections", "")
-	if !ok {
+	conPoolStr := server.config.Env.GetString("max.connections")
+	if conPoolStr == "" {
 		//If env variable max.connections was not set we use default val of MaxInt64
 		conCapacity = math.MaxInt64
 	} else {
