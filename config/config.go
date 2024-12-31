@@ -39,9 +39,12 @@ func NewConfig() (*Config, error) {
 
 	setDefaults(env)
 
-	err := env.ReadInConfig()
-	if err != nil {
-		panic(err)
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			slog.Warn("no server.properties file was found")
+		} else {
+			return nil, err
+		}
 	}
 
 	config.Env = env

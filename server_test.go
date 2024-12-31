@@ -27,6 +27,7 @@ func TestServer_Run(t *testing.T) {
 	defer os.Unsetenv("OT_MAX_CONNECTIONS")
 
 	os.Setenv("OT_LISTENERS", "PLAINTEXT://:9092")
+	defer os.Unsetenv("OT_LISTENERS")
 
 	// Mock server and client
 	mockClient := &MockClient{}

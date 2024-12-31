@@ -95,11 +95,18 @@ func Test_parseListener(t *testing.T) {
 			wantErr: true,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Setenv("listener.security.protocol.map", tt.args.securityMap)
+			t.Setenv("OT_LISTENERS", "PLAINTEXT://:9092")
+			t.Setenv("OT_LISTENER_SECURITY_PROTOCOL_MAP", tt.args.securityMap)
 
-			got, err := parseListener(tt.args.l, false)
+			conf, err := NewConfig()
+			if err != nil {
+				t.Error(err)
+			}
+
+			got, err := parseListener(conf.Env, tt.args.l, false)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parseListener() error = %v, wantErr %v", err, tt.wantErr)
 				return

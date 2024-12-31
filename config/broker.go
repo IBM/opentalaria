@@ -7,7 +7,6 @@ import (
 	"net"
 	"net/netip"
 	"net/url"
-	"opentalaria/utils"
 	"strconv"
 	"strings"
 
@@ -59,7 +58,7 @@ func NewBroker(env *viper.Viper) (*Broker, error) {
 		advertisedListeners = strings.Split(strings.ReplaceAll(advListenerStr, " ", ""), ",")
 	}
 
-	listenersArray, err := parseListeners(listeners, false)
+	listenersArray, err := parseListeners(env, listeners, false)
 	if err != nil {
 		return &Broker{}, err
 	}
@@ -70,7 +69,7 @@ func NewBroker(env *viper.Viper) (*Broker, error) {
 		return &Broker{}, err
 	}
 
-	advertisedListenersArr, err := parseListeners(advertisedListeners, true)
+	advertisedListenersArr, err := parseListeners(env, advertisedListeners, true)
 	if err != nil {
 		return &Broker{}, err
 	}
@@ -104,7 +103,7 @@ func NewBroker(env *viper.Viper) (*Broker, error) {
 	return &broker, nil
 }
 
-func parseListeners(listeners []string, advertised bool) ([]Listener, error) {
+func parseListeners(env *viper.Viper, listeners []string, advertised bool) ([]Listener, error) {
 	result := []Listener{}
 
 	for _, l := range listeners {
@@ -112,7 +111,7 @@ func parseListeners(listeners []string, advertised bool) ([]Listener, error) {
 			continue
 		}
 
-		listener, err := parseListener(l, advertised)
+		listener, err := parseListener(env, l, advertised)
 		if err != nil {
 			return []Listener{}, err
 		}
@@ -123,7 +122,7 @@ func parseListeners(listeners []string, advertised bool) ([]Listener, error) {
 	return result, nil
 }
 
-func parseListener(l string, advertised bool) (Listener, error) {
+func parseListener(env *viper.Viper, l string, advertised bool) (Listener, error) {
 	listener, err := url.Parse(l)
 	if err != nil {
 		return Listener{}, err
@@ -131,7 +130,7 @@ func parseListener(l string, advertised bool) (Listener, error) {
 
 	// parse the security protocol from the url scheme.
 	// If the protocol is unknown treat the scheme as broker name and check the listener.security.protocol.map
-	listenerName, securityProtocol, err := getBrokerNameComponents(listener.Scheme)
+	listenerName, securityProtocol, err := getBrokerNameComponents(env, listener.Scheme)
 	if err != nil {
 		return Listener{}, err
 	}
@@ -190,7 +189,7 @@ func parseListener(l string, advertised bool) (Listener, error) {
 // getBrokerNameComponents checks if the broker name, inferred from the URL schema is a valid security protocol.
 // If not, it checks the listener.security.protocol.map for mapping for custom broker names and returns the broker name/security protocol pair.
 // If no mapping is found in the case of custom broker name, the function returns an error.
-func getBrokerNameComponents(s string) (string, SecurityProtocol, error) {
+func getBrokerNameComponents(env *viper.Viper, s string) (string, SecurityProtocol, error) {
 	securityProtocol, ok := ParseSecurityProtocol(s)
 
 	if ok {
@@ -198,7 +197,7 @@ func getBrokerNameComponents(s string) (string, SecurityProtocol, error) {
 	} else {
 		// the listener schema is not a known security protocol, treat is as broker name
 		// and extract the security protocol from listener.security.protocol.map
-		listenerSpmStr, _ := utils.GetEnvVar("listener.security.protocol.map", "")
+		listenerSpmStr := env.GetString("listener.security.protocol.map")
 		spm := strings.Split(strings.ReplaceAll(listenerSpmStr, " ", ""), ",")
 
 		for _, sp := range spm {

@@ -11,7 +11,7 @@ import (
 	"opentalaria/api"
 	"opentalaria/config"
 	"opentalaria/protocol"
-	"opentalaria/utils"
+	"os"
 	"runtime"
 	"strconv"
 
@@ -56,15 +56,18 @@ func (server *Server) Run() {
 
 	slog.Info(fmt.Sprintf("tcp server listening on %s:%s", server.host, server.port))
 
-	cpu, _ := utils.GetEnvVar("GOMAXPROCS", "0")
+	cpu := os.Getenv("GOMAXPROCS")
+	if cpu == "" {
+		cpu = "0"
+	}
 	numberOfCpu, err := strconv.Atoi(cpu)
 	if err != nil {
 		slog.Error("error creating connection", "error", err)
 		return
 	}
-	//Adding more CPU's only helps up to number of available Go routines
-	//For example GOMAXPROCS(8) and semaphore.NewWeighted(8) means each Go routine will be executed on different CPU
-	//However if we set GOMAXPROCS(4) and semaphore.NewWeighted(8) we will have only 4 CPU's to handle 8 Go routines
+	// Adding more CPU's only helps up to number of available Go routines
+	// For example GOMAXPROCS(8) and semaphore.NewWeighted(8) means each Go routine will be executed on different CPU
+	// However if we set GOMAXPROCS(4) and semaphore.NewWeighted(8) we will have only 4 CPU's to handle 8 Go routines
 	runtime.GOMAXPROCS(numberOfCpu)
 	slog.Debug("number of available CPU's ", "GOMAXPROCS", numberOfCpu)
 
