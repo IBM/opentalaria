@@ -7,17 +7,17 @@ import (
 	"strings"
 )
 
-type LBKProfile int
+type OTProfile int
 
 const (
-	Localdev LBKProfile = iota
+	Localdev OTProfile = iota
 	Dev
 	Prod
 	Unknown
 )
 
-func GetProfile() LBKProfile {
-	switch os.Getenv("LKB_PROFILE") {
+func GetProfile() OTProfile {
+	switch os.Getenv("OT_PROFILE") {
 	case "localdev":
 		return Localdev
 	case "dev":
@@ -30,7 +30,7 @@ func GetProfile() LBKProfile {
 }
 
 func GetLogLevel() slog.Level {
-	switch strings.ToLower(os.Getenv("LOG_LEVEL")) {
+	switch strings.ToLower(os.Getenv("OT_LOG_LEVEL")) {
 	case "debug":
 		return slog.LevelDebug
 	case "info":

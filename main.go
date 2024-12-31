@@ -23,7 +23,7 @@ func initLogger() {
 	//
 	// JSON Handler might be better suited for a cloud environment. Set it with LOG_FORMAT=json env variable
 	var handler slog.Handler
-	if os.Getenv("LOG_FORMAT") == "json" {
+	if os.Getenv("OT_LOG_FORMAT") == "json" {
 		handler = slog.NewJSONHandler(os.Stdout, nil)
 	} else {
 		handler = logger.NewCustomHandler(os.Stdout, nil)
@@ -40,7 +40,7 @@ func main() {
 	if utils.GetProfile() == utils.Localdev {
 		slog.Info("starting in local dev mode ...")
 		// start a web server if we are in local dev mode
-		port, _ := utils.GetEnvVar("DEBUG_SERVER_PORT", ":9090")
+		port, _ := utils.GetEnvVar("OT_DEBUG_SERVER_PORT", ":9090")
 		go http.ListenAndServe(port, nil)
 	}
 

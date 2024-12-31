@@ -1,0 +1,20 @@
+## Broker configuration
+
+Setting configuration parameters in OpenTalaria can be done in multiple ways. The precedence order for variables is command line flag, environment variable, properties file, default value. For example if both `OT_ADVERTISED_LISTENERS` environment variable and the property `advertised.listeners` are set, OpenTalaria will initialize the broker with the value from the environment variable. 
+
+OpenTalaria uses the [Viper](https://github.com/spf13/viper) library under the hood. It is important to note that Viper configuration keys are case insensitive.
+
+Generally environment variables used by OpenTalaria are prefixed by `OT_` and map to the properties file key by replacing the `.` symbol with `_`.
+
+The below table lists the currently supported properties, their mapping and defaults. If adding new functionality, please don't forget to update the table with any new variables.
+
+| Environment variable              | Properties key                 | Flag | Default value | Description                                                                                                                                                                                                                         |
+| --------------------------------- | ------------------------------ | ---- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| OT_PROFILE                        | profile                        | -    | -             | Sets the runtime profile for the broker. Accepted values are `localdev`, `dev`, `prod`. Starting the process with profile `localdev` exposes [expvar](https://pkg.go.dev/expvar) on port set by `OT_DEBUG_SERVER_PORT`.             |
+| OT_LOG_LEVEL                      | log.level                      | -    | warn          | Sets the log level. Accepted values are `debug`, `info`, `warn`, `error`                                                                                                                                                            |
+| OT_LOG_FORMAT                     | log.format                     | -    | text          | Sets the log format used by the logger. Accepted values are `json` and `text`. it is recommended to use `json` for production, which produces structured logs in json format that can be directly consumed by log management tools. |
+| OT_DEBUG_SERVER_PORT              | debug.server.port              | -    | 9090          | Sets the debug port where the HTTP server for the `expvar` profile listens.                                                                                                                                                         |
+| OT_LISTENERS                      | listeners                      | -    | -             | The address the socket server listens on.                                                                                                                                                                                           |
+| OT_ADVERTISED_LISTENERS           | advertised.listeners           | -    | -             | Listener name, hostname and port the broker will advertise to clients. If not set, it uses the value for "listeners".                                                                                                               |
+| OT_LISTENER_SECURITY_PROTOCOL_MAP | listener.security.protocol.map | -    | -             | Maps listener names to security protocols, the default is for them to be the same.                                                                                                                                                  |
+| OT_CLUSTER_ID                     | cluster.id                     | -    | Random UUID   | Cluster ID associated with the broker. If not set, a new random UUID will be associated every time the broker is restarted.                                                                                                         |

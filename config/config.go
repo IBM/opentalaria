@@ -25,7 +25,7 @@ func NewConfig() (*Config, error) {
 
 	config.Broker = broker
 
-	clusterId, ok := utils.GetEnvVar("KAFKA_CLUSTER_ID", "")
+	clusterId, ok := utils.GetEnvVar("OT_CLUSTER_ID", "")
 	if !ok {
 		uid, err := uuid.NewV6()
 		if err != nil {

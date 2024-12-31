@@ -1,6 +1,6 @@
-### Supported APIs
+# Supported APIs
 
-This list will be updated as new APIs get implemented.
+This list will be updated as new APIs get implemented. For implementation details please see the [api](api/) directory. 
 
 - [ ] Produce (0) - In progress
 - [ ] Fetch	(1)

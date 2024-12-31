@@ -1,4 +1,4 @@
-## Dependencies
+# Dependencies
 
 The following library dependencies were used in OpenTalaria source code:
 
