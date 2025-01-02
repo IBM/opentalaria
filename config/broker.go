@@ -7,9 +7,10 @@ import (
 	"net"
 	"net/netip"
 	"net/url"
-	"opentalaria/utils"
 	"strconv"
 	"strings"
+
+	"github.com/spf13/viper"
 )
 
 type Broker struct {
@@ -31,33 +32,33 @@ type Listener struct {
 	ListenerName     string
 }
 
-var (
-	// by default in KRaft mode, generated broker IDs start from reserved.broker.max.id + 1,
-	// where reserved.broker.max.id=1000 if the property is not set.
-	// KRaft mode is the default Kafka mode, since Kafka v3.3.1, so OpenTalaria will implement default settings in KRaft mode.
-	RESERVED_BROKER_MAX_ID = 1000
-)
+// var (
+// 	// by default in KRaft mode, generated broker IDs start from reserved.broker.max.id + 1,
+// 	// where reserved.broker.max.id=1000 if the property is not set.
+// 	// KRaft mode is the default Kafka mode, since Kafka v3.3.1, so OpenTalaria will implement default settings in KRaft mode.
+// 	RESERVED_BROKER_MAX_ID = 1000
+// )
 
 // NewBroker returns a new instance of Broker.
 // For now OpenTalaria does not support rack awareness, but this will change in the future.
-func NewBroker() (*Broker, error) {
+func NewBroker(env *viper.Viper) (*Broker, error) {
 	broker := Broker{}
 
-	listenerStr, ok := utils.GetEnvVar("listeners", "")
-	if !ok {
+	listenerStr := env.GetString("listeners")
+	if listenerStr == "" {
 		return &Broker{}, errors.New("no listeners set")
 	}
 	listeners := strings.Split(strings.ReplaceAll(listenerStr, " ", ""), ",")
 
 	var advertisedListeners []string
-	advListenerStr, ok := utils.GetEnvVar("advertised.listeners", "")
-	if !ok {
+	advListenerStr := env.GetString("advertised.listeners")
+	if advListenerStr == "" {
 		advertisedListeners = listeners
 	} else {
 		advertisedListeners = strings.Split(strings.ReplaceAll(advListenerStr, " ", ""), ",")
 	}
 
-	listenersArray, err := parseListeners(listeners, false)
+	listenersArray, err := parseListeners(env, listeners, false)
 	if err != nil {
 		return &Broker{}, err
 	}
@@ -68,7 +69,7 @@ func NewBroker() (*Broker, error) {
 		return &Broker{}, err
 	}
 
-	advertisedListenersArr, err := parseListeners(advertisedListeners, true)
+	advertisedListenersArr, err := parseListeners(env, advertisedListeners, true)
 	if err != nil {
 		return &Broker{}, err
 	}
@@ -79,22 +80,18 @@ func NewBroker() (*Broker, error) {
 		return &Broker{}, err
 	}
 
-	brokerIdSetting, _ := utils.GetEnvVar("broker.id", "-1")
-
-	brokerId, err := strconv.Atoi(brokerIdSetting)
-	if err != nil {
-		return &broker, fmt.Errorf("error parsing broker.id: %s", err)
-	}
+	brokerId := env.GetInt("broker.id")
+	reservedBrokerMaxId := env.GetInt("reserved.max.broker.id")
 
 	// validate Broker ID
-	if brokerId > RESERVED_BROKER_MAX_ID {
+	if brokerId > reservedBrokerMaxId {
 		return &Broker{}, fmt.Errorf("the configured node ID is greater than `reserved.broker.max.id`. Please adjust the `reserved.broker.max.id` setting. [%d > %d]",
 			brokerId,
-			RESERVED_BROKER_MAX_ID)
+			reservedBrokerMaxId)
 	}
 
 	if brokerId == -1 {
-		brokerId = RESERVED_BROKER_MAX_ID + 1
+		brokerId = reservedBrokerMaxId + 1
 	}
 
 	broker.BrokerID = int32(brokerId)
@@ -106,7 +103,7 @@ func NewBroker() (*Broker, error) {
 	return &broker, nil
 }
 
-func parseListeners(listeners []string, advertised bool) ([]Listener, error) {
+func parseListeners(env *viper.Viper, listeners []string, advertised bool) ([]Listener, error) {
 	result := []Listener{}
 
 	for _, l := range listeners {
@@ -114,7 +111,7 @@ func parseListeners(listeners []string, advertised bool) ([]Listener, error) {
 			continue
 		}
 
-		listener, err := parseListener(l, advertised)
+		listener, err := parseListener(env, l, advertised)
 		if err != nil {
 			return []Listener{}, err
 		}
@@ -125,7 +122,7 @@ func parseListeners(listeners []string, advertised bool) ([]Listener, error) {
 	return result, nil
 }
 
-func parseListener(l string, advertised bool) (Listener, error) {
+func parseListener(env *viper.Viper, l string, advertised bool) (Listener, error) {
 	listener, err := url.Parse(l)
 	if err != nil {
 		return Listener{}, err
@@ -133,7 +130,7 @@ func parseListener(l string, advertised bool) (Listener, error) {
 
 	// parse the security protocol from the url scheme.
 	// If the protocol is unknown treat the scheme as broker name and check the listener.security.protocol.map
-	listenerName, securityProtocol, err := getBrokerNameComponents(listener.Scheme)
+	listenerName, securityProtocol, err := getBrokerNameComponents(env, listener.Scheme)
 	if err != nil {
 		return Listener{}, err
 	}
@@ -192,7 +189,7 @@ func parseListener(l string, advertised bool) (Listener, error) {
 // getBrokerNameComponents checks if the broker name, inferred from the URL schema is a valid security protocol.
 // If not, it checks the listener.security.protocol.map for mapping for custom broker names and returns the broker name/security protocol pair.
 // If no mapping is found in the case of custom broker name, the function returns an error.
-func getBrokerNameComponents(s string) (string, SecurityProtocol, error) {
+func getBrokerNameComponents(env *viper.Viper, s string) (string, SecurityProtocol, error) {
 	securityProtocol, ok := ParseSecurityProtocol(s)
 
 	if ok {
@@ -200,7 +197,7 @@ func getBrokerNameComponents(s string) (string, SecurityProtocol, error) {
 	} else {
 		// the listener schema is not a known security protocol, treat is as broker name
 		// and extract the security protocol from listener.security.protocol.map
-		listenerSpmStr, _ := utils.GetEnvVar("listener.security.protocol.map", "")
+		listenerSpmStr := env.GetString("listener.security.protocol.map")
 		spm := strings.Split(strings.ReplaceAll(listenerSpmStr, " ", ""), ",")
 
 		for _, sp := range spm {

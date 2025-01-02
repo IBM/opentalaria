@@ -48,14 +48,14 @@ func GenerateMetadataResponse(version int16, config *config.Config) *protocol.Me
 	// Since cluster mode is not supported for now, we take the first AdvertisedListener as broker config.
 	listener := config.Broker.AdvertisedListeners[0]
 	response.Brokers = append(response.Brokers, protocol.MetadataResponseBroker{
-		NodeID: 1,
+		NodeID: config.Broker.BrokerID,
 		Host:   listener.Host,
 		Port:   listener.Port,
 		Rack:   nil, // for now OpenTalaria does not support rack awareness.
 	})
 
 	response.ClusterID = &config.Cluster.ClusterID
-	response.ControllerID = 1
+	response.ControllerID = config.Broker.BrokerID
 	topicName := "test-topic"
 
 	response.Topics = append(response.Topics, protocol.MetadataResponseTopic{

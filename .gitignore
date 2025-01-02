@@ -2,3 +2,4 @@ __debug*
 .DS_Store
 .vscode/
 coverage.out
+bin/

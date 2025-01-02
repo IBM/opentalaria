@@ -11,7 +11,7 @@ import (
 	"opentalaria/api"
 	"opentalaria/config"
 	"opentalaria/protocol"
-	"opentalaria/utils"
+	"os"
 	"runtime"
 	"strconv"
 
@@ -35,10 +35,6 @@ func NewServer(config *config.Config) *Server {
 		listener := config.Broker.Listeners[0]
 		host = listener.Host
 		port = strconv.Itoa(int(listener.Port))
-	} else {
-		// if no listener is set, bind to PLAINTEXT://0.0.0.0:9092 by default.
-		host = "0.0.0.0"
-		port = "9092"
 	}
 
 	return &Server{
@@ -60,21 +56,24 @@ func (server *Server) Run() {
 
 	slog.Info(fmt.Sprintf("tcp server listening on %s:%s", server.host, server.port))
 
-	cpu, _ := utils.GetEnvVar("GOMAXPROCS", "0")
+	cpu := os.Getenv("GOMAXPROCS")
+	if cpu == "" {
+		cpu = "0"
+	}
 	numberOfCpu, err := strconv.Atoi(cpu)
 	if err != nil {
 		slog.Error("error creating connection", "error", err)
 		return
 	}
-	//Adding more CPU's only helps up to number of available Go routines
-	//For example GOMAXPROCS(8) and semaphore.NewWeighted(8) means each Go routine will be executed on different CPU
-	//However if we set GOMAXPROCS(4) and semaphore.NewWeighted(8) we will have only 4 CPU's to handle 8 Go routines
+	// Adding more CPU's only helps up to number of available Go routines
+	// For example GOMAXPROCS(8) and semaphore.NewWeighted(8) means each Go routine will be executed on different CPU
+	// However if we set GOMAXPROCS(4) and semaphore.NewWeighted(8) we will have only 4 CPU's to handle 8 Go routines
 	runtime.GOMAXPROCS(numberOfCpu)
 	slog.Debug("number of available CPU's ", "GOMAXPROCS", numberOfCpu)
 
 	var conCapacity int64
-	conPoolStr, ok := utils.GetEnvVar("max.connections", "")
-	if !ok {
+	conPoolStr := server.config.Env.GetString("max.connections")
+	if conPoolStr == "" {
 		//If env variable max.connections was not set we use default val of MaxInt64
 		conCapacity = math.MaxInt64
 	} else {

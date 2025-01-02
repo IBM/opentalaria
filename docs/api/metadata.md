@@ -1,4 +1,4 @@
-# Overview
+# Metadata API
 https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-MetadataAPI
 
 ## Broker config
@@ -9,7 +9,7 @@ If advertised listeners are not set, the Metadata API returns the listeners list
 OpenTalaria does not support more than one listener, please see [#18](https://github.com/IBM/opentalaria/issues/18) for updates.
 
 ## Cluster config
-if an environment variable `KAFKA_CLUSTER_ID` is not set OpenTalaria will generate a random UUID and set this as the cluster ID every time the process is restarted. 
+if an environment variable `OT_CLUSTER_ID` is not set OpenTalaria will generate a random UUID and set this as the cluster ID every time the process is restarted. 
 
 # Caveats
 * For now a rack ID cannot be assigned to the broker, since OpenTalaria will not support distributed clusters in the initial release. This will be added at later stages. To implement the specification, the API will always return the rack as null.
