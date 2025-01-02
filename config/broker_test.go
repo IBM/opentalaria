@@ -101,7 +101,7 @@ func Test_parseListener(t *testing.T) {
 			t.Setenv("OT_LISTENERS", "PLAINTEXT://:9092")
 			t.Setenv("OT_LISTENER_SECURITY_PROTOCOL_MAP", tt.args.securityMap)
 
-			conf, err := NewConfig()
+			conf, err := NewConfig("")
 			if err != nil {
 				t.Error(err)
 			}

@@ -31,7 +31,7 @@ func TestServer_Run(t *testing.T) {
 
 	// Mock server and client
 	mockClient := &MockClient{}
-	conf, err := config.NewConfig()
+	conf, err := config.NewConfig("")
 	if err != nil {
 		t.Error(err)
 	}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -35,8 +36,11 @@ func initLogger(config *config.Config) {
 }
 
 func main() {
+	confFile := flag.String("c", "server.properties", "Path to config file. Default is server.properties")
+	flag.Parse()
+
 	// global config object that will be passed to all downstream APIs and methods
-	conf, err := config.NewConfig()
+	conf, err := config.NewConfig(*confFile)
 	if err != nil {
 		slog.Error("Error initializing broker", "err", err)
 		os.Exit(1)

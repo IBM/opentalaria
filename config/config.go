@@ -1,7 +1,6 @@
 package config
 
 import (
-	"flag"
 	"log/slog"
 	"strings"
 
@@ -25,7 +24,7 @@ type Cluster struct {
 	ClusterID string
 }
 
-func NewConfig() (*Config, error) {
+func NewConfig(confFilename string) (*Config, error) {
 	config := Config{}
 
 	// init viper
@@ -35,16 +34,6 @@ func NewConfig() (*Config, error) {
 	env.SetEnvPrefix("ot")
 	env.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
-	// if a config file is set via a flag, parse the absolute path and the filename and set those to viper.
-	confFilename := "server.properties"
-
-	confFile := flag.String("c", "server.properties", "Path to config file. Default is server.properties")
-	flag.Parse()
-
-	if confFile != nil {
-		confFilename = *confFile
-	}
-
 	env.SetConfigType("properties")
 	env.SetConfigFile(confFilename)
 	env.AddConfigPath(".")
@@ -52,13 +41,7 @@ func NewConfig() (*Config, error) {
 	// set defaults for configuration properties
 	setDefaults(env)
 
-	if err := env.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			slog.Warn("no server.properties file was found")
-		} else {
-			return nil, err
-		}
-	}
+	env.ReadInConfig()
 
 	config.Env = env
 
