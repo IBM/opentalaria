@@ -7,7 +7,7 @@ run_broker:
 	go run .
 
 build:
-	go build -ldflags "-s -w" -trimpath -buildvcs=false -o bin/opentalaria
+	go get && go build -ldflags "-s -w" -trimpath -buildvcs=false -o bin/opentalaria
 
 run_test:
 	go run ./_examples/client/confluent/main.go
