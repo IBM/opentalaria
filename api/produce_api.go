@@ -2,8 +2,9 @@ package api
 
 import (
 	"log/slog"
-	"opentalaria/protocol"
-	"opentalaria/utils"
+
+	"github.com/ibm/opentalaria/protocol"
+	"github.com/ibm/opentalaria/utils"
 )
 
 type ProduceAPI struct {

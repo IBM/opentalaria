@@ -1,10 +1,11 @@
 package api
 
 import (
-	"opentalaria/config"
-	"opentalaria/protocol"
-	"opentalaria/utils"
 	"time"
+
+	"github.com/ibm/opentalaria/config"
+	"github.com/ibm/opentalaria/protocol"
+	"github.com/ibm/opentalaria/utils"
 )
 
 type MetadataAPI struct {

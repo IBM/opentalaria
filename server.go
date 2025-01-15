@@ -8,13 +8,15 @@ import (
 	"log/slog"
 	"math"
 	"net"
-	"opentalaria/api"
-	"opentalaria/config"
-	"opentalaria/protocol"
 	"os"
 	"runtime"
 	"strconv"
 
+	"github.com/ibm/opentalaria/config"
+
+	"github.com/ibm/opentalaria/protocol"
+
+	"github.com/ibm/opentalaria/api"
 	"golang.org/x/sync/semaphore"
 )
 

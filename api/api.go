@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
-	"opentalaria/config"
-	"opentalaria/protocol"
+
+	"github.com/ibm/opentalaria/config"
+	"github.com/ibm/opentalaria/protocol"
 )
 
 type API interface {

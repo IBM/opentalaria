@@ -1,10 +1,11 @@
-module opentalaria
+module github.com/ibm/opentalaria
 
 go 1.21.6
 
 require (
 	github.com/google/uuid v1.6.0
 	github.com/spf13/viper v1.19.0
+	github.com/traefik/yaegi v0.16.1
 	golang.org/x/sync v0.9.0
 )
 
