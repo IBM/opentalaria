@@ -2,7 +2,6 @@ package plugins
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"reflect"
 
@@ -10,8 +9,7 @@ import (
 	"github.com/traefik/yaegi/stdlib"
 )
 
-type PluginSubsystem struct {
-}
+type PluginSubsystem struct{}
 
 type PluginInterface interface {
 	Call() error
@@ -23,7 +21,7 @@ func New() (*PluginSubsystem, error) {
 
 func (ps *PluginSubsystem) Call() error {
 	i := interp.New(interp.Options{
-		GoPath: "./.plugins/",
+		GoPath: "./local_plugins/",
 		Env:    os.Environ(),
 	})
 
@@ -33,10 +31,11 @@ func (ps *PluginSubsystem) Call() error {
 	}
 
 	symbols := map[string]map[string]reflect.Value{
-		"github.com/ibm/opentalaria/plugins": {
+		"github.com/ibm/opentalaria/plugins/plugins": {
 			"PluginInterface": reflect.ValueOf((*PluginInterface)(nil)),
 		},
 	}
+
 	err = i.Use(symbols)
 	if err != nil {
 		return err
@@ -46,62 +45,37 @@ func (ps *PluginSubsystem) Call() error {
 		package wrapper
 
 		import (
+			"log"
+
 			"github.com/ibm/opentalaria/demo"
 			"github.com/ibm/opentalaria/plugins"
 		)
 
 		func NewWrapper() (plugins.PluginInterface, error) {
 			p, err := demo.New()
-			var plugin plugins.PluginInterface = p
-
-			return plugin, err
+			
+			var pv plugins.PluginInterface = p
+			return pv, err
 		}
 	`)
 	if err != nil {
-		return err
+		return fmt.Errorf("error evaluating wrapper: %v", err)
 	}
 
-	v, err := i.Eval(`wrapper.NewWrapper`)
-	if err != nil {
-		return err
-	}
-
-	results := v.Call(nil)
-
-	log.Printf("%T\n", results[0].Interface())
-
-	plugin, ok := results[0].Interface().(PluginInterface)
-	if !ok {
-		return fmt.Errorf("invalid plugin type: %T", results[0].Interface())
-	}
-
-	log.Println(plugin)
-
-	// _, err = i.Eval(string(plugin))
+	// v, err := i.Eval(`wrapper.NewWrapper`)
 	// if err != nil {
-	// 	return err
+	// 	return fmt.Errorf("error calling NewWrapper: %v", err)
 	// }
 
-	// log.Println(string(plugin))
+	// results := v.Call(nil)
+	// log.Printf("%T", results[0].Interface())
 
-	// 	_, err = i.Eval(`d, _ := demo.New()
-
-	// d.Call()`)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-
-	// v, err := i.Eval(`demo.New`)
-	// if err != nil {
-	// 	return err
+	// plugin, ok := results[0].Interface().(PluginInterface)
+	// if !ok {
+	// 	return fmt.Errorf("invalid plugin type: %T", results[0].Interface())
 	// }
 
-	// result := v.Call(nil)
-
-	// log.Println(result)
-
-	// p := result[0].Interface().(PluginInterface)
-	// p.Call()
+	// log.Printf("Plugin: %T", plugin)
 
 	return nil
 }

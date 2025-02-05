@@ -3,13 +3,10 @@ package demo
 import "log"
 
 type Demo struct {
-	A string
 }
 
 func New() (*Demo, error) {
-	return &Demo{
-		A: "doh",
-	}, nil
+	return &Demo{}, nil
 }
 
 func (d *Demo) Call() error {

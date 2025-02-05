@@ -1,10 +1,11 @@
 package api
 
 import (
-	"opentalaria/config"
-	"opentalaria/protocol"
 	"reflect"
 	"testing"
+
+	"github.com/ibm/opentalaria/config"
+	"github.com/ibm/opentalaria/protocol"
 )
 
 func getMockHeader(version int, requestApiKey, requestApiVersion int16, correlationId int32) protocol.RequestHeader {

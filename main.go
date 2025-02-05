@@ -41,7 +41,7 @@ func main() {
 	}
 	err = ps.Call()
 	if err != nil {
-		log.Printf("error invoking Call(): %v", err)
+		log.Printf("error invoking Call(): %+v\n", err)
 	}
 
 	return
