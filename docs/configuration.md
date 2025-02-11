@@ -1,14 +1,14 @@
 ## Broker configuration
 
-Setting configuration parameters in OpenTalaria can be done in multiple ways. The precedence order for variables is command line flag, environment variable, properties file, default value. For example if both `OT_ADVERTISED_LISTENERS` environment variable and the property `advertised.listeners` are set, OpenTalaria will initialize the broker with the value from the environment variable. 
+Setting configuration parameters in OpenTalaria can be done in multiple ways. The precedence order for variables is command line flag, environment variable, configuration file, default value. For example if both `OT_ADVERTISED_LISTENERS` environment variable and the property `advertised.listeners` are set, OpenTalaria will initialize the broker with the value from the environment variable. 
 
 OpenTalaria uses the [Viper](https://github.com/spf13/viper) library under the hood. It is important to note that Viper configuration keys are case insensitive.
 
-Generally environment variables used by OpenTalaria are prefixed by `OT_` and map to the properties file key by replacing the `.` symbol with `_`.
+Generally environment variables used by OpenTalaria are prefixed by `OT_` and map to the config file key by replacing the `.` symbol with `_`.
 
 The below table lists the currently supported properties, their mapping and defaults. If adding new functionality, please don't forget to update the table with any new variables.
 
-| Environment variable              | Properties key                 | Flag | Default value | Description                                                                                                                                                                                                                         |
+| Environment variable              | Configuration key              | Flag | Default value | Description                                                                                                                                                                                                                         |
 | --------------------------------- | ------------------------------ | ---- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | OT_PROFILE                        | profile                        | -    | -             | Sets the runtime profile for the broker. Accepted values are `localdev`, `dev`, `prod`. Starting the process with profile `localdev` exposes [expvar](https://pkg.go.dev/expvar) on port set by `OT_DEBUG_SERVER_PORT`.             |
 | OT_LOG_LEVEL                      | log.level                      | -    | warn          | Sets the log level. Accepted values are `debug`, `info`, `warn`, `error`                                                                                                                                                            |
