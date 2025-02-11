@@ -9,9 +9,6 @@ run_broker:
 build:
 	go get && go build -ldflags "-s -w" -trimpath -buildvcs=false -o bin/opentalaria
 
-plugin:
-	go build -buildmode=plugin -o ./plugins/demo/demo.so ./plugins/demo/demo.go
-
 run_test:
 	go run ./_examples/client/confluent/main.go
 
