@@ -17,6 +17,7 @@ func (a APIVersionsAPI) GetRequest() Request {
 }
 
 func (a APIVersionsAPI) GeneratePayload() ([]byte, error) {
+	// TODO: Remove this test call from here.
 	a.Request.Config.Plugin.Call()
 
 	// handle response
