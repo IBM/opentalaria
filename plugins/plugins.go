@@ -1,5 +1,5 @@
 package plugins
 
 type PluginInterface interface {
-	Config() error
+	Init() error
 }
