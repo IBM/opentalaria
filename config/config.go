@@ -34,7 +34,7 @@ func NewConfig(confFilename string) (*Config, error) {
 	env.SetEnvPrefix("ot")
 	env.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
-	env.SetConfigType("properties")
+	env.SetConfigType("yaml")
 	env.SetConfigFile(confFilename)
 	env.AddConfigPath(".")
 
