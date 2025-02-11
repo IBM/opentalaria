@@ -43,14 +43,14 @@ func main() {
 	log.Printf("%+v", metadata)
 
 	// produce message
-	// deliveryChan := make(chan kafka.Event, 1)
-	// err := producer.Produce(&kafka.Message{
-	// 	TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
-	// 	Value:          []byte("message")},
-	// 	deliveryChan)
+	deliveryChan := make(chan kafka.Event, 1)
+	err = producer.Produce(&kafka.Message{
+		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
+		Value:          []byte("message")},
+		deliveryChan)
 
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// <-deliveryChan
+	if err != nil {
+		panic(err)
+	}
+	<-deliveryChan
 }

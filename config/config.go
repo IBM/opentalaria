@@ -5,6 +5,9 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/ibm/opentalaria/plugins"
+	"github.com/ibm/opentalaria/plugins/postgresql"
+	"github.com/ibm/opentalaria/utils"
 	"github.com/spf13/viper"
 )
 
@@ -18,6 +21,8 @@ type Config struct {
 	Cluster *Cluster
 
 	Env *viper.Viper
+
+	Plugin plugins.PluginInterface
 }
 
 type Cluster struct {
@@ -69,6 +74,32 @@ func NewConfig(confFilename string) (*Config, error) {
 
 	config.Cluster = &Cluster{
 		ClusterID: clusterId,
+	}
+
+	// load the plugin. For now the plugins are statically defined in the plugins package,
+	// but this will change in the future.
+	pluginsConf := make(map[string]interface{})
+	err = env.UnmarshalKey("plugins", &pluginsConf)
+	if err != nil {
+		return &Config{}, err
+	}
+
+	k := utils.MapKeys(pluginsConf)
+
+	// In the first implementation of the plugin system, we will load only the first defined plugin.
+	// Later this will be changed to implement a plugin/middleware chain where multiple plugins will be loaded
+	// and chained together.
+	if len(k) > 0 {
+		switch k[0] {
+		case "postgres":
+			plugin := postgresql.Plugin{}
+			err := plugin.Init(env)
+			if err != nil {
+				return &Config{}, err
+			}
+
+			config.Plugin = &plugin
+		}
 	}
 
 	return &config, nil

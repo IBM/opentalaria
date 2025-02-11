@@ -3,5 +3,5 @@
 ```
 go get github.com/confluentinc/confluent-kafka-go/kafka
 
-go run main.go
+go run produce.go
 ```

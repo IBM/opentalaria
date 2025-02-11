@@ -17,6 +17,8 @@ func (a APIVersionsAPI) GetRequest() Request {
 }
 
 func (a APIVersionsAPI) GeneratePayload() ([]byte, error) {
+	a.Request.Config.Plugin.Call()
+
 	// handle response
 	apiVersionRequest := protocol.ApiVersionsRequest{}
 	_, err := protocol.VersionedDecode(a.Request.Message, &apiVersionRequest, a.Request.Header.RequestApiVersion)
