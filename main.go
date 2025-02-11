@@ -36,7 +36,7 @@ func initLogger(config *config.Config) {
 }
 
 func main() {
-	confFile := flag.String("c", "server.properties", "Path to config file. Default is server.properties")
+	confFile := flag.String("c", "config.yaml", "Path to config file. Default is config.yaml")
 	flag.Parse()
 
 	// global config object that will be passed to all downstream APIs and methods

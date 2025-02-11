@@ -6,24 +6,23 @@
 #     listeners = listener_name://host_name:port
 #   EXAMPLE:
 #     listeners = PLAINTEXT://your.host.name:9092
-listeners=PLAINTEXT://:9092
+listeners: PLAINTEXT://:9092
 
 # Listener name, hostname and port the broker will advertise to clients.
 # If not set, it uses the value for "listeners".
-advertised.listeners=PLAINTEXT://localhost:9092
+advertised.listeners: PLAINTEXT://localhost:9092
 
 # Maps listener names to security protocols, the default is for them to be the same. See the config documentation for more details
-listener.security.protocol.map=PLAINTEXT:PLAINTEXT,SSL:SSL,SASL_PLAINTEXT:SASL_PLAINTEXT,SASL_SSL:SASL_SSL
+listener.security.protocol.map: PLAINTEXT:PLAINTEXT,SSL:SSL,SASL_PLAINTEXT:SASL_PLAINTEXT,SASL_SSL:SASL_SSL
 
 # logger output format - json or text
-log.format=text
+log.format: text
 # logger verbosity level - debug,info,warn,error
-log.level=debug
+log.level: debug
 # broker instance profile - localdev,dev,prod
-profile=localdev
+profile: localdev
 
 # Port for expvar web server
-debug.server.port=9090
-
+debug.server.port: 9090
 # Connection pool size used by socket server
-# max.connections=5
+# max.connections: 5
