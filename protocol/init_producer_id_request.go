@@ -12,6 +12,10 @@ type InitProducerIdRequest struct {
 	ProducerID int64
 	// ProducerEpoch contains the producer's current epoch. This will be checked against the producer epoch on the broker, and the request will return an error if they do not match.
 	ProducerEpoch int16
+	// Enable2Pc contains a True if the client wants to enable two-phase commit (2PC) protocol for transactions.
+	Enable2Pc bool
+	// KeepPreparedTxn contains a True if the client wants to keep the currently ongoing transaction instead of aborting it.
+	KeepPreparedTxn bool
 }
 
 func (r *InitProducerIdRequest) encode(pe packetEncoder) (err error) {
@@ -30,6 +34,14 @@ func (r *InitProducerIdRequest) encode(pe packetEncoder) (err error) {
 
 	if r.Version >= 3 {
 		pe.putInt16(r.ProducerEpoch)
+	}
+
+	if r.Version >= 6 {
+		pe.putBool(r.Enable2Pc)
+	}
+
+	if r.Version >= 6 {
+		pe.putBool(r.KeepPreparedTxn)
 	}
 
 	if r.Version >= 2 {
@@ -63,6 +75,18 @@ func (r *InitProducerIdRequest) decode(pd packetDecoder, version int16) (err err
 		}
 	}
 
+	if r.Version >= 6 {
+		if r.Enable2Pc, err = pd.getBool(); err != nil {
+			return err
+		}
+	}
+
+	if r.Version >= 6 {
+		if r.KeepPreparedTxn, err = pd.getBool(); err != nil {
+			return err
+		}
+	}
+
 	if r.Version >= 2 {
 		if _, err = pd.getEmptyTaggedFieldArray(); err != nil {
 			return err
@@ -87,7 +111,7 @@ func (r *InitProducerIdRequest) GetHeaderVersion() int16 {
 }
 
 func (r *InitProducerIdRequest) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 4
+	return r.Version >= 0 && r.Version <= 6
 }
 
 func (r *InitProducerIdRequest) GetRequiredVersion() int16 {

@@ -45,6 +45,10 @@ func (pe *prepEncoder) putUUID(in uuid.UUID) error {
 	return nil
 }
 
+func (pe *prepEncoder) putUUIDArray(in []uuid.UUID) error {
+	return nil
+}
+
 func (pe *prepEncoder) putVarint(in int64) {
 	var buf [binary.MaxVarintLen64]byte
 	pe.length += binary.PutVarint(buf[:], in)
@@ -154,6 +158,26 @@ func (pe *prepEncoder) putStringArray(in []string) error {
 	return nil
 }
 
+func (pe *prepEncoder) putCompactInt8Array(in []int8) error {
+	if in == nil {
+		return errors.New("expected int8 array to be non null")
+	}
+
+	pe.putUVarint(uint64(len(in)) + 1)
+	pe.length += len(in)
+	return nil
+}
+
+func (pe *prepEncoder) putCompactInt16Array(in []int16) error {
+	if in == nil {
+		return errors.New("expected int16 array to be non null")
+	}
+
+	pe.putUVarint(uint64(len(in)) + 1)
+	pe.length += 2 * len(in)
+	return nil
+}
+
 func (pe *prepEncoder) putCompactInt32Array(in []int32) error {
 	if in == nil {
 		return errors.New("expected int32 array to be non null")
@@ -172,6 +196,24 @@ func (pe *prepEncoder) putNullableCompactInt32Array(in []int32) error {
 
 	pe.putUVarint(uint64(len(in)) + 1)
 	pe.length += 4 * len(in)
+	return nil
+}
+
+func (pe *prepEncoder) putInt8Array(in []int8) error {
+	err := pe.putArrayLength(len(in))
+	if err != nil {
+		return err
+	}
+	pe.length += len(in)
+	return nil
+}
+
+func (pe *prepEncoder) putInt16Array(in []int16) error {
+	err := pe.putArrayLength(len(in))
+	if err != nil {
+		return err
+	}
+	pe.length += 2 * len(in)
 	return nil
 }
 

@@ -6,7 +6,7 @@ type FindCoordinatorRequest struct {
 	Version int16
 	// Key contains the coordinator key.
 	Key string
-	// KeyType contains the coordinator key type. (Group, transaction, etc.)
+	// KeyType contains the coordinator key type. (group, transaction, share).
 	KeyType int8
 	// CoordinatorKeys contains the coordinator keys.
 	CoordinatorKeys []string
@@ -85,7 +85,7 @@ func (r *FindCoordinatorRequest) GetHeaderVersion() int16 {
 }
 
 func (r *FindCoordinatorRequest) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 4
+	return r.Version >= 0 && r.Version <= 6
 }
 
 func (r *FindCoordinatorRequest) GetRequiredVersion() int16 {

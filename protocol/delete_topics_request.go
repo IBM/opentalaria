@@ -3,13 +3,13 @@ package protocol
 
 import uuid "github.com/google/uuid"
 
-// DeleteTopicState contains the name or topic ID of the topic
+// DeleteTopicState contains the name or topic ID of the topic.
 type DeleteTopicState struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// Name contains the topic name
+	// Name contains the topic name.
 	Name *string
-	// TopicID contains the unique topic ID
+	// TopicID contains the unique topic ID.
 	TopicID uuid.UUID
 }
 
@@ -58,9 +58,9 @@ func (t *DeleteTopicState) decode(pd packetDecoder, version int16) (err error) {
 type DeleteTopicsRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// Topics contains the name or topic ID of the topic
+	// Topics contains the name or topic ID of the topic.
 	Topics []DeleteTopicState
-	// TopicNames contains the names of the topics to delete
+	// TopicNames contains the names of the topics to delete.
 	TopicNames []string
 	// TimeoutMs contains the length of time in milliseconds to wait for the deletions to complete.
 	TimeoutMs int32
@@ -151,7 +151,7 @@ func (r *DeleteTopicsRequest) GetHeaderVersion() int16 {
 }
 
 func (r *DeleteTopicsRequest) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 6
+	return r.Version >= 1 && r.Version <= 6
 }
 
 func (r *DeleteTopicsRequest) GetRequiredVersion() int16 {

@@ -3,13 +3,13 @@ package protocol
 
 import "time"
 
-// BatchIndexAndErrorMessage contains the batch indices of records that caused the batch to be dropped
+// BatchIndexAndErrorMessage contains the batch indices of records that caused the batch to be dropped.
 type BatchIndexAndErrorMessage struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// BatchIndex contains the batch index of the record that cause the batch to be dropped
+	// BatchIndex contains the batch index of the record that caused the batch to be dropped.
 	BatchIndex int32
-	// BatchIndexErrorMessage contains the error message of the record that caused the batch to be dropped
+	// BatchIndexErrorMessage contains the error message of the record that caused the batch to be dropped.
 	BatchIndexErrorMessage *string
 }
 
@@ -53,6 +53,46 @@ func (r *BatchIndexAndErrorMessage) decode(pd packetDecoder, version int16) (err
 	return nil
 }
 
+// LeaderIdAndEpoch_ProduceResponse contains the leader broker that the producer should use for future requests.
+type LeaderIdAndEpoch_ProduceResponse struct {
+	// Version defines the protocol version to use for encode and decode
+	Version int16
+	// LeaderID contains the ID of the current leader or -1 if the leader is unknown.
+	LeaderID int32
+	// LeaderEpoch contains the latest known leader epoch.
+	LeaderEpoch int32
+}
+
+func (c *LeaderIdAndEpoch_ProduceResponse) encode(pe packetEncoder, version int16) (err error) {
+	c.Version = version
+	if c.Version >= 10 {
+		pe.putInt32(c.LeaderID)
+	}
+
+	if c.Version >= 10 {
+		pe.putInt32(c.LeaderEpoch)
+	}
+
+	return nil
+}
+
+func (c *LeaderIdAndEpoch_ProduceResponse) decode(pd packetDecoder, version int16) (err error) {
+	c.Version = version
+	if c.Version >= 10 {
+		if c.LeaderID, err = pd.getInt32(); err != nil {
+			return err
+		}
+	}
+
+	if c.Version >= 10 {
+		if c.LeaderEpoch, err = pd.getInt32(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // PartitionProduceResponse contains each partition that we produced to within the topic.
 type PartitionProduceResponse struct {
 	// Version defines the protocol version to use for encode and decode
@@ -67,10 +107,12 @@ type PartitionProduceResponse struct {
 	LogAppendTimeMs int64
 	// LogStartOffset contains the log start offset.
 	LogStartOffset int64
-	// RecordErrors contains the batch indices of records that caused the batch to be dropped
+	// RecordErrors contains the batch indices of records that caused the batch to be dropped.
 	RecordErrors []BatchIndexAndErrorMessage
-	// ErrorMessage contains the global error message summarizing the common root cause of the records that caused the batch to be dropped
+	// ErrorMessage contains the global error message summarizing the common root cause of the records that caused the batch to be dropped.
 	ErrorMessage *string
+	// CurrentLeader contains the leader broker that the producer should use for future requests.
+	CurrentLeader LeaderIdAndEpoch_ProduceResponse
 }
 
 func (p *PartitionProduceResponse) encode(pe packetEncoder, version int16) (err error) {
@@ -169,11 +211,11 @@ func (p *PartitionProduceResponse) decode(pd packetDecoder, version int16) (err 
 	return nil
 }
 
-// TopicProduceResponse contains each produce response
+// TopicProduceResponse contains each produce response.
 type TopicProduceResponse struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// Name contains the topic name
+	// Name contains the topic name.
 	Name string
 	// PartitionResponses contains each partition that we produced to within the topic.
 	PartitionResponses []PartitionProduceResponse
@@ -229,13 +271,83 @@ func (r *TopicProduceResponse) decode(pd packetDecoder, version int16) (err erro
 	return nil
 }
 
+// NodeEndpoint_ProduceResponse contains a Endpoints for all current-leaders enumerated in PartitionProduceResponses, with errors NOT_LEADER_OR_FOLLOWER.
+type NodeEndpoint_ProduceResponse struct {
+	// Version defines the protocol version to use for encode and decode
+	Version int16
+	// NodeID contains the ID of the associated node.
+	NodeID int32
+	// Host contains the node's hostname.
+	Host string
+	// Port contains the node's port.
+	Port int32
+	// Rack contains the rack of the node, or null if it has not been assigned to a rack.
+	Rack *string
+}
+
+func (n *NodeEndpoint_ProduceResponse) encode(pe packetEncoder, version int16) (err error) {
+	n.Version = version
+	if n.Version >= 10 {
+		pe.putInt32(n.NodeID)
+	}
+
+	if n.Version >= 10 {
+		if err := pe.putString(n.Host); err != nil {
+			return err
+		}
+	}
+
+	if n.Version >= 10 {
+		pe.putInt32(n.Port)
+	}
+
+	if n.Version >= 10 {
+		if err := pe.putNullableString(n.Rack); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (n *NodeEndpoint_ProduceResponse) decode(pd packetDecoder, version int16) (err error) {
+	n.Version = version
+	if n.Version >= 10 {
+		if n.NodeID, err = pd.getInt32(); err != nil {
+			return err
+		}
+	}
+
+	if n.Version >= 10 {
+		if n.Host, err = pd.getString(); err != nil {
+			return err
+		}
+	}
+
+	if n.Version >= 10 {
+		if n.Port, err = pd.getInt32(); err != nil {
+			return err
+		}
+	}
+
+	if n.Version >= 10 {
+		if n.Rack, err = pd.getNullableString(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 type ProduceResponse struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// Responses contains each produce response
+	// Responses contains each produce response.
 	Responses []TopicProduceResponse
 	// ThrottleTimeMs contains the duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
 	ThrottleTimeMs int32
+	// NodeEndpoints contains a Endpoints for all current-leaders enumerated in PartitionProduceResponses, with errors NOT_LEADER_OR_FOLLOWER.
+	NodeEndpoints []NodeEndpoint_ProduceResponse
 }
 
 func (r *ProduceResponse) encode(pe packetEncoder) (err error) {
@@ -311,7 +423,7 @@ func (r *ProduceResponse) GetHeaderVersion() int16 {
 }
 
 func (r *ProduceResponse) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 9
+	return r.Version >= 3 && r.Version <= 12
 }
 
 func (r *ProduceResponse) GetRequiredVersion() int16 {

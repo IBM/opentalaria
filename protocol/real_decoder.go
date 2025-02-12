@@ -294,6 +294,48 @@ func (rd *realDecoder) getCompactNullableString() (*string, error) {
 	return &tmpStr, err
 }
 
+func (rd *realDecoder) getCompactInt8Array() ([]int8, error) {
+	n, err := rd.getUVarint()
+	if err != nil {
+		return nil, err
+	}
+
+	if n == 0 {
+		return nil, nil
+	}
+
+	arrayLength := int(n) - 1
+
+	ret := make([]int8, arrayLength)
+
+	for i := range ret {
+		ret[i] = int8(rd.raw[rd.off])
+		rd.off++
+	}
+	return ret, nil
+}
+
+func (rd *realDecoder) getCompactInt16Array() ([]int16, error) {
+	n, err := rd.getUVarint()
+	if err != nil {
+		return nil, err
+	}
+
+	if n == 0 {
+		return nil, nil
+	}
+
+	arrayLength := int(n) - 1
+
+	ret := make([]int16, arrayLength)
+
+	for i := range ret {
+		ret[i] = int16(binary.BigEndian.Uint16(rd.raw[rd.off:]))
+		rd.off += 2
+	}
+	return ret, nil
+}
+
 func (rd *realDecoder) getCompactInt32Array() ([]int32, error) {
 	n, err := rd.getUVarint()
 	if err != nil {
@@ -311,6 +353,64 @@ func (rd *realDecoder) getCompactInt32Array() ([]int32, error) {
 	for i := range ret {
 		ret[i] = int32(binary.BigEndian.Uint32(rd.raw[rd.off:]))
 		rd.off += 4
+	}
+	return ret, nil
+}
+
+func (rd *realDecoder) getInt8Array() ([]int8, error) {
+	if rd.remaining() < 4 {
+		rd.off = len(rd.raw)
+		return nil, ErrInsufficientData
+	}
+	n := int(binary.BigEndian.Uint32(rd.raw[rd.off:]))
+	rd.off += 4
+
+	if rd.remaining() < 4*n {
+		rd.off = len(rd.raw)
+		return nil, ErrInsufficientData
+	}
+
+	if n == 0 {
+		return nil, nil
+	}
+
+	if n < 0 {
+		return nil, errInvalidArrayLength
+	}
+
+	ret := make([]int8, n)
+	for i := range ret {
+		ret[i] = int8(rd.raw[rd.off])
+		rd.off++
+	}
+	return ret, nil
+}
+
+func (rd *realDecoder) getInt16Array() ([]int16, error) {
+	if rd.remaining() < 4 {
+		rd.off = len(rd.raw)
+		return nil, ErrInsufficientData
+	}
+	n := int(binary.BigEndian.Uint32(rd.raw[rd.off:]))
+	rd.off += 4
+
+	if rd.remaining() < 4*n {
+		rd.off = len(rd.raw)
+		return nil, ErrInsufficientData
+	}
+
+	if n == 0 {
+		return nil, nil
+	}
+
+	if n < 0 {
+		return nil, errInvalidArrayLength
+	}
+
+	ret := make([]int16, n)
+	for i := range ret {
+		ret[i] = int16(binary.BigEndian.Uint16(rd.raw[rd.off:]))
+		rd.off += 2
 	}
 	return ret, nil
 }
@@ -403,6 +503,10 @@ func (rd *realDecoder) getStringArray() ([]string, error) {
 
 func (rd *realDecoder) getUUID() (uuid.UUID, error) {
 	return uuid.UUID{}, nil
+}
+
+func (rd *realDecoder) getUUIDArray() ([]uuid.UUID, error) {
+	return []uuid.UUID{}, nil
 }
 
 // subsets

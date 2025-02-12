@@ -3,15 +3,15 @@ package protocol
 
 import "time"
 
-// TransactionState_ListTransactionsResponse contains a
+// TransactionState_ListTransactionsResponse contains the current state of the transaction for the transactional id.
 type TransactionState_ListTransactionsResponse struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// TransactionalID contains a
+	// TransactionalID contains the transactional id.
 	TransactionalID string
-	// ProducerID contains a
+	// ProducerID contains the producer id.
 	ProducerID int64
-	// TransactionState contains the current transaction state of the producer
+	// TransactionState contains the current transaction state of the producer.
 	TransactionState string
 }
 
@@ -56,11 +56,11 @@ type ListTransactionsResponse struct {
 	Version int16
 	// ThrottleTimeMs contains the duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
 	ThrottleTimeMs int32
-	// ErrorCode contains a
+	// ErrorCode contains the error code, or 0 if there was no error.
 	ErrorCode int16
-	// UnknownStateFilters contains a Set of state filters provided in the request which were unknown to the transaction coordinator
+	// UnknownStateFilters contains a Set of state filters provided in the request which were unknown to the transaction coordinator.
 	UnknownStateFilters []string
-	// TransactionStates contains a
+	// TransactionStates contains the current state of the transaction for the transactional id.
 	TransactionStates []TransactionState_ListTransactionsResponse
 }
 
@@ -136,7 +136,7 @@ func (r *ListTransactionsResponse) GetHeaderVersion() int16 {
 }
 
 func (r *ListTransactionsResponse) IsValidVersion() bool {
-	return r.Version == 0
+	return r.Version >= 0 && r.Version <= 1
 }
 
 func (r *ListTransactionsResponse) GetRequiredVersion() int16 {

@@ -30,11 +30,16 @@ type packetDecoder interface {
 	getNullableString() (*string, error)
 	getCompactString() (string, error)
 	getCompactNullableString() (*string, error)
+	getCompactInt8Array() ([]int8, error)
+	getCompactInt16Array() ([]int16, error)
 	getCompactInt32Array() ([]int32, error)
+	getInt8Array() ([]int8, error)
+	getInt16Array() ([]int16, error)
 	getInt32Array() ([]int32, error)
 	getInt64Array() ([]int64, error)
 	getStringArray() ([]string, error)
 	getUUID() (uuid.UUID, error)
+	getUUIDArray() ([]uuid.UUID, error)
 
 	// Subsets
 	remaining() int

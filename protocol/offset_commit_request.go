@@ -11,8 +11,6 @@ type OffsetCommitRequestPartition struct {
 	CommittedOffset int64
 	// CommittedLeaderEpoch contains the leader epoch of this partition.
 	CommittedLeaderEpoch int32
-	// CommitTimestamp contains the timestamp of the commit.
-	CommitTimestamp int64
 	// CommittedMetadata contains a Any associated metadata the client wants to keep.
 	CommittedMetadata *string
 }
@@ -25,10 +23,6 @@ func (p *OffsetCommitRequestPartition) encode(pe packetEncoder, version int16) (
 
 	if p.Version >= 6 {
 		pe.putInt32(p.CommittedLeaderEpoch)
-	}
-
-	if p.Version == 1 {
-		pe.putInt64(p.CommitTimestamp)
 	}
 
 	if err := pe.putNullableString(p.CommittedMetadata); err != nil {
@@ -53,12 +47,6 @@ func (p *OffsetCommitRequestPartition) decode(pd packetDecoder, version int16) (
 
 	if p.Version >= 6 {
 		if p.CommittedLeaderEpoch, err = pd.getInt32(); err != nil {
-			return err
-		}
-	}
-
-	if p.Version == 1 {
-		if p.CommitTimestamp, err = pd.getInt64(); err != nil {
 			return err
 		}
 	}
@@ -140,8 +128,8 @@ type OffsetCommitRequest struct {
 	Version int16
 	// GroupID contains the unique group identifier.
 	GroupID string
-	// GenerationID contains the generation of the group.
-	GenerationID int32
+	// GenerationIdOrMemberEpoch contains the generation of the group if using the classic group protocol or the member epoch if using the consumer protocol.
+	GenerationIdOrMemberEpoch int32
 	// MemberID contains the member ID assigned by the group coordinator.
 	MemberID string
 	// GroupInstanceID contains the unique identifier of the consumer instance provided by end user.
@@ -161,7 +149,7 @@ func (r *OffsetCommitRequest) encode(pe packetEncoder) (err error) {
 	}
 
 	if r.Version >= 1 {
-		pe.putInt32(r.GenerationID)
+		pe.putInt32(r.GenerationIdOrMemberEpoch)
 	}
 
 	if r.Version >= 1 {
@@ -205,7 +193,7 @@ func (r *OffsetCommitRequest) decode(pd packetDecoder, version int16) (err error
 	}
 
 	if r.Version >= 1 {
-		if r.GenerationID, err = pd.getInt32(); err != nil {
+		if r.GenerationIdOrMemberEpoch, err = pd.getInt32(); err != nil {
 			return err
 		}
 	}
@@ -267,7 +255,7 @@ func (r *OffsetCommitRequest) GetHeaderVersion() int16 {
 }
 
 func (r *OffsetCommitRequest) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 8
+	return r.Version >= 2 && r.Version <= 9
 }
 
 func (r *OffsetCommitRequest) GetRequiredVersion() int16 {

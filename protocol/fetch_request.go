@@ -3,7 +3,7 @@ package protocol
 
 import uuid "github.com/google/uuid"
 
-// ReplicaState_FetchRequest contains a
+// ReplicaState_FetchRequest contains the state of the replica in the follower.
 type ReplicaState_FetchRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
@@ -43,8 +43,8 @@ func (r *ReplicaState_FetchRequest) decode(pd packetDecoder, version int16) (err
 	return nil
 }
 
-// FetchPartition contains the partitions to fetch.
-type FetchPartition struct {
+// FetchPartition_FetchRequest contains the partitions to fetch.
+type FetchPartition_FetchRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
 	// Partition contains the partition index.
@@ -53,15 +53,17 @@ type FetchPartition struct {
 	CurrentLeaderEpoch int32
 	// FetchOffset contains the message offset.
 	FetchOffset int64
-	// LastFetchedEpoch contains the epoch of the last fetched record or -1 if there is none
+	// LastFetchedEpoch contains the epoch of the last fetched record or -1 if there is none.
 	LastFetchedEpoch int32
 	// LogStartOffset contains the earliest available offset of the follower replica.  The field is only used when the request is sent by the follower.
 	LogStartOffset int64
 	// PartitionMaxBytes contains the maximum bytes to fetch from this partition.  See KIP-74 for cases where this limit may not be honored.
 	PartitionMaxBytes int32
+	// ReplicaDirectoryID contains the directory id of the follower fetching.
+	ReplicaDirectoryID uuid.UUID
 }
 
-func (p *FetchPartition) encode(pe packetEncoder, version int16) (err error) {
+func (p *FetchPartition_FetchRequest) encode(pe packetEncoder, version int16) (err error) {
 	p.Version = version
 	pe.putInt32(p.Partition)
 
@@ -87,7 +89,7 @@ func (p *FetchPartition) encode(pe packetEncoder, version int16) (err error) {
 	return nil
 }
 
-func (p *FetchPartition) decode(pd packetDecoder, version int16) (err error) {
+func (p *FetchPartition_FetchRequest) decode(pd packetDecoder, version int16) (err error) {
 	p.Version = version
 	if p.Partition, err = pd.getInt32(); err != nil {
 		return err
@@ -127,19 +129,19 @@ func (p *FetchPartition) decode(pd packetDecoder, version int16) (err error) {
 	return nil
 }
 
-// FetchTopic contains the topics to fetch.
-type FetchTopic struct {
+// FetchTopic_FetchRequest contains the topics to fetch.
+type FetchTopic_FetchRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
 	// Topic contains the name of the topic to fetch.
 	Topic string
-	// TopicID contains the unique topic ID
+	// TopicID contains the unique topic ID.
 	TopicID uuid.UUID
 	// Partitions contains the partitions to fetch.
-	Partitions []FetchPartition
+	Partitions []FetchPartition_FetchRequest
 }
 
-func (t *FetchTopic) encode(pe packetEncoder, version int16) (err error) {
+func (t *FetchTopic_FetchRequest) encode(pe packetEncoder, version int16) (err error) {
 	t.Version = version
 	if t.Version >= 0 && t.Version <= 12 {
 		if err := pe.putString(t.Topic); err != nil {
@@ -168,7 +170,7 @@ func (t *FetchTopic) encode(pe packetEncoder, version int16) (err error) {
 	return nil
 }
 
-func (t *FetchTopic) decode(pd packetDecoder, version int16) (err error) {
+func (t *FetchTopic_FetchRequest) decode(pd packetDecoder, version int16) (err error) {
 	t.Version = version
 	if t.Version >= 0 && t.Version <= 12 {
 		if t.Topic, err = pd.getString(); err != nil {
@@ -187,9 +189,9 @@ func (t *FetchTopic) decode(pd packetDecoder, version int16) (err error) {
 		return err
 	}
 	if numPartitions > 0 {
-		t.Partitions = make([]FetchPartition, numPartitions)
+		t.Partitions = make([]FetchPartition_FetchRequest, numPartitions)
 		for i := 0; i < numPartitions; i++ {
-			var block FetchPartition
+			var block FetchPartition_FetchRequest
 			if err := block.decode(pd, t.Version); err != nil {
 				return err
 			}
@@ -205,19 +207,19 @@ func (t *FetchTopic) decode(pd packetDecoder, version int16) (err error) {
 	return nil
 }
 
-// ForgottenTopic contains in an incremental fetch request, the partitions to remove.
-type ForgottenTopic struct {
+// ForgottenTopic_FetchRequest contains in an incremental fetch request, the partitions to remove.
+type ForgottenTopic_FetchRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
 	// Topic contains the topic name.
 	Topic string
-	// TopicID contains the unique topic ID
+	// TopicID contains the unique topic ID.
 	TopicID uuid.UUID
 	// Partitions contains the partitions indexes to forget.
 	Partitions []int32
 }
 
-func (f *ForgottenTopic) encode(pe packetEncoder, version int16) (err error) {
+func (f *ForgottenTopic_FetchRequest) encode(pe packetEncoder, version int16) (err error) {
 	f.Version = version
 	if f.Version >= 7 && f.Version <= 12 {
 		if err := pe.putString(f.Topic); err != nil {
@@ -243,7 +245,7 @@ func (f *ForgottenTopic) encode(pe packetEncoder, version int16) (err error) {
 	return nil
 }
 
-func (f *ForgottenTopic) decode(pd packetDecoder, version int16) (err error) {
+func (f *ForgottenTopic_FetchRequest) decode(pd packetDecoder, version int16) (err error) {
 	f.Version = version
 	if f.Version >= 7 && f.Version <= 12 {
 		if f.Topic, err = pd.getString(); err != nil {
@@ -278,7 +280,7 @@ type FetchRequest struct {
 	ClusterID *string
 	// ReplicaID contains the broker ID of the follower, of -1 if this request is from a consumer.
 	ReplicaID int32
-	// ReplicaState contains a
+	// ReplicaState contains the state of the replica in the follower.
 	ReplicaState ReplicaState_FetchRequest
 	// MaxWaitMs contains the maximum time in milliseconds to wait for the response.
 	MaxWaitMs int32
@@ -286,17 +288,17 @@ type FetchRequest struct {
 	MinBytes int32
 	// MaxBytes contains the maximum bytes to fetch.  See KIP-74 for cases where this limit may not be honored.
 	MaxBytes int32
-	// IsolationLevel contains a This setting controls the visibility of transactional records. Using READ_UNCOMMITTED (isolation_level = 0) makes all records visible. With READ_COMMITTED (isolation_level = 1), non-transactional and COMMITTED transactional records are visible. To be more concrete, READ_COMMITTED returns all data from offsets smaller than the current LSO (last stable offset), and enables the inclusion of the list of aborted transactions in the result, which allows consumers to discard ABORTED transactional records
+	// IsolationLevel contains a This setting controls the visibility of transactional records. Using READ_UNCOMMITTED (isolation_level = 0) makes all records visible. With READ_COMMITTED (isolation_level = 1), non-transactional and COMMITTED transactional records are visible. To be more concrete, READ_COMMITTED returns all data from offsets smaller than the current LSO (last stable offset), and enables the inclusion of the list of aborted transactions in the result, which allows consumers to discard ABORTED transactional records.
 	IsolationLevel int8
 	// SessionID contains the fetch session ID.
 	SessionID int32
 	// SessionEpoch contains the fetch session epoch, which is used for ordering requests in a session.
 	SessionEpoch int32
 	// Topics contains the topics to fetch.
-	Topics []FetchTopic
+	Topics []FetchTopic_FetchRequest
 	// ForgottenTopicsData contains in an incremental fetch request, the partitions to remove.
-	ForgottenTopicsData []ForgottenTopic
-	// RackID contains a Rack ID of the consumer making this request
+	ForgottenTopicsData []ForgottenTopic_FetchRequest
+	// RackID contains a Rack ID of the consumer making this request.
 	RackID string
 }
 
@@ -408,9 +410,9 @@ func (r *FetchRequest) decode(pd packetDecoder, version int16) (err error) {
 		return err
 	}
 	if numTopics > 0 {
-		r.Topics = make([]FetchTopic, numTopics)
+		r.Topics = make([]FetchTopic_FetchRequest, numTopics)
 		for i := 0; i < numTopics; i++ {
-			var block FetchTopic
+			var block FetchTopic_FetchRequest
 			if err := block.decode(pd, r.Version); err != nil {
 				return err
 			}
@@ -424,9 +426,9 @@ func (r *FetchRequest) decode(pd packetDecoder, version int16) (err error) {
 			return err
 		}
 		if numForgottenTopicsData > 0 {
-			r.ForgottenTopicsData = make([]ForgottenTopic, numForgottenTopicsData)
+			r.ForgottenTopicsData = make([]ForgottenTopic_FetchRequest, numForgottenTopicsData)
 			for i := 0; i < numForgottenTopicsData; i++ {
-				var block ForgottenTopic
+				var block ForgottenTopic_FetchRequest
 				if err := block.decode(pd, r.Version); err != nil {
 					return err
 				}
@@ -465,7 +467,7 @@ func (r *FetchRequest) GetHeaderVersion() int16 {
 }
 
 func (r *FetchRequest) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 15
+	return r.Version >= 4 && r.Version <= 17
 }
 
 func (r *FetchRequest) GetRequiredVersion() int16 {

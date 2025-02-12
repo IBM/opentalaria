@@ -150,6 +150,30 @@ func (re *realEncoder) putStringArray(in []string) error {
 	return nil
 }
 
+func (re *realEncoder) putCompactInt8Array(in []int8) error {
+	if in == nil {
+		return errors.New("expected int8 array to be non null")
+	}
+	// 0 represents a null array, so +1 has to be added
+	re.putUVarint(uint64(len(in)) + 1)
+	for _, val := range in {
+		re.putInt8(val)
+	}
+	return nil
+}
+
+func (re *realEncoder) putCompactInt16Array(in []int16) error {
+	if in == nil {
+		return errors.New("expected int16 array to be non null")
+	}
+	// 0 represents a null array, so +1 has to be added
+	re.putUVarint(uint64(len(in)) + 1)
+	for _, val := range in {
+		re.putInt16(val)
+	}
+	return nil
+}
+
 func (re *realEncoder) putCompactInt32Array(in []int32) error {
 	if in == nil {
 		return errors.New("expected int32 array to be non null")
@@ -171,6 +195,28 @@ func (re *realEncoder) putNullableCompactInt32Array(in []int32) error {
 	re.putUVarint(uint64(len(in)) + 1)
 	for _, val := range in {
 		re.putInt32(val)
+	}
+	return nil
+}
+
+func (re *realEncoder) putInt8Array(in []int8) error {
+	err := re.putArrayLength(len(in))
+	if err != nil {
+		return err
+	}
+	for _, val := range in {
+		re.putInt8(val)
+	}
+	return nil
+}
+
+func (re *realEncoder) putInt16Array(in []int16) error {
+	err := re.putArrayLength(len(in))
+	if err != nil {
+		return err
+	}
+	for _, val := range in {
+		re.putInt16(val)
 	}
 	return nil
 }
@@ -208,6 +254,10 @@ func (re *realEncoder) putUUID(in uuid.UUID) error {
 	}
 
 	return re.putRawBytes(bytes)
+}
+
+func (re *realEncoder) putUUIDArray(in []uuid.UUID) error {
+	return errors.New("putUUIDArray is not implemented yet")
 }
 
 func (re *realEncoder) offset() int {

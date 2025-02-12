@@ -43,8 +43,8 @@ func (a *CreatableReplicaAssignment) decode(pd packetDecoder, version int16) (er
 	return nil
 }
 
-// CreateableTopicConfig contains the custom topic configurations to set.
-type CreateableTopicConfig struct {
+// CreatableTopicConfig contains the custom topic configurations to set.
+type CreatableTopicConfig struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
 	// Name contains the configuration name.
@@ -53,7 +53,7 @@ type CreateableTopicConfig struct {
 	Value *string
 }
 
-func (c *CreateableTopicConfig) encode(pe packetEncoder, version int16) (err error) {
+func (c *CreatableTopicConfig) encode(pe packetEncoder, version int16) (err error) {
 	c.Version = version
 	if err := pe.putString(c.Name); err != nil {
 		return err
@@ -69,7 +69,7 @@ func (c *CreateableTopicConfig) encode(pe packetEncoder, version int16) (err err
 	return nil
 }
 
-func (c *CreateableTopicConfig) decode(pd packetDecoder, version int16) (err error) {
+func (c *CreatableTopicConfig) decode(pd packetDecoder, version int16) (err error) {
 	c.Version = version
 	if c.Name, err = pd.getString(); err != nil {
 		return err
@@ -100,7 +100,7 @@ type CreatableTopic struct {
 	// Assignments contains the manual partition assignment, or the empty array if we are using automatic assignment.
 	Assignments []CreatableReplicaAssignment
 	// Configs contains the custom topic configurations to set.
-	Configs []CreateableTopicConfig
+	Configs []CreatableTopicConfig
 }
 
 func (t *CreatableTopic) encode(pe packetEncoder, version int16) (err error) {
@@ -171,9 +171,9 @@ func (t *CreatableTopic) decode(pd packetDecoder, version int16) (err error) {
 		return err
 	}
 	if numConfigs > 0 {
-		t.Configs = make([]CreateableTopicConfig, numConfigs)
+		t.Configs = make([]CreatableTopicConfig, numConfigs)
 		for i := 0; i < numConfigs; i++ {
-			var block CreateableTopicConfig
+			var block CreatableTopicConfig
 			if err := block.decode(pd, t.Version); err != nil {
 				return err
 			}
@@ -279,7 +279,7 @@ func (r *CreateTopicsRequest) GetHeaderVersion() int16 {
 }
 
 func (r *CreateTopicsRequest) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 7
+	return r.Version >= 2 && r.Version <= 7
 }
 
 func (r *CreateTopicsRequest) GetRequiredVersion() int16 {

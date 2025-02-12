@@ -3,7 +3,7 @@ package protocol
 
 import "time"
 
-// Coordinator contains each coordinator result in the response
+// Coordinator contains each coordinator result in the response.
 type Coordinator struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
@@ -120,7 +120,7 @@ type FindCoordinatorResponse struct {
 	Host string
 	// Port contains the port.
 	Port int32
-	// Coordinators contains each coordinator result in the response
+	// Coordinators contains each coordinator result in the response.
 	Coordinators []Coordinator
 }
 
@@ -255,7 +255,7 @@ func (r *FindCoordinatorResponse) GetHeaderVersion() int16 {
 }
 
 func (r *FindCoordinatorResponse) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 4
+	return r.Version >= 0 && r.Version <= 6
 }
 
 func (r *FindCoordinatorResponse) GetRequiredVersion() int16 {

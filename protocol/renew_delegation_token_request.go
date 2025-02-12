@@ -63,7 +63,7 @@ func (r *RenewDelegationTokenRequest) GetHeaderVersion() int16 {
 }
 
 func (r *RenewDelegationTokenRequest) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 2
+	return r.Version >= 1 && r.Version <= 2
 }
 
 func (r *RenewDelegationTokenRequest) GetRequiredVersion() int16 {

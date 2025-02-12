@@ -3,11 +3,11 @@ package protocol
 
 import "time"
 
-// DeletableGroupResult contains the deletion results
+// DeletableGroupResult contains the deletion results.
 type DeletableGroupResult struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// GroupID contains the group id
+	// GroupID contains the group id.
 	GroupID string
 	// ErrorCode contains the deletion error, or 0 if the deletion succeeded.
 	ErrorCode int16
@@ -50,7 +50,7 @@ type DeleteGroupsResponse struct {
 	Version int16
 	// ThrottleTimeMs contains the duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
 	ThrottleTimeMs int32
-	// Results contains the deletion results
+	// Results contains the deletion results.
 	Results []DeletableGroupResult
 }
 

@@ -1,19 +1,19 @@
 // protocol has been generated from message format json - DO NOT EDIT
 package protocol
 
-// PartitionData_VoteResponse contains a
+// PartitionData_VoteResponse contains the results for each partition.
 type PartitionData_VoteResponse struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
 	// PartitionIndex contains the partition index.
 	PartitionIndex int32
-	// ErrorCode contains a
+	// ErrorCode contains the partition level error code.
 	ErrorCode int16
 	// LeaderID contains the ID of the current leader or -1 if the leader is unknown.
 	LeaderID int32
-	// LeaderEpoch contains the latest known leader epoch
+	// LeaderEpoch contains the latest known leader epoch.
 	LeaderEpoch int32
-	// VoteGranted contains a True if the vote was granted and false otherwise
+	// VoteGranted contains a True if the vote was granted and false otherwise.
 	VoteGranted bool
 }
 
@@ -61,13 +61,13 @@ func (p *PartitionData_VoteResponse) decode(pd packetDecoder, version int16) (er
 	return nil
 }
 
-// TopicData_VoteResponse contains a
+// TopicData_VoteResponse contains the results for each topic.
 type TopicData_VoteResponse struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
 	// TopicName contains the topic name.
 	TopicName string
-	// Partitions contains a
+	// Partitions contains the results for each partition.
 	Partitions []PartitionData_VoteResponse
 }
 
@@ -117,13 +117,69 @@ func (t *TopicData_VoteResponse) decode(pd packetDecoder, version int16) (err er
 	return nil
 }
 
+// NodeEndpoint_VoteResponse contains a Endpoints for all current-leaders enumerated in PartitionData.
+type NodeEndpoint_VoteResponse struct {
+	// Version defines the protocol version to use for encode and decode
+	Version int16
+	// NodeID contains the ID of the associated node.
+	NodeID int32
+	// Host contains the node's hostname.
+	Host string
+	// Port contains the node's port.
+	Port uint16
+}
+
+func (n *NodeEndpoint_VoteResponse) encode(pe packetEncoder, version int16) (err error) {
+	n.Version = version
+	if n.Version >= 1 {
+		pe.putInt32(n.NodeID)
+	}
+
+	if n.Version >= 1 {
+		if err := pe.putString(n.Host); err != nil {
+			return err
+		}
+	}
+
+	if n.Version >= 1 {
+		pe.putUint16(n.Port)
+	}
+
+	return nil
+}
+
+func (n *NodeEndpoint_VoteResponse) decode(pd packetDecoder, version int16) (err error) {
+	n.Version = version
+	if n.Version >= 1 {
+		if n.NodeID, err = pd.getInt32(); err != nil {
+			return err
+		}
+	}
+
+	if n.Version >= 1 {
+		if n.Host, err = pd.getString(); err != nil {
+			return err
+		}
+	}
+
+	if n.Version >= 1 {
+		if n.Port, err = pd.getUint16(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 type VoteResponse struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
 	// ErrorCode contains the top level error code.
 	ErrorCode int16
-	// Topics contains a
+	// Topics contains the results for each topic.
 	Topics []TopicData_VoteResponse
+	// NodeEndpoints contains a Endpoints for all current-leaders enumerated in PartitionData.
+	NodeEndpoints []NodeEndpoint_VoteResponse
 }
 
 func (r *VoteResponse) encode(pe packetEncoder) (err error) {
@@ -184,7 +240,7 @@ func (r *VoteResponse) GetHeaderVersion() int16 {
 }
 
 func (r *VoteResponse) IsValidVersion() bool {
-	return r.Version == 0
+	return r.Version >= 0 && r.Version <= 2
 }
 
 func (r *VoteResponse) GetRequiredVersion() int16 {

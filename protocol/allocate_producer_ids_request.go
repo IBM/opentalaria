@@ -4,9 +4,9 @@ package protocol
 type AllocateProducerIdsRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// BrokerID contains the ID of the requesting broker
+	// BrokerID contains the ID of the requesting broker.
 	BrokerID int32
-	// BrokerEpoch contains the epoch of the requesting broker
+	// BrokerEpoch contains the epoch of the requesting broker.
 	BrokerEpoch int64
 }
 

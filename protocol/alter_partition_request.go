@@ -3,7 +3,7 @@ package protocol
 
 import uuid "github.com/google/uuid"
 
-// BrokerState contains a
+// BrokerState contains the ISR for this partition.
 type BrokerState struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
@@ -47,21 +47,21 @@ func (n *BrokerState) decode(pd packetDecoder, version int16) (err error) {
 	return nil
 }
 
-// PartitionData_AlterPartitionRequest contains a
+// PartitionData_AlterPartitionRequest contains the partitions to alter ISRs for.
 type PartitionData_AlterPartitionRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// PartitionIndex contains the partition index
+	// PartitionIndex contains the partition index.
 	PartitionIndex int32
-	// LeaderEpoch contains the leader epoch of this partition
+	// LeaderEpoch contains the leader epoch of this partition.
 	LeaderEpoch int32
 	// NewIsr contains the ISR for this partition. Deprecated since version 3.
 	NewIsr []int32
-	// NewIsrWithEpochs contains a
+	// NewIsrWithEpochs contains the ISR for this partition.
 	NewIsrWithEpochs []BrokerState
 	// LeaderRecoveryState contains a 1 if the partition is recovering from an unclean leader election; 0 otherwise.
 	LeaderRecoveryState int8
-	// PartitionEpoch contains the expected epoch of the partition which is being updated. For legacy cluster this is the ZkVersion in the LeaderAndIsr request.
+	// PartitionEpoch contains the expected epoch of the partition which is being updated.
 	PartitionEpoch int32
 }
 
@@ -147,15 +147,15 @@ func (p *PartitionData_AlterPartitionRequest) decode(pd packetDecoder, version i
 	return nil
 }
 
-// TopicData_AlterPartitionRequest contains a
+// TopicData_AlterPartitionRequest contains the topics to alter ISRs for.
 type TopicData_AlterPartitionRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// TopicName contains the name of the topic to alter ISRs for
+	// TopicName contains the name of the topic to alter ISRs for.
 	TopicName string
-	// TopicID contains the ID of the topic to alter ISRs for
+	// TopicID contains the ID of the topic to alter ISRs for.
 	TopicID uuid.UUID
-	// Partitions contains a
+	// Partitions contains the partitions to alter ISRs for.
 	Partitions []PartitionData_AlterPartitionRequest
 }
 
@@ -224,11 +224,11 @@ func (t *TopicData_AlterPartitionRequest) decode(pd packetDecoder, version int16
 type AlterPartitionRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// BrokerID contains the ID of the requesting broker
+	// BrokerID contains the ID of the requesting broker.
 	BrokerID int32
-	// BrokerEpoch contains the epoch of the requesting broker
+	// BrokerEpoch contains the epoch of the requesting broker.
 	BrokerEpoch int64
-	// Topics contains a
+	// Topics contains the topics to alter ISRs for.
 	Topics []TopicData_AlterPartitionRequest
 }
 

@@ -1,7 +1,7 @@
 // protocol has been generated from message format json - DO NOT EDIT
 package protocol
 
-// PartitionData_DescribeQuorumRequest contains a
+// PartitionData_DescribeQuorumRequest contains the partitions to describe.
 type PartitionData_DescribeQuorumRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
@@ -29,13 +29,13 @@ func (p *PartitionData_DescribeQuorumRequest) decode(pd packetDecoder, version i
 	return nil
 }
 
-// TopicData_DescribeQuorumRequest contains a
+// TopicData_DescribeQuorumRequest contains the topics to describe.
 type TopicData_DescribeQuorumRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
 	// TopicName contains the topic name.
 	TopicName string
-	// Partitions contains a
+	// Partitions contains the partitions to describe.
 	Partitions []PartitionData_DescribeQuorumRequest
 }
 
@@ -88,7 +88,7 @@ func (t *TopicData_DescribeQuorumRequest) decode(pd packetDecoder, version int16
 type DescribeQuorumRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// Topics contains a
+	// Topics contains the topics to describe.
 	Topics []TopicData_DescribeQuorumRequest
 }
 
@@ -144,7 +144,7 @@ func (r *DescribeQuorumRequest) GetHeaderVersion() int16 {
 }
 
 func (r *DescribeQuorumRequest) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 1
+	return r.Version >= 0 && r.Version <= 2
 }
 
 func (r *DescribeQuorumRequest) GetRequiredVersion() int16 {

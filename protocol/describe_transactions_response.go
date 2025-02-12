@@ -7,9 +7,9 @@ import "time"
 type TopicData_DescribeTransactionsResponse struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// Topic contains a
+	// Topic contains the topic name.
 	Topic string
-	// Partitions contains a
+	// Partitions contains the partition ids included in the current transaction.
 	Partitions []int32
 }
 
@@ -43,23 +43,23 @@ func (t *TopicData_DescribeTransactionsResponse) decode(pd packetDecoder, versio
 	return nil
 }
 
-// TransactionState_DescribeTransactionsResponse contains a
+// TransactionState_DescribeTransactionsResponse contains the current state of the transaction.
 type TransactionState_DescribeTransactionsResponse struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// ErrorCode contains a
+	// ErrorCode contains the error code.
 	ErrorCode int16
-	// TransactionalID contains a
+	// TransactionalID contains the transactional id.
 	TransactionalID string
-	// TransactionState contains a
+	// TransactionState contains the current transaction state of the producer.
 	TransactionState string
-	// TransactionTimeoutMs contains a
+	// TransactionTimeoutMs contains the timeout in milliseconds for the transaction.
 	TransactionTimeoutMs int32
-	// TransactionStartTimeMs contains a
+	// TransactionStartTimeMs contains the start time of the transaction in milliseconds.
 	TransactionStartTimeMs int64
-	// ProducerID contains a
+	// ProducerID contains the current producer id associated with the transaction.
 	ProducerID int64
-	// ProducerEpoch contains a
+	// ProducerEpoch contains the current epoch associated with the producer id.
 	ProducerEpoch int16
 	// Topics contains the set of partitions included in the current transaction (if active). When a transaction is preparing to commit or abort, this will include only partitions which do not have markers.
 	Topics []TopicData_DescribeTransactionsResponse
@@ -154,7 +154,7 @@ type DescribeTransactionsResponse struct {
 	Version int16
 	// ThrottleTimeMs contains the duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
 	ThrottleTimeMs int32
-	// TransactionStates contains a
+	// TransactionStates contains the current state of the transaction.
 	TransactionStates []TransactionState_DescribeTransactionsResponse
 }
 
