@@ -1,6 +1,8 @@
 // protocol has been generated from message format json - DO NOT EDIT
 package protocol
 
+import uuid "github.com/google/uuid"
+
 type BrokerHeartbeatRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
@@ -14,6 +16,8 @@ type BrokerHeartbeatRequest struct {
 	WantFence bool
 	// WantShutDown contains a True if the broker wants to be shut down, false otherwise.
 	WantShutDown bool
+	// OfflineLogDirs contains a Log directories that failed and went offline.
+	OfflineLogDirs []uuid.UUID
 }
 
 func (r *BrokerHeartbeatRequest) encode(pe packetEncoder) (err error) {
@@ -74,7 +78,7 @@ func (r *BrokerHeartbeatRequest) GetHeaderVersion() int16 {
 }
 
 func (r *BrokerHeartbeatRequest) IsValidVersion() bool {
-	return r.Version == 0
+	return r.Version >= 0 && r.Version <= 1
 }
 
 func (r *BrokerHeartbeatRequest) GetRequiredVersion() int16 {

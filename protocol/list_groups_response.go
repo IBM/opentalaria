@@ -13,6 +13,8 @@ type ListedGroup struct {
 	ProtocolType string
 	// GroupState contains the group state name.
 	GroupState string
+	// GroupType contains the group type name.
+	GroupType string
 }
 
 func (g *ListedGroup) encode(pe packetEncoder, version int16) (err error) {
@@ -27,6 +29,12 @@ func (g *ListedGroup) encode(pe packetEncoder, version int16) (err error) {
 
 	if g.Version >= 4 {
 		if err := pe.putString(g.GroupState); err != nil {
+			return err
+		}
+	}
+
+	if g.Version >= 5 {
+		if err := pe.putString(g.GroupType); err != nil {
 			return err
 		}
 	}
@@ -49,6 +57,12 @@ func (g *ListedGroup) decode(pd packetDecoder, version int16) (err error) {
 
 	if g.Version >= 4 {
 		if g.GroupState, err = pd.getString(); err != nil {
+			return err
+		}
+	}
+
+	if g.Version >= 5 {
+		if g.GroupType, err = pd.getString(); err != nil {
 			return err
 		}
 	}
@@ -151,7 +165,7 @@ func (r *ListGroupsResponse) GetHeaderVersion() int16 {
 }
 
 func (r *ListGroupsResponse) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 4
+	return r.Version >= 0 && r.Version <= 5
 }
 
 func (r *ListGroupsResponse) GetRequiredVersion() int16 {

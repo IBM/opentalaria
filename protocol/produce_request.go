@@ -31,11 +31,11 @@ func (p *PartitionProduceData) decode(pd packetDecoder, version int16) (err erro
 		return err
 	}
 
-	tmprecords := RecordBatch{}
-	if err := tmprecords.decode(pd, p.Version); err != nil {
+	tmpRecords := RecordBatch{}
+	if err := tmpRecords.decode(pd, p.Version); err != nil {
 		return err
 	}
-	p.Records = tmprecords
+	p.Records = tmpRecords
 
 	if p.Version >= 9 {
 		if _, err = pd.getEmptyTaggedFieldArray(); err != nil {
@@ -205,7 +205,7 @@ func (r *ProduceRequest) GetHeaderVersion() int16 {
 }
 
 func (r *ProduceRequest) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 9
+	return r.Version >= 3 && r.Version <= 12
 }
 
 func (r *ProduceRequest) GetRequiredVersion() int16 {

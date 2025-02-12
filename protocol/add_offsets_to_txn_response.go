@@ -63,7 +63,7 @@ func (r *AddOffsetsToTxnResponse) GetHeaderVersion() int16 {
 }
 
 func (r *AddOffsetsToTxnResponse) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 3
+	return r.Version >= 0 && r.Version <= 4
 }
 
 func (r *AddOffsetsToTxnResponse) GetRequiredVersion() int16 {

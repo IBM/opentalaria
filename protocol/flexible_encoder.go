@@ -91,12 +91,28 @@ func (fe *flexibleEncoder) putStringArray(in []string) error {
 	return fe.parent.putStringArray(in)
 }
 
+func (fe *flexibleEncoder) putCompactInt8Array(in []int8) error {
+	return fe.parent.putCompactInt8Array(in)
+}
+
+func (fe *flexibleEncoder) putCompactInt16Array(in []int16) error {
+	return fe.parent.putCompactInt16Array(in)
+}
+
 func (fe *flexibleEncoder) putCompactInt32Array(in []int32) error {
 	return fe.parent.putCompactInt32Array(in)
 }
 
 func (fe *flexibleEncoder) putNullableCompactInt32Array(in []int32) error {
 	return fe.parent.putNullableCompactInt32Array(in)
+}
+
+func (fe *flexibleEncoder) putInt8Array(in []int8) error {
+	return fe.parent.putCompactInt8Array(in)
+}
+
+func (fe *flexibleEncoder) putInt16Array(in []int16) error {
+	return fe.parent.putCompactInt16Array(in)
 }
 
 func (fe *flexibleEncoder) putInt32Array(in []int32) error {
@@ -113,6 +129,10 @@ func (fe *flexibleEncoder) putEmptyTaggedFieldArray() {
 
 func (fe *flexibleEncoder) putUUID(in uuid.UUID) error {
 	return fe.parent.putUUID(in)
+}
+
+func (fe *flexibleEncoder) putUUIDArray(in []uuid.UUID) error {
+	return fe.parent.putUUIDArray(in)
 }
 
 // Provide the current offset to record the batch size metric

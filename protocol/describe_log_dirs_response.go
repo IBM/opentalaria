@@ -3,7 +3,7 @@ package protocol
 
 import "time"
 
-// DescribeLogDirsPartition contains a
+// DescribeLogDirsPartition contains the partitions.
 type DescribeLogDirsPartition struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
@@ -11,7 +11,7 @@ type DescribeLogDirsPartition struct {
 	PartitionIndex int32
 	// PartitionSize contains the size of the log segments in this partition in bytes.
 	PartitionSize int64
-	// OffsetLag contains the lag of the log's LEO w.r.t. partition's HW (if it is the current log for the partition) or current replica's LEO (if it is the future log for the partition)
+	// OffsetLag contains the lag of the log's LEO w.r.t. partition's HW (if it is the current log for the partition) or current replica's LEO (if it is the future log for the partition).
 	OffsetLag int64
 	// IsFutureKey contains a True if this log is created by AlterReplicaLogDirsRequest and will replace the current log of the replica in the future.
 	IsFutureKey bool
@@ -59,13 +59,13 @@ func (p *DescribeLogDirsPartition) decode(pd packetDecoder, version int16) (err 
 	return nil
 }
 
-// DescribeLogDirsTopic contains each topic.
+// DescribeLogDirsTopic contains the topics.
 type DescribeLogDirsTopic struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
 	// Name contains the topic name.
 	Name string
-	// Partitions contains a
+	// Partitions contains the partitions.
 	Partitions []DescribeLogDirsPartition
 }
 
@@ -127,7 +127,7 @@ type DescribeLogDirsResult struct {
 	ErrorCode int16
 	// LogDir contains the absolute log directory path.
 	LogDir string
-	// Topics contains each topic.
+	// Topics contains the topics.
 	Topics []DescribeLogDirsTopic
 	// TotalBytes contains the total size in bytes of the volume the log directory is in.
 	TotalBytes int64
@@ -301,7 +301,7 @@ func (r *DescribeLogDirsResponse) GetHeaderVersion() int16 {
 }
 
 func (r *DescribeLogDirsResponse) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 4
+	return r.Version >= 1 && r.Version <= 4
 }
 
 func (r *DescribeLogDirsResponse) GetRequiredVersion() int16 {

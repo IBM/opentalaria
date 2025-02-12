@@ -5,7 +5,7 @@ package protocol
 type ListPartitionReassignmentsTopics struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// Name contains the topic name
+	// Name contains the topic name.
 	Name string
 	// PartitionIndexes contains the partitions to list partition reassignments for.
 	PartitionIndexes []int32

@@ -15,6 +15,8 @@ type DescribeClusterBroker struct {
 	Port int32
 	// Rack contains the rack of the broker, or null if it has not been assigned to a rack.
 	Rack *string
+	// IsFenced contains a Whether the broker is fenced
+	IsFenced bool
 }
 
 func (b *DescribeClusterBroker) encode(pe packetEncoder, version int16) (err error) {
@@ -29,6 +31,10 @@ func (b *DescribeClusterBroker) encode(pe packetEncoder, version int16) (err err
 
 	if err := pe.putNullableString(b.Rack); err != nil {
 		return err
+	}
+
+	if b.Version >= 2 {
+		pe.putBool(b.IsFenced)
 	}
 
 	pe.putUVarint(0)
@@ -53,6 +59,12 @@ func (b *DescribeClusterBroker) decode(pd packetDecoder, version int16) (err err
 		return err
 	}
 
+	if b.Version >= 2 {
+		if b.IsFenced, err = pd.getBool(); err != nil {
+			return err
+		}
+	}
+
 	if _, err = pd.getEmptyTaggedFieldArray(); err != nil {
 		return err
 	}
@@ -64,10 +76,12 @@ type DescribeClusterResponse struct {
 	Version int16
 	// ThrottleTimeMs contains the duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
 	ThrottleTimeMs int32
-	// ErrorCode contains the top-level error code, or 0 if there was no error
+	// ErrorCode contains the top-level error code, or 0 if there was no error.
 	ErrorCode int16
 	// ErrorMessage contains the top-level error message, or null if there was no error.
 	ErrorMessage *string
+	// EndpointType contains the endpoint type that was described. 1=brokers, 2=controllers.
+	EndpointType int8
 	// ClusterID contains the cluster ID that responding broker belongs to.
 	ClusterID string
 	// ControllerID contains the ID of the controller broker.
@@ -86,6 +100,10 @@ func (r *DescribeClusterResponse) encode(pe packetEncoder) (err error) {
 
 	if err := pe.putNullableString(r.ErrorMessage); err != nil {
 		return err
+	}
+
+	if r.Version >= 1 {
+		pe.putInt8(r.EndpointType)
 	}
 
 	if err := pe.putString(r.ClusterID); err != nil {
@@ -122,6 +140,12 @@ func (r *DescribeClusterResponse) decode(pd packetDecoder, version int16) (err e
 
 	if r.ErrorMessage, err = pd.getNullableString(); err != nil {
 		return err
+	}
+
+	if r.Version >= 1 {
+		if r.EndpointType, err = pd.getInt8(); err != nil {
+			return err
+		}
 	}
 
 	if r.ClusterID, err = pd.getString(); err != nil {
@@ -170,7 +194,7 @@ func (r *DescribeClusterResponse) GetHeaderVersion() int16 {
 }
 
 func (r *DescribeClusterResponse) IsValidVersion() bool {
-	return r.Version == 0
+	return r.Version >= 0 && r.Version <= 2
 }
 
 func (r *DescribeClusterResponse) GetRequiredVersion() int16 {

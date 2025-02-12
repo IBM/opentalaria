@@ -93,8 +93,24 @@ func (fd *flexibleDecoder) getCompactNullableString() (*string, error) {
 	return fd.parent.getCompactNullableString()
 }
 
+func (fd *flexibleDecoder) getCompactInt8Array() ([]int8, error) {
+	return fd.parent.getCompactInt8Array()
+}
+
+func (fd *flexibleDecoder) getCompactInt16Array() ([]int16, error) {
+	return fd.parent.getCompactInt16Array()
+}
+
 func (fd *flexibleDecoder) getCompactInt32Array() ([]int32, error) {
 	return fd.parent.getCompactInt32Array()
+}
+
+func (fd *flexibleDecoder) getInt8Array() ([]int8, error) {
+	return fd.parent.getCompactInt8Array()
+}
+
+func (fd *flexibleDecoder) getInt16Array() ([]int16, error) {
+	return fd.parent.getCompactInt16Array()
 }
 
 func (fd *flexibleDecoder) getInt32Array() ([]int32, error) {
@@ -111,6 +127,10 @@ func (fd *flexibleDecoder) getStringArray() ([]string, error) {
 
 func (fd *flexibleDecoder) getUUID() (uuid.UUID, error) {
 	return fd.parent.getUUID()
+}
+
+func (fd *flexibleDecoder) getUUIDArray() ([]uuid.UUID, error) {
+	return fd.parent.getUUIDArray()
 }
 
 // Subsets

@@ -57,7 +57,7 @@ type WritableTxnMarker struct {
 	TransactionResult bool
 	// Topics contains each topic that we want to write transaction marker(s) for.
 	Topics []WritableTxnMarkerTopic
-	// CoordinatorEpoch contains a Epoch associated with the transaction state partition hosted by this transaction coordinator
+	// CoordinatorEpoch contains a Epoch associated with the transaction state partition hosted by this transaction coordinator.
 	CoordinatorEpoch int32
 }
 
@@ -197,7 +197,7 @@ func (r *WriteTxnMarkersRequest) GetHeaderVersion() int16 {
 }
 
 func (r *WriteTxnMarkersRequest) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 1
+	return r.Version == 1
 }
 
 func (r *WriteTxnMarkersRequest) GetRequiredVersion() int16 {

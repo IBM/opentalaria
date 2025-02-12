@@ -229,7 +229,7 @@ func (r *WriteTxnMarkersResponse) GetHeaderVersion() int16 {
 }
 
 func (r *WriteTxnMarkersResponse) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 1
+	return r.Version == 1
 }
 
 func (r *WriteTxnMarkersResponse) GetRequiredVersion() int16 {

@@ -9,7 +9,7 @@ type AddPartitionsToTxnTopicResult_AddPartitionsToTxnResponse struct {
 	Version int16
 	// Name contains the topic name.
 	Name string
-	// ResultsByPartition contains the results for each partition
+	// ResultsByPartition contains the results for each partition.
 	ResultsByPartition []AddPartitionsToTxnPartitionResult
 }
 
@@ -295,7 +295,7 @@ func (r *AddPartitionsToTxnResponse) GetHeaderVersion() int16 {
 }
 
 func (r *AddPartitionsToTxnResponse) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 4
+	return r.Version >= 0 && r.Version <= 5
 }
 
 func (r *AddPartitionsToTxnResponse) GetRequiredVersion() int16 {

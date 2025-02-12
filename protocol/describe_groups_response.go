@@ -7,7 +7,7 @@ import "time"
 type DescribedGroupMember struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// MemberID contains the member ID assigned by the group coordinator.
+	// MemberID contains the member id.
 	MemberID string
 	// GroupInstanceID contains the unique identifier of the consumer instance provided by end user.
 	GroupInstanceID *string
@@ -91,12 +91,14 @@ func (m *DescribedGroupMember) decode(pd packetDecoder, version int16) (err erro
 	return nil
 }
 
-// DescribedGroup contains each described group.
-type DescribedGroup struct {
+// DescribedGroup_DescribeGroupsResponse contains each described group.
+type DescribedGroup_DescribeGroupsResponse struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
 	// ErrorCode contains the describe error, or 0 if there was no error.
 	ErrorCode int16
+	// ErrorMessage contains the describe error message, or null if there was no error.
+	ErrorMessage *string
 	// GroupID contains the group ID string.
 	GroupID string
 	// GroupState contains the group state string, or the empty string.
@@ -111,9 +113,15 @@ type DescribedGroup struct {
 	AuthorizedOperations int32
 }
 
-func (g *DescribedGroup) encode(pe packetEncoder, version int16) (err error) {
+func (g *DescribedGroup_DescribeGroupsResponse) encode(pe packetEncoder, version int16) (err error) {
 	g.Version = version
 	pe.putInt16(g.ErrorCode)
+
+	if g.Version >= 6 {
+		if err := pe.putNullableString(g.ErrorMessage); err != nil {
+			return err
+		}
+	}
 
 	if err := pe.putString(g.GroupID); err != nil {
 		return err
@@ -150,10 +158,16 @@ func (g *DescribedGroup) encode(pe packetEncoder, version int16) (err error) {
 	return nil
 }
 
-func (g *DescribedGroup) decode(pd packetDecoder, version int16) (err error) {
+func (g *DescribedGroup_DescribeGroupsResponse) decode(pd packetDecoder, version int16) (err error) {
 	g.Version = version
 	if g.ErrorCode, err = pd.getInt16(); err != nil {
 		return err
+	}
+
+	if g.Version >= 6 {
+		if g.ErrorMessage, err = pd.getNullableString(); err != nil {
+			return err
+		}
 	}
 
 	if g.GroupID, err = pd.getString(); err != nil {
@@ -207,7 +221,7 @@ type DescribeGroupsResponse struct {
 	// ThrottleTimeMs contains the duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
 	ThrottleTimeMs int32
 	// Groups contains each described group.
-	Groups []DescribedGroup
+	Groups []DescribedGroup_DescribeGroupsResponse
 }
 
 func (r *DescribeGroupsResponse) encode(pe packetEncoder) (err error) {
@@ -249,9 +263,9 @@ func (r *DescribeGroupsResponse) decode(pd packetDecoder, version int16) (err er
 		return err
 	}
 	if numGroups > 0 {
-		r.Groups = make([]DescribedGroup, numGroups)
+		r.Groups = make([]DescribedGroup_DescribeGroupsResponse, numGroups)
 		for i := 0; i < numGroups; i++ {
-			var block DescribedGroup
+			var block DescribedGroup_DescribeGroupsResponse
 			if err := block.decode(pd, r.Version); err != nil {
 				return err
 			}
@@ -283,7 +297,7 @@ func (r *DescribeGroupsResponse) GetHeaderVersion() int16 {
 }
 
 func (r *DescribeGroupsResponse) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 5
+	return r.Version >= 0 && r.Version <= 6
 }
 
 func (r *DescribeGroupsResponse) GetRequiredVersion() int16 {

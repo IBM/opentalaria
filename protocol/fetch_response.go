@@ -6,13 +6,13 @@ import (
 	"time"
 )
 
-// EpochEndOffset_FetchResponse contains in case divergence is detected based on the `LastFetchedEpoch` and `FetchOffset` in the request, this field indicates the largest epoch and its end offset such that subsequent records are known to diverge
+// EpochEndOffset_FetchResponse contains in case divergence is detected based on the `LastFetchedEpoch` and `FetchOffset` in the request, this field indicates the largest epoch and its end offset such that subsequent records are known to diverge.
 type EpochEndOffset_FetchResponse struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// Epoch contains a
+	// Epoch contains the largest epoch.
 	Epoch int32
-	// EndOffset contains a
+	// EndOffset contains the end offset of the epoch.
 	EndOffset int64
 }
 
@@ -46,13 +46,13 @@ func (d *EpochEndOffset_FetchResponse) decode(pd packetDecoder, version int16) (
 	return nil
 }
 
-// LeaderIdAndEpoch_FetchResponse contains a
+// LeaderIdAndEpoch_FetchResponse contains the current leader of the partition.
 type LeaderIdAndEpoch_FetchResponse struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
 	// LeaderID contains the ID of the current leader or -1 if the leader is unknown.
 	LeaderID int32
-	// LeaderEpoch contains the latest known leader epoch
+	// LeaderEpoch contains the latest known leader epoch.
 	LeaderEpoch int32
 }
 
@@ -90,9 +90,9 @@ func (c *LeaderIdAndEpoch_FetchResponse) decode(pd packetDecoder, version int16)
 type SnapshotId_FetchResponse struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// EndOffset contains a
+	// EndOffset contains the end offset of the epoch.
 	EndOffset int64
-	// Epoch contains a
+	// Epoch contains the largest epoch.
 	Epoch int32
 }
 
@@ -176,19 +176,19 @@ type PartitionData_FetchResponse struct {
 	ErrorCode int16
 	// HighWatermark contains the current high water mark.
 	HighWatermark int64
-	// LastStableOffset contains the last stable offset (or LSO) of the partition. This is the last offset such that the state of all transactional records prior to this offset have been decided (ABORTED or COMMITTED)
+	// LastStableOffset contains the last stable offset (or LSO) of the partition. This is the last offset such that the state of all transactional records prior to this offset have been decided (ABORTED or COMMITTED).
 	LastStableOffset int64
 	// LogStartOffset contains the current log start offset.
 	LogStartOffset int64
-	// DivergingEpoch contains in case divergence is detected based on the `LastFetchedEpoch` and `FetchOffset` in the request, this field indicates the largest epoch and its end offset such that subsequent records are known to diverge
+	// DivergingEpoch contains in case divergence is detected based on the `LastFetchedEpoch` and `FetchOffset` in the request, this field indicates the largest epoch and its end offset such that subsequent records are known to diverge.
 	DivergingEpoch EpochEndOffset_FetchResponse
-	// CurrentLeader contains a
+	// CurrentLeader contains the current leader of the partition.
 	CurrentLeader LeaderIdAndEpoch_FetchResponse
 	// SnapshotID contains in the case of fetching an offset less than the LogStartOffset, this is the end offset and epoch that should be used in the FetchSnapshot request.
 	SnapshotID SnapshotId_FetchResponse
 	// AbortedTransactions contains the aborted transactions.
 	AbortedTransactions []AbortedTransaction
-	// PreferredReadReplica contains the preferred read replica for the consumer to use on its next fetch request
+	// PreferredReadReplica contains the preferred read replica for the consumer to use on its next fetch request.
 	PreferredReadReplica int32
 	// Records contains the record data.
 	Records RecordBatch
@@ -284,11 +284,11 @@ func (p *PartitionData_FetchResponse) decode(pd packetDecoder, version int16) (e
 		}
 	}
 
-	tmprecords := RecordBatch{}
-	if err := tmprecords.decode(pd, p.Version); err != nil {
+	tmpRecords := RecordBatch{}
+	if err := tmpRecords.decode(pd, p.Version); err != nil {
 		return err
 	}
-	p.Records = tmprecords
+	p.Records = tmpRecords
 
 	if p.Version >= 12 {
 		if _, err = pd.getEmptyTaggedFieldArray(); err != nil {
@@ -304,7 +304,7 @@ type FetchableTopicResponse struct {
 	Version int16
 	// Topic contains the topic name.
 	Topic string
-	// TopicID contains the unique topic ID
+	// TopicID contains the unique topic ID.
 	TopicID uuid.UUID
 	// Partitions contains the topic partitions.
 	Partitions []PartitionData_FetchResponse
@@ -376,6 +376,74 @@ func (r *FetchableTopicResponse) decode(pd packetDecoder, version int16) (err er
 	return nil
 }
 
+// NodeEndpoint_FetchResponse contains a Endpoints for all current-leaders enumerated in PartitionData, with errors NOT_LEADER_OR_FOLLOWER & FENCED_LEADER_EPOCH.
+type NodeEndpoint_FetchResponse struct {
+	// Version defines the protocol version to use for encode and decode
+	Version int16
+	// NodeID contains the ID of the associated node.
+	NodeID int32
+	// Host contains the node's hostname.
+	Host string
+	// Port contains the node's port.
+	Port int32
+	// Rack contains the rack of the node, or null if it has not been assigned to a rack.
+	Rack *string
+}
+
+func (n *NodeEndpoint_FetchResponse) encode(pe packetEncoder, version int16) (err error) {
+	n.Version = version
+	if n.Version >= 16 {
+		pe.putInt32(n.NodeID)
+	}
+
+	if n.Version >= 16 {
+		if err := pe.putString(n.Host); err != nil {
+			return err
+		}
+	}
+
+	if n.Version >= 16 {
+		pe.putInt32(n.Port)
+	}
+
+	if n.Version >= 16 {
+		if err := pe.putNullableString(n.Rack); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (n *NodeEndpoint_FetchResponse) decode(pd packetDecoder, version int16) (err error) {
+	n.Version = version
+	if n.Version >= 16 {
+		if n.NodeID, err = pd.getInt32(); err != nil {
+			return err
+		}
+	}
+
+	if n.Version >= 16 {
+		if n.Host, err = pd.getString(); err != nil {
+			return err
+		}
+	}
+
+	if n.Version >= 16 {
+		if n.Port, err = pd.getInt32(); err != nil {
+			return err
+		}
+	}
+
+	if n.Version >= 16 {
+		if n.Rack, err = pd.getNullableString(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 type FetchResponse struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
@@ -387,6 +455,8 @@ type FetchResponse struct {
 	SessionID int32
 	// Responses contains the response topics.
 	Responses []FetchableTopicResponse
+	// NodeEndpoints contains a Endpoints for all current-leaders enumerated in PartitionData, with errors NOT_LEADER_OR_FOLLOWER & FENCED_LEADER_EPOCH.
+	NodeEndpoints []NodeEndpoint_FetchResponse
 }
 
 func (r *FetchResponse) encode(pe packetEncoder) (err error) {
@@ -482,7 +552,7 @@ func (r *FetchResponse) GetHeaderVersion() int16 {
 }
 
 func (r *FetchResponse) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 15
+	return r.Version >= 4 && r.Version <= 17
 }
 
 func (r *FetchResponse) GetRequiredVersion() int16 {

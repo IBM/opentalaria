@@ -3,7 +3,7 @@ package protocol
 
 import "time"
 
-// OffsetFetchResponsePartition contains the responses per partition
+// OffsetFetchResponsePartition contains the responses per partition.
 type OffsetFetchResponsePartition struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
@@ -95,7 +95,7 @@ type OffsetFetchResponseTopic struct {
 	Version int16
 	// Name contains the topic name.
 	Name string
-	// Partitions contains the responses per partition
+	// Partitions contains the responses per partition.
 	Partitions []OffsetFetchResponsePartition
 }
 
@@ -157,7 +157,7 @@ func (t *OffsetFetchResponseTopic) decode(pd packetDecoder, version int16) (err 
 	return nil
 }
 
-// OffsetFetchResponsePartitions contains the responses per partition
+// OffsetFetchResponsePartitions contains the responses per partition.
 type OffsetFetchResponsePartitions struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
@@ -249,7 +249,7 @@ type OffsetFetchResponseTopics struct {
 	Version int16
 	// Name contains the topic name.
 	Name string
-	// Partitions contains the responses per partition
+	// Partitions contains the responses per partition.
 	Partitions []OffsetFetchResponsePartitions
 }
 
@@ -315,8 +315,8 @@ func (t *OffsetFetchResponseTopics) decode(pd packetDecoder, version int16) (err
 type OffsetFetchResponseGroup struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// groupID contains the group ID.
-	groupID string
+	// GroupID contains the group ID.
+	GroupID string
 	// Topics contains the responses per topic.
 	Topics []OffsetFetchResponseTopics
 	// ErrorCode contains the group-level error code, or 0 if there was no error.
@@ -326,7 +326,7 @@ type OffsetFetchResponseGroup struct {
 func (g *OffsetFetchResponseGroup) encode(pe packetEncoder, version int16) (err error) {
 	g.Version = version
 	if g.Version >= 8 {
-		if err := pe.putString(g.groupID); err != nil {
+		if err := pe.putString(g.GroupID); err != nil {
 			return err
 		}
 	}
@@ -355,7 +355,7 @@ func (g *OffsetFetchResponseGroup) encode(pe packetEncoder, version int16) (err 
 func (g *OffsetFetchResponseGroup) decode(pd packetDecoder, version int16) (err error) {
 	g.Version = version
 	if g.Version >= 8 {
-		if g.groupID, err = pd.getString(); err != nil {
+		if g.GroupID, err = pd.getString(); err != nil {
 			return err
 		}
 	}
@@ -519,7 +519,7 @@ func (r *OffsetFetchResponse) GetHeaderVersion() int16 {
 }
 
 func (r *OffsetFetchResponse) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 8
+	return r.Version >= 1 && r.Version <= 9
 }
 
 func (r *OffsetFetchResponse) GetRequiredVersion() int16 {

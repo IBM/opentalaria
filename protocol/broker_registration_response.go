@@ -60,7 +60,7 @@ func (r *BrokerRegistrationResponse) GetHeaderVersion() int16 {
 }
 
 func (r *BrokerRegistrationResponse) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 1
+	return r.Version >= 0 && r.Version <= 4
 }
 
 func (r *BrokerRegistrationResponse) GetRequiredVersion() int16 {

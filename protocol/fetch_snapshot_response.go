@@ -3,13 +3,13 @@ package protocol
 
 import "time"
 
-// SnapshotId_FetchSnapshotResponse contains the snapshot endOffset and epoch fetched
+// SnapshotId_FetchSnapshotResponse contains the snapshot endOffset and epoch fetched.
 type SnapshotId_FetchSnapshotResponse struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// EndOffset contains a
+	// EndOffset contains the snapshot end offset.
 	EndOffset int64
-	// Epoch contains a
+	// Epoch contains the snapshot epoch.
 	Epoch int32
 }
 
@@ -39,13 +39,13 @@ func (s *SnapshotId_FetchSnapshotResponse) decode(pd packetDecoder, version int1
 	return nil
 }
 
-// LeaderIdAndEpoch_FetchSnapshotResponse contains a
+// LeaderIdAndEpoch_FetchSnapshotResponse contains the leader of the partition at the time of the snapshot.
 type LeaderIdAndEpoch_FetchSnapshotResponse struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
 	// LeaderID contains the ID of the current leader or -1 if the leader is unknown.
 	LeaderID int32
-	// LeaderEpoch contains the latest known leader epoch
+	// LeaderEpoch contains the latest known leader epoch.
 	LeaderEpoch int32
 }
 
@@ -79,15 +79,15 @@ type PartitionSnapshot_FetchSnapshotResponse struct {
 	Index int32
 	// ErrorCode contains the error code, or 0 if there was no fetch error.
 	ErrorCode int16
-	// SnapshotID contains the snapshot endOffset and epoch fetched
+	// SnapshotID contains the snapshot endOffset and epoch fetched.
 	SnapshotID SnapshotId_FetchSnapshotResponse
-	// CurrentLeader contains a
+	// CurrentLeader contains the leader of the partition at the time of the snapshot.
 	CurrentLeader LeaderIdAndEpoch_FetchSnapshotResponse
 	// Size contains the total size of the snapshot.
 	Size int64
 	// Position contains the starting byte position within the snapshot included in the Bytes field.
 	Position int64
-	// UnalignedRecords contains a Snapshot data in records format which may not be aligned on an offset boundary
+	// UnalignedRecords contains a Snapshot data in records format which may not be aligned on an offset boundary.
 	UnalignedRecords RecordBatch
 }
 
@@ -123,11 +123,11 @@ func (p *PartitionSnapshot_FetchSnapshotResponse) decode(pd packetDecoder, versi
 		return err
 	}
 
-	tmpSnapshotId_FetchSnapshotResponse := SnapshotId_FetchSnapshotResponse{}
-	if err := tmpSnapshotId_FetchSnapshotResponse.decode(pd, p.Version); err != nil {
+	tmpSnapshotId := SnapshotId_FetchSnapshotResponse{}
+	if err := tmpSnapshotId.decode(pd, p.Version); err != nil {
 		return err
 	}
-	p.SnapshotID = tmpSnapshotId_FetchSnapshotResponse
+	p.SnapshotID = tmpSnapshotId
 
 	if p.Size, err = pd.getInt64(); err != nil {
 		return err
@@ -137,11 +137,11 @@ func (p *PartitionSnapshot_FetchSnapshotResponse) decode(pd packetDecoder, versi
 		return err
 	}
 
-	tmprecords := RecordBatch{}
-	if err := tmprecords.decode(pd, p.Version); err != nil {
+	tmpUnalignedRecords := RecordBatch{}
+	if err := tmpUnalignedRecords.decode(pd, p.Version); err != nil {
 		return err
 	}
-	p.UnalignedRecords = tmprecords
+	p.UnalignedRecords = tmpUnalignedRecords
 
 	if _, err = pd.getEmptyTaggedFieldArray(); err != nil {
 		return err
@@ -205,6 +205,60 @@ func (t *TopicSnapshot_FetchSnapshotResponse) decode(pd packetDecoder, version i
 	return nil
 }
 
+// NodeEndpoint_FetchSnapshotResponse contains a Endpoints for all current-leaders enumerated in PartitionSnapshot.
+type NodeEndpoint_FetchSnapshotResponse struct {
+	// Version defines the protocol version to use for encode and decode
+	Version int16
+	// NodeID contains the ID of the associated node.
+	NodeID int32
+	// Host contains the node's hostname.
+	Host string
+	// Port contains the node's port.
+	Port uint16
+}
+
+func (n *NodeEndpoint_FetchSnapshotResponse) encode(pe packetEncoder, version int16) (err error) {
+	n.Version = version
+	if n.Version >= 1 {
+		pe.putInt32(n.NodeID)
+	}
+
+	if n.Version >= 1 {
+		if err := pe.putString(n.Host); err != nil {
+			return err
+		}
+	}
+
+	if n.Version >= 1 {
+		pe.putUint16(n.Port)
+	}
+
+	return nil
+}
+
+func (n *NodeEndpoint_FetchSnapshotResponse) decode(pd packetDecoder, version int16) (err error) {
+	n.Version = version
+	if n.Version >= 1 {
+		if n.NodeID, err = pd.getInt32(); err != nil {
+			return err
+		}
+	}
+
+	if n.Version >= 1 {
+		if n.Host, err = pd.getString(); err != nil {
+			return err
+		}
+	}
+
+	if n.Version >= 1 {
+		if n.Port, err = pd.getUint16(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 type FetchSnapshotResponse struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
@@ -214,6 +268,8 @@ type FetchSnapshotResponse struct {
 	ErrorCode int16
 	// Topics contains the topics to fetch.
 	Topics []TopicSnapshot_FetchSnapshotResponse
+	// NodeEndpoints contains a Endpoints for all current-leaders enumerated in PartitionSnapshot.
+	NodeEndpoints []NodeEndpoint_FetchSnapshotResponse
 }
 
 func (r *FetchSnapshotResponse) encode(pe packetEncoder) (err error) {
@@ -280,7 +336,7 @@ func (r *FetchSnapshotResponse) GetHeaderVersion() int16 {
 }
 
 func (r *FetchSnapshotResponse) IsValidVersion() bool {
-	return r.Version == 0
+	return r.Version >= 0 && r.Version <= 1
 }
 
 func (r *FetchSnapshotResponse) GetRequiredVersion() int16 {

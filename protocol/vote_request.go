@@ -1,33 +1,57 @@
 // protocol has been generated from message format json - DO NOT EDIT
 package protocol
 
-// PartitionData_VoteRequest contains a
+import uuid "github.com/google/uuid"
+
+// PartitionData_VoteRequest contains the partition data.
 type PartitionData_VoteRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
 	// PartitionIndex contains the partition index.
 	PartitionIndex int32
-	// CandidateEpoch contains the bumped epoch of the candidate sending the request
-	CandidateEpoch int32
-	// CandidateID contains the ID of the voter sending the request
-	CandidateID int32
-	// LastOffsetEpoch contains the epoch of the last record written to the metadata log
+	// ReplicaEpoch contains the epoch of the voter sending the request
+	ReplicaEpoch int32
+	// ReplicaID contains the replica id of the voter sending the request
+	ReplicaID int32
+	// ReplicaDirectoryID contains the directory id of the voter sending the request
+	ReplicaDirectoryID uuid.UUID
+	// VoterDirectoryID contains the directory id of the voter receiving the request
+	VoterDirectoryID uuid.UUID
+	// LastOffsetEpoch contains the epoch of the last record written to the metadata log.
 	LastOffsetEpoch int32
-	// LastOffset contains the offset of the last record written to the metadata log
+	// LastOffset contains the log end offset of the metadata log of the voter sending the request.
 	LastOffset int64
+	// PreVote contains a Whether the request is a PreVote request (not persisted) or not.
+	PreVote bool
 }
 
 func (p *PartitionData_VoteRequest) encode(pe packetEncoder, version int16) (err error) {
 	p.Version = version
 	pe.putInt32(p.PartitionIndex)
 
-	pe.putInt32(p.CandidateEpoch)
+	pe.putInt32(p.ReplicaEpoch)
 
-	pe.putInt32(p.CandidateID)
+	pe.putInt32(p.ReplicaID)
+
+	if p.Version >= 1 {
+		if err := pe.putUUID(p.ReplicaDirectoryID); err != nil {
+			return err
+		}
+	}
+
+	if p.Version >= 1 {
+		if err := pe.putUUID(p.VoterDirectoryID); err != nil {
+			return err
+		}
+	}
 
 	pe.putInt32(p.LastOffsetEpoch)
 
 	pe.putInt64(p.LastOffset)
+
+	if p.Version >= 2 {
+		pe.putBool(p.PreVote)
+	}
 
 	pe.putUVarint(0)
 	return nil
@@ -39,12 +63,24 @@ func (p *PartitionData_VoteRequest) decode(pd packetDecoder, version int16) (err
 		return err
 	}
 
-	if p.CandidateEpoch, err = pd.getInt32(); err != nil {
+	if p.ReplicaEpoch, err = pd.getInt32(); err != nil {
 		return err
 	}
 
-	if p.CandidateID, err = pd.getInt32(); err != nil {
+	if p.ReplicaID, err = pd.getInt32(); err != nil {
 		return err
+	}
+
+	if p.Version >= 1 {
+		if p.ReplicaDirectoryID, err = pd.getUUID(); err != nil {
+			return err
+		}
+	}
+
+	if p.Version >= 1 {
+		if p.VoterDirectoryID, err = pd.getUUID(); err != nil {
+			return err
+		}
 	}
 
 	if p.LastOffsetEpoch, err = pd.getInt32(); err != nil {
@@ -55,19 +91,25 @@ func (p *PartitionData_VoteRequest) decode(pd packetDecoder, version int16) (err
 		return err
 	}
 
+	if p.Version >= 2 {
+		if p.PreVote, err = pd.getBool(); err != nil {
+			return err
+		}
+	}
+
 	if _, err = pd.getEmptyTaggedFieldArray(); err != nil {
 		return err
 	}
 	return nil
 }
 
-// TopicData_VoteRequest contains a
+// TopicData_VoteRequest contains the topic data.
 type TopicData_VoteRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
 	// TopicName contains the topic name.
 	TopicName string
-	// Partitions contains a
+	// Partitions contains the partition data.
 	Partitions []PartitionData_VoteRequest
 }
 
@@ -120,9 +162,11 @@ func (t *TopicData_VoteRequest) decode(pd packetDecoder, version int16) (err err
 type VoteRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// ClusterID contains a
+	// ClusterID contains the cluster id.
 	ClusterID *string
-	// Topics contains a
+	// VoterID contains the replica id of the voter receiving the request.
+	VoterID int32
+	// Topics contains the topic data.
 	Topics []TopicData_VoteRequest
 }
 
@@ -130,6 +174,10 @@ func (r *VoteRequest) encode(pe packetEncoder) (err error) {
 	pe = FlexibleEncoderFrom(pe)
 	if err := pe.putNullableString(r.ClusterID); err != nil {
 		return err
+	}
+
+	if r.Version >= 1 {
+		pe.putInt32(r.VoterID)
 	}
 
 	if err := pe.putArrayLength(len(r.Topics)); err != nil {
@@ -150,6 +198,12 @@ func (r *VoteRequest) decode(pd packetDecoder, version int16) (err error) {
 	pd = FlexibleDecoderFrom(pd)
 	if r.ClusterID, err = pd.getNullableString(); err != nil {
 		return err
+	}
+
+	if r.Version >= 1 {
+		if r.VoterID, err = pd.getInt32(); err != nil {
+			return err
+		}
 	}
 
 	var numTopics int
@@ -186,7 +240,7 @@ func (r *VoteRequest) GetHeaderVersion() int16 {
 }
 
 func (r *VoteRequest) IsValidVersion() bool {
-	return r.Version == 0
+	return r.Version >= 0 && r.Version <= 2
 }
 
 func (r *VoteRequest) GetRequiredVersion() int16 {

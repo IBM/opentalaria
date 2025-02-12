@@ -8,11 +8,11 @@ type AllocateProducerIdsResponse struct {
 	Version int16
 	// ThrottleTimeMs contains the duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
 	ThrottleTimeMs int32
-	// ErrorCode contains the top level response error code
+	// ErrorCode contains the top level response error code.
 	ErrorCode int16
-	// ProducerIdStart contains the first producer ID in this range, inclusive
+	// ProducerIdStart contains the first producer ID in this range, inclusive.
 	ProducerIdStart int64
-	// ProducerIdLen contains the number of producer IDs in this range
+	// ProducerIdLen contains the number of producer IDs in this range.
 	ProducerIdLen int32
 }
 

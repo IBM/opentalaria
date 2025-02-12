@@ -11,13 +11,11 @@ type ListOffsetsPartitionResponse struct {
 	PartitionIndex int32
 	// ErrorCode contains the partition error code, or 0 if there was no error.
 	ErrorCode int16
-	// OldStyleOffsets contains the result offsets.
-	OldStyleOffsets []int64
 	// Timestamp contains the timestamp associated with the returned offset.
 	Timestamp int64
 	// Offset contains the returned offset.
 	Offset int64
-	// LeaderEpoch contains a
+	// LeaderEpoch contains the leader epoch associated with the returned offset.
 	LeaderEpoch int32
 }
 
@@ -26,12 +24,6 @@ func (p *ListOffsetsPartitionResponse) encode(pe packetEncoder, version int16) (
 	pe.putInt32(p.PartitionIndex)
 
 	pe.putInt16(p.ErrorCode)
-
-	if p.Version == 0 {
-		if err := pe.putInt64Array(p.OldStyleOffsets); err != nil {
-			return err
-		}
-	}
 
 	if p.Version >= 1 {
 		pe.putInt64(p.Timestamp)
@@ -59,12 +51,6 @@ func (p *ListOffsetsPartitionResponse) decode(pd packetDecoder, version int16) (
 
 	if p.ErrorCode, err = pd.getInt16(); err != nil {
 		return err
-	}
-
-	if p.Version == 0 {
-		if p.OldStyleOffsets, err = pd.getInt64Array(); err != nil {
-			return err
-		}
 	}
 
 	if p.Version >= 1 {
@@ -97,7 +83,7 @@ func (p *ListOffsetsPartitionResponse) decode(pd packetDecoder, version int16) (
 type ListOffsetsTopicResponse struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// Name contains the topic name
+	// Name contains the topic name.
 	Name string
 	// Partitions contains each partition in the response.
 	Partitions []ListOffsetsPartitionResponse
@@ -235,7 +221,7 @@ func (r *ListOffsetsResponse) GetHeaderVersion() int16 {
 }
 
 func (r *ListOffsetsResponse) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 8
+	return r.Version >= 1 && r.Version <= 10
 }
 
 func (r *ListOffsetsResponse) GetRequiredVersion() int16 {

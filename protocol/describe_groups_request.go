@@ -4,7 +4,7 @@ package protocol
 type DescribeGroupsRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// Groups contains the names of the groups to describe
+	// Groups contains the names of the groups to describe.
 	Groups []string
 	// IncludeAuthorizedOperations contains a Whether to include authorized operations.
 	IncludeAuthorizedOperations bool
@@ -67,7 +67,7 @@ func (r *DescribeGroupsRequest) GetHeaderVersion() int16 {
 }
 
 func (r *DescribeGroupsRequest) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 5
+	return r.Version >= 0 && r.Version <= 6
 }
 
 func (r *DescribeGroupsRequest) GetRequiredVersion() int16 {
