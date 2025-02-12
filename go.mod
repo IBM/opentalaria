@@ -5,11 +5,10 @@ go 1.21.6
 require (
 	github.com/google/uuid v1.6.0
 	github.com/spf13/viper v1.19.0
-	golang.org/x/sync v0.9.0
+	golang.org/x/sync v0.11.0
 )
 
 require (
-	github.com/confluentinc/confluent-kafka-go v1.9.2 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
