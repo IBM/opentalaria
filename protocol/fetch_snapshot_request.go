@@ -1,13 +1,15 @@
 // protocol has been generated from message format json - DO NOT EDIT
 package protocol
 
-// SnapshotId_FetchSnapshotRequest contains the snapshot endOffset and epoch to fetch
+import uuid "github.com/google/uuid"
+
+// SnapshotId_FetchSnapshotRequest contains the snapshot endOffset and epoch to fetch.
 type SnapshotId_FetchSnapshotRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// EndOffset contains a
+	// EndOffset contains the end offset of the snapshot.
 	EndOffset int64
-	// Epoch contains a
+	// Epoch contains the epoch of the snapshot.
 	Epoch int32
 }
 
@@ -37,18 +39,20 @@ func (s *SnapshotId_FetchSnapshotRequest) decode(pd packetDecoder, version int16
 	return nil
 }
 
-// PartitionSnapshot_FetchSnapshotRequest contains the partitions to fetch
+// PartitionSnapshot_FetchSnapshotRequest contains the partitions to fetch.
 type PartitionSnapshot_FetchSnapshotRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// Partition contains the partition index
+	// Partition contains the partition index.
 	Partition int32
-	// CurrentLeaderEpoch contains the current leader epoch of the partition, -1 for unknown leader epoch
+	// CurrentLeaderEpoch contains the current leader epoch of the partition, -1 for unknown leader epoch.
 	CurrentLeaderEpoch int32
-	// SnapshotID contains the snapshot endOffset and epoch to fetch
+	// SnapshotID contains the snapshot endOffset and epoch to fetch.
 	SnapshotID SnapshotId_FetchSnapshotRequest
-	// Position contains the byte position within the snapshot to start fetching from
+	// Position contains the byte position within the snapshot to start fetching from.
 	Position int64
+	// ReplicaDirectoryID contains the directory id of the follower fetching.
+	ReplicaDirectoryID uuid.UUID
 }
 
 func (p *PartitionSnapshot_FetchSnapshotRequest) encode(pe packetEncoder, version int16) (err error) {
@@ -77,11 +81,11 @@ func (p *PartitionSnapshot_FetchSnapshotRequest) decode(pd packetDecoder, versio
 		return err
 	}
 
-	tmpSnapshotId_FetchSnapshotRequest := SnapshotId_FetchSnapshotRequest{}
-	if err := tmpSnapshotId_FetchSnapshotRequest.decode(pd, p.Version); err != nil {
+	tmpSnapshotId := SnapshotId_FetchSnapshotRequest{}
+	if err := tmpSnapshotId.decode(pd, p.Version); err != nil {
 		return err
 	}
-	p.SnapshotID = tmpSnapshotId_FetchSnapshotRequest
+	p.SnapshotID = tmpSnapshotId
 
 	if p.Position, err = pd.getInt64(); err != nil {
 		return err
@@ -93,13 +97,13 @@ func (p *PartitionSnapshot_FetchSnapshotRequest) decode(pd packetDecoder, versio
 	return nil
 }
 
-// TopicSnapshot_FetchSnapshotRequest contains the topics to fetch
+// TopicSnapshot_FetchSnapshotRequest contains the topics to fetch.
 type TopicSnapshot_FetchSnapshotRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// Name contains the name of the topic to fetch
+	// Name contains the name of the topic to fetch.
 	Name string
-	// Partitions contains the partitions to fetch
+	// Partitions contains the partitions to fetch.
 	Partitions []PartitionSnapshot_FetchSnapshotRequest
 }
 
@@ -152,13 +156,13 @@ func (t *TopicSnapshot_FetchSnapshotRequest) decode(pd packetDecoder, version in
 type FetchSnapshotRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// ClusterID contains the clusterId if known, this is used to validate metadata fetches prior to broker registration
+	// ClusterID contains the clusterId if known, this is used to validate metadata fetches prior to broker registration.
 	ClusterID *string
-	// ReplicaID contains the broker ID of the follower
+	// ReplicaID contains the broker ID of the follower.
 	ReplicaID int32
-	// MaxBytes contains the maximum bytes to fetch from all of the snapshots
+	// MaxBytes contains the maximum bytes to fetch from all of the snapshots.
 	MaxBytes int32
-	// Topics contains the topics to fetch
+	// Topics contains the topics to fetch.
 	Topics []TopicSnapshot_FetchSnapshotRequest
 }
 
@@ -226,7 +230,7 @@ func (r *FetchSnapshotRequest) GetHeaderVersion() int16 {
 }
 
 func (r *FetchSnapshotRequest) IsValidVersion() bool {
-	return r.Version == 0
+	return r.Version >= 0 && r.Version <= 1
 }
 
 func (r *FetchSnapshotRequest) GetRequiredVersion() int16 {

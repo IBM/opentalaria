@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// JoinGroupResponseMember contains a
+// JoinGroupResponseMember contains the group members.
 type JoinGroupResponseMember struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
@@ -83,7 +83,7 @@ type JoinGroupResponse struct {
 	SkipAssignment bool
 	// MemberID contains the member ID assigned by the group coordinator.
 	MemberID string
-	// Members contains a
+	// Members contains the group members.
 	Members []JoinGroupResponseMember
 }
 
@@ -236,7 +236,7 @@ func (r *JoinGroupResponse) GetHeaderVersion() int16 {
 }
 
 func (r *JoinGroupResponse) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 9
+	return r.Version >= 2 && r.Version <= 9
 }
 
 func (r *JoinGroupResponse) GetRequiredVersion() int16 {

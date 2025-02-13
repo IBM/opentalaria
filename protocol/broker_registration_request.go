@@ -3,8 +3,8 @@ package protocol
 
 import uuid "github.com/google/uuid"
 
-// Listener contains the listeners of this broker
-type Listener struct {
+// Listener_BrokerRegistrationRequest contains the listeners of this broker.
+type Listener_BrokerRegistrationRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
 	// Name contains the name of the endpoint.
@@ -17,7 +17,7 @@ type Listener struct {
 	SecurityProtocol int16
 }
 
-func (l *Listener) encode(pe packetEncoder, version int16) (err error) {
+func (l *Listener_BrokerRegistrationRequest) encode(pe packetEncoder, version int16) (err error) {
 	l.Version = version
 	if err := pe.putString(l.Name); err != nil {
 		return err
@@ -35,7 +35,7 @@ func (l *Listener) encode(pe packetEncoder, version int16) (err error) {
 	return nil
 }
 
-func (l *Listener) decode(pd packetDecoder, version int16) (err error) {
+func (l *Listener_BrokerRegistrationRequest) decode(pd packetDecoder, version int16) (err error) {
 	l.Version = version
 	if l.Name, err = pd.getString(); err != nil {
 		return err
@@ -59,8 +59,8 @@ func (l *Listener) decode(pd packetDecoder, version int16) (err error) {
 	return nil
 }
 
-// Feature contains the features on this broker
-type Feature struct {
+// Feature_BrokerRegistrationRequest contains the features on this broker. Note: in v0-v3, features with MinSupportedVersion = 0 are omitted.
+type Feature_BrokerRegistrationRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
 	// Name contains the feature name.
@@ -71,7 +71,7 @@ type Feature struct {
 	MaxSupportedVersion int16
 }
 
-func (f *Feature) encode(pe packetEncoder, version int16) (err error) {
+func (f *Feature_BrokerRegistrationRequest) encode(pe packetEncoder, version int16) (err error) {
 	f.Version = version
 	if err := pe.putString(f.Name); err != nil {
 		return err
@@ -85,7 +85,7 @@ func (f *Feature) encode(pe packetEncoder, version int16) (err error) {
 	return nil
 }
 
-func (f *Feature) decode(pd packetDecoder, version int16) (err error) {
+func (f *Feature_BrokerRegistrationRequest) decode(pd packetDecoder, version int16) (err error) {
 	f.Version = version
 	if f.Name, err = pd.getString(); err != nil {
 		return err
@@ -114,14 +114,18 @@ type BrokerRegistrationRequest struct {
 	ClusterID string
 	// IncarnationID contains the incarnation id of the broker process.
 	IncarnationID uuid.UUID
-	// Listeners contains the listeners of this broker
-	Listeners []Listener
-	// Features contains the features on this broker
-	Features []Feature
+	// Listeners contains the listeners of this broker.
+	Listeners []Listener_BrokerRegistrationRequest
+	// Features contains the features on this broker. Note: in v0-v3, features with MinSupportedVersion = 0 are omitted.
+	Features []Feature_BrokerRegistrationRequest
 	// Rack contains the rack which this broker is in.
 	Rack *string
-	// IsMigratingZkBroker contains a If the required configurations for ZK migration are present, this value is set to true
+	// IsMigratingZkBroker contains a If the required configurations for ZK migration are present, this value is set to true.
 	IsMigratingZkBroker bool
+	// LogDirs contains a Log directories configured in this broker which are available.
+	LogDirs []uuid.UUID
+	// PreviousBrokerEpoch contains the epoch before a clean shutdown.
+	PreviousBrokerEpoch int64
 }
 
 func (r *BrokerRegistrationRequest) encode(pe packetEncoder) (err error) {
@@ -162,6 +166,16 @@ func (r *BrokerRegistrationRequest) encode(pe packetEncoder) (err error) {
 		pe.putBool(r.IsMigratingZkBroker)
 	}
 
+	if r.Version >= 2 {
+		if err := pe.putUUIDArray(r.LogDirs); err != nil {
+			return err
+		}
+	}
+
+	if r.Version >= 3 {
+		pe.putInt64(r.PreviousBrokerEpoch)
+	}
+
 	pe.putUVarint(0)
 	return nil
 }
@@ -186,9 +200,9 @@ func (r *BrokerRegistrationRequest) decode(pd packetDecoder, version int16) (err
 		return err
 	}
 	if numListeners > 0 {
-		r.Listeners = make([]Listener, numListeners)
+		r.Listeners = make([]Listener_BrokerRegistrationRequest, numListeners)
 		for i := 0; i < numListeners; i++ {
-			var block Listener
+			var block Listener_BrokerRegistrationRequest
 			if err := block.decode(pd, r.Version); err != nil {
 				return err
 			}
@@ -201,9 +215,9 @@ func (r *BrokerRegistrationRequest) decode(pd packetDecoder, version int16) (err
 		return err
 	}
 	if numFeatures > 0 {
-		r.Features = make([]Feature, numFeatures)
+		r.Features = make([]Feature_BrokerRegistrationRequest, numFeatures)
 		for i := 0; i < numFeatures; i++ {
-			var block Feature
+			var block Feature_BrokerRegistrationRequest
 			if err := block.decode(pd, r.Version); err != nil {
 				return err
 			}
@@ -217,6 +231,18 @@ func (r *BrokerRegistrationRequest) decode(pd packetDecoder, version int16) (err
 
 	if r.Version >= 1 {
 		if r.IsMigratingZkBroker, err = pd.getBool(); err != nil {
+			return err
+		}
+	}
+
+	if r.Version >= 2 {
+		if r.LogDirs, err = pd.getUUIDArray(); err != nil {
+			return err
+		}
+	}
+
+	if r.Version >= 3 {
+		if r.PreviousBrokerEpoch, err = pd.getInt64(); err != nil {
 			return err
 		}
 	}
@@ -240,7 +266,7 @@ func (r *BrokerRegistrationRequest) GetHeaderVersion() int16 {
 }
 
 func (r *BrokerRegistrationRequest) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 1
+	return r.Version >= 0 && r.Version <= 4
 }
 
 func (r *BrokerRegistrationRequest) GetRequiredVersion() int16 {

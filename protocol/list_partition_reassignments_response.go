@@ -122,7 +122,7 @@ type ListPartitionReassignmentsResponse struct {
 	Version int16
 	// ThrottleTimeMs contains the duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
 	ThrottleTimeMs int32
-	// ErrorCode contains the top-level error code, or 0 if there was no error
+	// ErrorCode contains the top-level error code, or 0 if there was no error.
 	ErrorCode int16
 	// ErrorMessage contains the top-level error message, or null if there was no error.
 	ErrorMessage *string

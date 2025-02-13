@@ -3,21 +3,21 @@ package protocol
 
 import "time"
 
-// ProducerState contains a
+// ProducerState contains the active producers for the partition.
 type ProducerState struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// ProducerID contains a
+	// ProducerID contains the producer id.
 	ProducerID int64
-	// ProducerEpoch contains a
+	// ProducerEpoch contains the producer epoch.
 	ProducerEpoch int32
-	// LastSequence contains a
+	// LastSequence contains the last sequence number sent by the producer.
 	LastSequence int32
-	// LastTimestamp contains a
+	// LastTimestamp contains the last timestamp sent by the producer.
 	LastTimestamp int64
-	// CoordinatorEpoch contains a
+	// CoordinatorEpoch contains the current epoch of the producer group.
 	CoordinatorEpoch int32
-	// CurrentTxnStartOffset contains a
+	// CurrentTxnStartOffset contains the current transaction start offset of the producer.
 	CurrentTxnStartOffset int64
 }
 
@@ -79,9 +79,9 @@ type PartitionResponse struct {
 	PartitionIndex int32
 	// ErrorCode contains the partition error code, or 0 if there was no error.
 	ErrorCode int16
-	// ErrorMessage contains the partition error message, which may be null if no additional details are available
+	// ErrorMessage contains the partition error message, which may be null if no additional details are available.
 	ErrorMessage *string
-	// ActiveProducers contains a
+	// ActiveProducers contains the active producers for the partition.
 	ActiveProducers []ProducerState
 }
 
@@ -147,7 +147,7 @@ func (p *PartitionResponse) decode(pd packetDecoder, version int16) (err error) 
 type TopicResponse struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// Name contains the topic name
+	// Name contains the topic name.
 	Name string
 	// Partitions contains each partition in the response.
 	Partitions []PartitionResponse

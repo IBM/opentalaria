@@ -79,7 +79,7 @@ func (r *EndTxnRequest) GetHeaderVersion() int16 {
 }
 
 func (r *EndTxnRequest) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 3
+	return r.Version >= 0 && r.Version <= 5
 }
 
 func (r *EndTxnRequest) GetRequiredVersion() int16 {

@@ -142,7 +142,7 @@ func (r *UpdateFeaturesRequest) GetHeaderVersion() int16 {
 }
 
 func (r *UpdateFeaturesRequest) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 1
+	return r.Version >= 0 && r.Version <= 2
 }
 
 func (r *UpdateFeaturesRequest) GetRequiredVersion() int16 {

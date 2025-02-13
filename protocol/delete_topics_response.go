@@ -11,9 +11,9 @@ import (
 type DeletableTopicResult struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// Name contains the topic name
+	// Name contains the topic name.
 	Name *string
-	// TopicID contains a the unique topic ID
+	// TopicID contains the unique topic ID.
 	TopicID uuid.UUID
 	// ErrorCode contains the deletion error, or 0 if the deletion succeeded.
 	ErrorCode int16
@@ -177,7 +177,7 @@ func (r *DeleteTopicsResponse) GetHeaderVersion() int16 {
 }
 
 func (r *DeleteTopicsResponse) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 6
+	return r.Version >= 1 && r.Version <= 6
 }
 
 func (r *DeleteTopicsResponse) GetRequiredVersion() int16 {

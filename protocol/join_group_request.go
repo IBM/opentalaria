@@ -193,7 +193,7 @@ func (r *JoinGroupRequest) GetHeaderVersion() int16 {
 }
 
 func (r *JoinGroupRequest) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 9
+	return r.Version >= 2 && r.Version <= 9
 }
 
 func (r *JoinGroupRequest) GetRequiredVersion() int16 {

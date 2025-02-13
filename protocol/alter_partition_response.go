@@ -6,13 +6,13 @@ import (
 	"time"
 )
 
-// PartitionData_AlterPartitionResponse contains a
+// PartitionData_AlterPartitionResponse contains the responses for each partition.
 type PartitionData_AlterPartitionResponse struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// PartitionIndex contains the partition index
+	// PartitionIndex contains the partition index.
 	PartitionIndex int32
-	// ErrorCode contains the partition level error code
+	// ErrorCode contains the partition level error code.
 	ErrorCode int16
 	// LeaderID contains the broker ID of the leader.
 	LeaderID int32
@@ -22,7 +22,7 @@ type PartitionData_AlterPartitionResponse struct {
 	Isr []int32
 	// LeaderRecoveryState contains a 1 if the partition is recovering from an unclean leader election; 0 otherwise.
 	LeaderRecoveryState int8
-	// PartitionEpoch contains the current epoch for the partition for KRaft controllers. The current ZK version for the legacy controllers.
+	// PartitionEpoch contains the current epoch for the partition for KRaft controllers.
 	PartitionEpoch int32
 }
 
@@ -88,15 +88,15 @@ func (p *PartitionData_AlterPartitionResponse) decode(pd packetDecoder, version 
 	return nil
 }
 
-// TopicData_AlterPartitionResponse contains a
+// TopicData_AlterPartitionResponse contains the responses for each topic.
 type TopicData_AlterPartitionResponse struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// TopicName contains the name of the topic
+	// TopicName contains the name of the topic.
 	TopicName string
-	// TopicID contains the ID of the topic
+	// TopicID contains the ID of the topic.
 	TopicID uuid.UUID
-	// Partitions contains a
+	// Partitions contains the responses for each partition.
 	Partitions []PartitionData_AlterPartitionResponse
 }
 
@@ -167,9 +167,9 @@ type AlterPartitionResponse struct {
 	Version int16
 	// ThrottleTimeMs contains the duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
 	ThrottleTimeMs int32
-	// ErrorCode contains the top level response error code
+	// ErrorCode contains the top level response error code.
 	ErrorCode int16
-	// Topics contains a
+	// Topics contains the responses for each topic.
 	Topics []TopicData_AlterPartitionResponse
 }
 

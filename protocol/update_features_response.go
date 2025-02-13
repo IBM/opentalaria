@@ -74,12 +74,14 @@ func (r *UpdateFeaturesResponse) encode(pe packetEncoder) (err error) {
 		return err
 	}
 
-	if err := pe.putArrayLength(len(r.Results)); err != nil {
-		return err
-	}
-	for _, block := range r.Results {
-		if err := block.encode(pe, r.Version); err != nil {
+	if r.Version >= 0 && r.Version <= 1 {
+		if err := pe.putArrayLength(len(r.Results)); err != nil {
 			return err
+		}
+		for _, block := range r.Results {
+			if err := block.encode(pe, r.Version); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -102,18 +104,20 @@ func (r *UpdateFeaturesResponse) decode(pd packetDecoder, version int16) (err er
 		return err
 	}
 
-	var numResults int
-	if numResults, err = pd.getArrayLength(); err != nil {
-		return err
-	}
-	if numResults > 0 {
-		r.Results = make([]UpdatableFeatureResult, numResults)
-		for i := 0; i < numResults; i++ {
-			var block UpdatableFeatureResult
-			if err := block.decode(pd, r.Version); err != nil {
-				return err
+	if r.Version >= 0 && r.Version <= 1 {
+		var numResults int
+		if numResults, err = pd.getArrayLength(); err != nil {
+			return err
+		}
+		if numResults > 0 {
+			r.Results = make([]UpdatableFeatureResult, numResults)
+			for i := 0; i < numResults; i++ {
+				var block UpdatableFeatureResult
+				if err := block.decode(pd, r.Version); err != nil {
+					return err
+				}
+				r.Results[i] = block
 			}
-			r.Results[i] = block
 		}
 	}
 
@@ -136,7 +140,7 @@ func (r *UpdateFeaturesResponse) GetHeaderVersion() int16 {
 }
 
 func (r *UpdateFeaturesResponse) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 1
+	return r.Version >= 0 && r.Version <= 2
 }
 
 func (r *UpdateFeaturesResponse) GetRequiredVersion() int16 {

@@ -161,7 +161,7 @@ func (r *CreateAclsRequest) GetHeaderVersion() int16 {
 }
 
 func (r *CreateAclsRequest) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 3
+	return r.Version >= 1 && r.Version <= 3
 }
 
 func (r *CreateAclsRequest) GetRequiredVersion() int16 {

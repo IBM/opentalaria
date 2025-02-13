@@ -1,7 +1,7 @@
 // protocol has been generated from message format json - DO NOT EDIT
 package protocol
 
-// TxnOffsetCommitRequestPartition contains the partitions inside the topic that we want to committ offsets for.
+// TxnOffsetCommitRequestPartition contains the partitions inside the topic that we want to commit offsets for.
 type TxnOffsetCommitRequestPartition struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
@@ -69,7 +69,7 @@ type TxnOffsetCommitRequestTopic struct {
 	Version int16
 	// Name contains the topic name.
 	Name string
-	// Partitions contains the partitions inside the topic that we want to committ offsets for.
+	// Partitions contains the partitions inside the topic that we want to commit offsets for.
 	Partitions []TxnOffsetCommitRequestPartition
 }
 
@@ -269,7 +269,7 @@ func (r *TxnOffsetCommitRequest) GetHeaderVersion() int16 {
 }
 
 func (r *TxnOffsetCommitRequest) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 3
+	return r.Version >= 0 && r.Version <= 5
 }
 
 func (r *TxnOffsetCommitRequest) GetRequiredVersion() int16 {

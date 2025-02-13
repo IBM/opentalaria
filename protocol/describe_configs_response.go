@@ -77,15 +77,13 @@ type DescribeConfigsResourceResult struct {
 	Value *string
 	// ReadOnly contains a True if the configuration is read-only.
 	ReadOnly bool
-	// IsDefault contains a True if the configuration is not set.
-	IsDefault bool
 	// ConfigSource contains the configuration source.
 	ConfigSource int8
 	// IsSensitive contains a True if this configuration is sensitive.
 	IsSensitive bool
 	// Synonyms contains the synonyms for this configuration key.
 	Synonyms []DescribeConfigsSynonym
-	// ConfigType contains the configuration data type. Type can be one of the following values - BOOLEAN, STRING, INT, SHORT, LONG, DOUBLE, LIST, CLASS, PASSWORD
+	// ConfigType contains the configuration data type. Type can be one of the following values - BOOLEAN, STRING, INT, SHORT, LONG, DOUBLE, LIST, CLASS, PASSWORD.
 	ConfigType int8
 	// Documentation contains the configuration documentation.
 	Documentation *string
@@ -102,10 +100,6 @@ func (c *DescribeConfigsResourceResult) encode(pe packetEncoder, version int16) 
 	}
 
 	pe.putBool(c.ReadOnly)
-
-	if c.Version == 0 {
-		pe.putBool(c.IsDefault)
-	}
 
 	if c.Version >= 1 {
 		pe.putInt8(c.ConfigSource)
@@ -152,12 +146,6 @@ func (c *DescribeConfigsResourceResult) decode(pd packetDecoder, version int16) 
 
 	if c.ReadOnly, err = pd.getBool(); err != nil {
 		return err
-	}
-
-	if c.Version == 0 {
-		if c.IsDefault, err = pd.getBool(); err != nil {
-			return err
-		}
 	}
 
 	if c.Version >= 1 {
@@ -371,7 +359,7 @@ func (r *DescribeConfigsResponse) GetHeaderVersion() int16 {
 }
 
 func (r *DescribeConfigsResponse) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 4
+	return r.Version >= 1 && r.Version <= 4
 }
 
 func (r *DescribeConfigsResponse) GetRequiredVersion() int16 {

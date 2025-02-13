@@ -10,7 +10,7 @@ type SaslAuthenticateResponse struct {
 	ErrorMessage *string
 	// AuthBytes contains the SASL authentication bytes from the server, as defined by the SASL mechanism.
 	AuthBytes []byte
-	// SessionLifetimeMs contains the SASL authentication bytes from the server, as defined by the SASL mechanism.
+	// SessionLifetimeMs contains a Number of milliseconds after which only re-authentication over the existing connection to create a new session can occur.
 	SessionLifetimeMs int64
 }
 

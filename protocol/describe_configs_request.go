@@ -147,7 +147,7 @@ func (r *DescribeConfigsRequest) GetHeaderVersion() int16 {
 }
 
 func (r *DescribeConfigsRequest) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 4
+	return r.Version >= 1 && r.Version <= 4
 }
 
 func (r *DescribeConfigsRequest) GetRequiredVersion() int16 {

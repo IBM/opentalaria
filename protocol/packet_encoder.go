@@ -30,12 +30,17 @@ type packetEncoder interface {
 	putString(in string) error
 	putNullableString(in *string) error
 	putStringArray(in []string) error
+	putCompactInt8Array(in []int8) error
+	putCompactInt16Array(in []int16) error
 	putCompactInt32Array(in []int32) error
 	putNullableCompactInt32Array(in []int32) error
+	putInt8Array(in []int8) error
+	putInt16Array(in []int16) error
 	putInt32Array(in []int32) error
 	putInt64Array(in []int64) error
 	putEmptyTaggedFieldArray()
 	putUUID(in uuid.UUID) error
+	putUUIDArray(in []uuid.UUID) error
 
 	// Provide the current offset to record the batch size metric
 	offset() int

@@ -5,7 +5,7 @@ package protocol
 type DescribableLogDirTopic struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// Topic contains the topic name
+	// Topic contains the topic name.
 	Topic string
 	// Partitions contains the partition indexes.
 	Partitions []int32
@@ -115,7 +115,7 @@ func (r *DescribeLogDirsRequest) GetHeaderVersion() int16 {
 }
 
 func (r *DescribeLogDirsRequest) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 4
+	return r.Version >= 1 && r.Version <= 4
 }
 
 func (r *DescribeLogDirsRequest) GetRequiredVersion() int16 {
