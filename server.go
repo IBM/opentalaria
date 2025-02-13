@@ -189,6 +189,16 @@ Exit:
 				break Exit
 			}
 			apiHandler = api.ProduceAPI{Request: req}
+		case (&protocol.CreateTopicsRequest{}).GetKey():
+			req, err := makeRequest(messageBytes,
+				client.conn,
+				(&protocol.CreateTopicsRequest{Version: header.RequestApiVersion}).GetHeaderVersion(),
+				client.config)
+			if err != nil {
+				slog.Error("error creating request", "err", err)
+				break Exit
+			}
+			apiHandler = api.CreateTopicsAPI{Request: req}
 		default:
 			slog.Error("Unknown API key", "key", header.RequestApiKey)
 		}
