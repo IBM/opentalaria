@@ -3,8 +3,6 @@ package api
 import (
 	"opentalaria/protocol"
 	"opentalaria/utils"
-
-	"github.com/google/uuid"
 )
 
 type CreateTopicsAPI struct {
@@ -26,46 +24,31 @@ func (m CreateTopicsAPI) GetHeaderVersion(requestVersion int16) int16 {
 func (m CreateTopicsAPI) GeneratePayload() ([]byte, error) {
 	req := protocol.CreateTopicsRequest{}
 	_, err := protocol.VersionedDecode(m.GetRequest().Message, &req, m.GetRequest().Header.RequestApiVersion)
-	if err != nil {
-		return nil, err
-	}
 
-	response := GenerateCreateTopicsResponse(m.GetRequest().Header.RequestApiVersion, req)
-	return protocol.Encode(response)
+	resp := GenerateCreateTopicsResponse(m.GetRequest().Header.RequestApiVersion, req, err)
+
+	return protocol.Encode(resp)
 }
 
-func GenerateCreateTopicsResponse(version int16, req protocol.CreateTopicsRequest) *protocol.CreateTopicsResponse {
+func GenerateCreateTopicsResponse(version int16, req protocol.CreateTopicsRequest, err error) *protocol.CreateTopicsResponse {
 	response := protocol.CreateTopicsResponse{}
 
 	response.Version = version
 	// TODO: handle throttle time
 	response.ThrottleTimeMs = 0
 
+	errorCode := int16(utils.ErrNoError)
+	if err != nil {
+		errorCode = int16(utils.ErrInvalidRequest)
+	}
+
 	for _, topic := range req.Topics {
 		response.Topics = append(response.Topics, protocol.CreatableTopicResult{
-			Version:           req.Version,
-			Name:              topic.Name,
-			TopicID:           uuid.New(),
-			ErrorCode:         int16(utils.ErrNoError),
-			NumPartitions:     topic.NumPartitions,
-			ReplicationFactor: topic.ReplicationFactor,
-			Configs:           convertConfigs(topic.Configs),
+			Version:   req.Version,
+			Name:      topic.Name,
+			ErrorCode: errorCode,
 		})
 	}
 
 	return &response
-}
-
-func convertConfigs(reqConfig []protocol.CreateableTopicConfig) []protocol.CreatableTopicConfigs {
-	result := make([]protocol.CreatableTopicConfigs, len(reqConfig))
-
-	for i, conf := range reqConfig {
-		result[i] = protocol.CreatableTopicConfigs{
-			Version: conf.Version,
-			Name:    conf.Name,
-			Value:   conf.Value,
-		}
-	}
-
-	return result
 }

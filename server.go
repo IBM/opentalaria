@@ -198,7 +198,7 @@ Exit:
 				slog.Error("error creating request", "err", err)
 				break Exit
 			}
-			apiHandler = api.ProduceAPI{Request: req}
+			apiHandler = api.CreateTopicsAPI{Request: req}
 		default:
 			slog.Error("Unknown API key", "key", header.RequestApiKey)
 		}
