@@ -28,6 +28,11 @@ func (p *Plugin) Init(env *viper.Viper) error {
 	return nil
 }
 
+func (p *Plugin) GetSetting(key string) string {
+
+	return ""
+}
+
 func (p *Plugin) Call() {
 	log.Println("===========> Call from plugin")
 }
