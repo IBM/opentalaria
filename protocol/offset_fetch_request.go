@@ -105,12 +105,16 @@ func (t *OffsetFetchRequestTopics) decode(pd packetDecoder, version int16) (err 
 	return nil
 }
 
-// OffsetFetchRequestGroup contains each group we would like to fetch offsets for
+// OffsetFetchRequestGroup contains each group we would like to fetch offsets for.
 type OffsetFetchRequestGroup struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// groupID contains the group ID.
-	groupID string
+	// GroupID contains the group ID.
+	GroupID string
+	// MemberID contains the member id.
+	MemberID *string
+	// MemberEpoch contains the member epoch if using the new consumer protocol (KIP-848).
+	MemberEpoch int32
 	// Topics contains each topic we would like to fetch offsets for, or null to fetch offsets for all topics.
 	Topics []OffsetFetchRequestTopics
 }
@@ -118,9 +122,19 @@ type OffsetFetchRequestGroup struct {
 func (g *OffsetFetchRequestGroup) encode(pe packetEncoder, version int16) (err error) {
 	g.Version = version
 	if g.Version >= 8 {
-		if err := pe.putString(g.groupID); err != nil {
+		if err := pe.putString(g.GroupID); err != nil {
 			return err
 		}
+	}
+
+	if g.Version >= 9 {
+		if err := pe.putNullableString(g.MemberID); err != nil {
+			return err
+		}
+	}
+
+	if g.Version >= 9 {
+		pe.putInt32(g.MemberEpoch)
 	}
 
 	if g.Version >= 8 {
@@ -143,7 +157,19 @@ func (g *OffsetFetchRequestGroup) encode(pe packetEncoder, version int16) (err e
 func (g *OffsetFetchRequestGroup) decode(pd packetDecoder, version int16) (err error) {
 	g.Version = version
 	if g.Version >= 8 {
-		if g.groupID, err = pd.getString(); err != nil {
+		if g.GroupID, err = pd.getString(); err != nil {
+			return err
+		}
+	}
+
+	if g.Version >= 9 {
+		if g.MemberID, err = pd.getNullableString(); err != nil {
+			return err
+		}
+	}
+
+	if g.Version >= 9 {
+		if g.MemberEpoch, err = pd.getInt32(); err != nil {
 			return err
 		}
 	}
@@ -180,7 +206,7 @@ type OffsetFetchRequest struct {
 	GroupID string
 	// Topics contains each topic we would like to fetch offsets for, or null to fetch offsets for all topics.
 	Topics []OffsetFetchRequestTopic
-	// Groups contains each group we would like to fetch offsets for
+	// Groups contains each group we would like to fetch offsets for.
 	Groups []OffsetFetchRequestGroup
 	// RequireStable contains a Whether broker should hold on returning unstable offsets but set a retriable error code for the partitions.
 	RequireStable bool
@@ -303,7 +329,7 @@ func (r *OffsetFetchRequest) GetHeaderVersion() int16 {
 }
 
 func (r *OffsetFetchRequest) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 8
+	return r.Version >= 1 && r.Version <= 9
 }
 
 func (r *OffsetFetchRequest) GetRequiredVersion() int16 {

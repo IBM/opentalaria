@@ -3,7 +3,7 @@ package protocol
 
 import "time"
 
-// ReassignablePartitionResponse contains the responses to partitions to reassign
+// ReassignablePartitionResponse contains the responses to partitions to reassign.
 type ReassignablePartitionResponse struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
@@ -53,9 +53,9 @@ func (p *ReassignablePartitionResponse) decode(pd packetDecoder, version int16) 
 type ReassignableTopicResponse struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// Name contains the topic name
+	// Name contains the topic name.
 	Name string
-	// Partitions contains the responses to partitions to reassign
+	// Partitions contains the responses to partitions to reassign.
 	Partitions []ReassignablePartitionResponse
 }
 

@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// MetadataResponseBroker contains each broker in the response.
+// MetadataResponseBroker contains a A list of brokers present in the cluster.
 type MetadataResponseBroker struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
@@ -171,9 +171,9 @@ type MetadataResponseTopic struct {
 	Version int16
 	// ErrorCode contains the topic error, or 0 if there was no error.
 	ErrorCode int16
-	// Name contains the topic name.
+	// Name contains the topic name. Null for non-existing topics queried by ID. This is never null when ErrorCode is zero. One of Name and TopicId is always populated.
 	Name *string
-	// TopicID contains the topic id.
+	// TopicID contains the topic id. Zero for non-existing topics queried by name. This is never zero when ErrorCode is zero. One of Name and TopicId is always populated.
 	TopicID uuid.UUID
 	// IsInternal contains a True if the topic is internal.
 	IsInternal bool
@@ -294,7 +294,7 @@ type MetadataResponse struct {
 	Version int16
 	// ThrottleTimeMs contains the duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
 	ThrottleTimeMs int32
-	// Brokers contains each broker in the response.
+	// Brokers contains a A list of brokers present in the cluster.
 	Brokers []MetadataResponseBroker
 	// ClusterID contains the cluster ID that responding broker belongs to.
 	ClusterID *string
@@ -304,6 +304,8 @@ type MetadataResponse struct {
 	Topics []MetadataResponseTopic
 	// ClusterAuthorizedOperations contains a 32-bit bitfield to represent authorized operations for this cluster.
 	ClusterAuthorizedOperations int32
+	// ErrorCode contains the top-level error code, or 0 if there was no error.
+	ErrorCode int16
 }
 
 func (r *MetadataResponse) encode(pe packetEncoder) (err error) {
@@ -344,6 +346,10 @@ func (r *MetadataResponse) encode(pe packetEncoder) (err error) {
 
 	if r.Version >= 8 && r.Version <= 10 {
 		pe.putInt32(r.ClusterAuthorizedOperations)
+	}
+
+	if r.Version >= 13 {
+		pe.putInt16(r.ErrorCode)
 	}
 
 	if r.Version >= 9 {
@@ -411,6 +417,12 @@ func (r *MetadataResponse) decode(pd packetDecoder, version int16) (err error) {
 		}
 	}
 
+	if r.Version >= 13 {
+		if r.ErrorCode, err = pd.getInt16(); err != nil {
+			return err
+		}
+	}
+
 	if r.Version >= 9 {
 		if _, err = pd.getEmptyTaggedFieldArray(); err != nil {
 			return err
@@ -435,7 +447,7 @@ func (r *MetadataResponse) GetHeaderVersion() int16 {
 }
 
 func (r *MetadataResponse) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 12
+	return r.Version >= 0 && r.Version <= 13
 }
 
 func (r *MetadataResponse) GetRequiredVersion() int16 {

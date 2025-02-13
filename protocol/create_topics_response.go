@@ -100,7 +100,7 @@ type CreatableTopicResult struct {
 	Version int16
 	// Name contains the topic name.
 	Name string
-	// TopicID contains the unique topic ID
+	// TopicID contains the unique topic ID.
 	TopicID uuid.UUID
 	// ErrorCode contains the error code, or 0 if there was no error.
 	ErrorCode int16
@@ -302,7 +302,7 @@ func (r *CreateTopicsResponse) GetHeaderVersion() int16 {
 }
 
 func (r *CreateTopicsResponse) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 7
+	return r.Version >= 2 && r.Version <= 7
 }
 
 func (r *CreateTopicsResponse) GetRequiredVersion() int16 {

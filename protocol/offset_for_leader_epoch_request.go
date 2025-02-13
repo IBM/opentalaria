@@ -195,7 +195,7 @@ func (r *OffsetForLeaderEpochRequest) GetHeaderVersion() int16 {
 }
 
 func (r *OffsetForLeaderEpochRequest) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 4
+	return r.Version >= 2 && r.Version <= 4
 }
 
 func (r *OffsetForLeaderEpochRequest) GetRequiredVersion() int16 {

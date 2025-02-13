@@ -7,7 +7,7 @@ type AddPartitionsToTxnTopic_AddPartitionsToTxnRequest struct {
 	Version int16
 	// Name contains the name of the topic.
 	Name string
-	// Partitions contains the partition indexes to add to the transaction
+	// Partitions contains the partition indexes to add to the transaction.
 	Partitions []int32
 }
 
@@ -291,7 +291,7 @@ func (r *AddPartitionsToTxnRequest) GetHeaderVersion() int16 {
 }
 
 func (r *AddPartitionsToTxnRequest) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 4
+	return r.Version >= 0 && r.Version <= 5
 }
 
 func (r *AddPartitionsToTxnRequest) GetRequiredVersion() int16 {

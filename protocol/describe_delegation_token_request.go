@@ -115,7 +115,7 @@ func (r *DescribeDelegationTokenRequest) GetHeaderVersion() int16 {
 }
 
 func (r *DescribeDelegationTokenRequest) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 3
+	return r.Version >= 1 && r.Version <= 3
 }
 
 func (r *DescribeDelegationTokenRequest) GetRequiredVersion() int16 {

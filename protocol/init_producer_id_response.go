@@ -14,6 +14,10 @@ type InitProducerIdResponse struct {
 	ProducerID int64
 	// ProducerEpoch contains the current epoch associated with the producer id.
 	ProducerEpoch int16
+	// OngoingTxnProducerID contains the producer id for ongoing transaction when KeepPreparedTxn is used, -1 if there is no transaction ongoing.
+	OngoingTxnProducerID int64
+	// OngoingTxnProducerEpoch contains the epoch associated with the  producer id for ongoing transaction when KeepPreparedTxn is used, -1 if there is no transaction ongoing.
+	OngoingTxnProducerEpoch int16
 }
 
 func (r *InitProducerIdResponse) encode(pe packetEncoder) (err error) {
@@ -27,6 +31,14 @@ func (r *InitProducerIdResponse) encode(pe packetEncoder) (err error) {
 	pe.putInt64(r.ProducerID)
 
 	pe.putInt16(r.ProducerEpoch)
+
+	if r.Version >= 6 {
+		pe.putInt64(r.OngoingTxnProducerID)
+	}
+
+	if r.Version >= 6 {
+		pe.putInt16(r.OngoingTxnProducerEpoch)
+	}
 
 	if r.Version >= 2 {
 		pe.putUVarint(0)
@@ -55,6 +67,18 @@ func (r *InitProducerIdResponse) decode(pd packetDecoder, version int16) (err er
 		return err
 	}
 
+	if r.Version >= 6 {
+		if r.OngoingTxnProducerID, err = pd.getInt64(); err != nil {
+			return err
+		}
+	}
+
+	if r.Version >= 6 {
+		if r.OngoingTxnProducerEpoch, err = pd.getInt16(); err != nil {
+			return err
+		}
+	}
+
 	if r.Version >= 2 {
 		if _, err = pd.getEmptyTaggedFieldArray(); err != nil {
 			return err
@@ -79,7 +103,7 @@ func (r *InitProducerIdResponse) GetHeaderVersion() int16 {
 }
 
 func (r *InitProducerIdResponse) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 4
+	return r.Version >= 0 && r.Version <= 6
 }
 
 func (r *InitProducerIdResponse) GetRequiredVersion() int16 {

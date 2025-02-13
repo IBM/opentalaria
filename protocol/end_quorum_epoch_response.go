@@ -1,17 +1,17 @@
 // protocol has been generated from message format json - DO NOT EDIT
 package protocol
 
-// PartitionData_EndQuorumEpochResponse contains a
+// PartitionData_EndQuorumEpochResponse contains the partition data.
 type PartitionData_EndQuorumEpochResponse struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
 	// PartitionIndex contains the partition index.
 	PartitionIndex int32
-	// ErrorCode contains a
+	// ErrorCode contains the partition level error code.
 	ErrorCode int16
 	// LeaderID contains the ID of the current leader or -1 if the leader is unknown.
 	LeaderID int32
-	// LeaderEpoch contains the latest known leader epoch
+	// LeaderEpoch contains the latest known leader epoch.
 	LeaderEpoch int32
 }
 
@@ -25,6 +25,9 @@ func (p *PartitionData_EndQuorumEpochResponse) encode(pe packetEncoder, version 
 
 	pe.putInt32(p.LeaderEpoch)
 
+	if p.Version >= 1 {
+		pe.putUVarint(0)
+	}
 	return nil
 }
 
@@ -46,16 +49,21 @@ func (p *PartitionData_EndQuorumEpochResponse) decode(pd packetDecoder, version 
 		return err
 	}
 
+	if p.Version >= 1 {
+		if _, err = pd.getEmptyTaggedFieldArray(); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
-// TopicData_EndQuorumEpochResponse contains a
+// TopicData_EndQuorumEpochResponse contains the topic data.
 type TopicData_EndQuorumEpochResponse struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
 	// TopicName contains the topic name.
 	TopicName string
-	// Partitions contains a
+	// Partitions contains the partition data.
 	Partitions []PartitionData_EndQuorumEpochResponse
 }
 
@@ -74,6 +82,9 @@ func (t *TopicData_EndQuorumEpochResponse) encode(pe packetEncoder, version int1
 		}
 	}
 
+	if t.Version >= 1 {
+		pe.putUVarint(0)
+	}
 	return nil
 }
 
@@ -98,6 +109,65 @@ func (t *TopicData_EndQuorumEpochResponse) decode(pd packetDecoder, version int1
 		}
 	}
 
+	if t.Version >= 1 {
+		if _, err = pd.getEmptyTaggedFieldArray(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// NodeEndpoint_EndQuorumEpochResponse contains a Endpoints for all leaders enumerated in PartitionData.
+type NodeEndpoint_EndQuorumEpochResponse struct {
+	// Version defines the protocol version to use for encode and decode
+	Version int16
+	// NodeID contains the ID of the associated node.
+	NodeID int32
+	// Host contains the node's hostname.
+	Host string
+	// Port contains the node's port.
+	Port uint16
+}
+
+func (n *NodeEndpoint_EndQuorumEpochResponse) encode(pe packetEncoder, version int16) (err error) {
+	n.Version = version
+	if n.Version >= 1 {
+		pe.putInt32(n.NodeID)
+	}
+
+	if n.Version >= 1 {
+		if err := pe.putString(n.Host); err != nil {
+			return err
+		}
+	}
+
+	if n.Version >= 1 {
+		pe.putUint16(n.Port)
+	}
+
+	return nil
+}
+
+func (n *NodeEndpoint_EndQuorumEpochResponse) decode(pd packetDecoder, version int16) (err error) {
+	n.Version = version
+	if n.Version >= 1 {
+		if n.NodeID, err = pd.getInt32(); err != nil {
+			return err
+		}
+	}
+
+	if n.Version >= 1 {
+		if n.Host, err = pd.getString(); err != nil {
+			return err
+		}
+	}
+
+	if n.Version >= 1 {
+		if n.Port, err = pd.getUint16(); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -106,11 +176,16 @@ type EndQuorumEpochResponse struct {
 	Version int16
 	// ErrorCode contains the top level error code.
 	ErrorCode int16
-	// Topics contains a
+	// Topics contains the topic data.
 	Topics []TopicData_EndQuorumEpochResponse
+	// NodeEndpoints contains a Endpoints for all leaders enumerated in PartitionData.
+	NodeEndpoints []NodeEndpoint_EndQuorumEpochResponse
 }
 
 func (r *EndQuorumEpochResponse) encode(pe packetEncoder) (err error) {
+	if r.Version >= 1 {
+		pe = FlexibleEncoderFrom(pe)
+	}
 	pe.putInt16(r.ErrorCode)
 
 	if err := pe.putArrayLength(len(r.Topics)); err != nil {
@@ -122,11 +197,17 @@ func (r *EndQuorumEpochResponse) encode(pe packetEncoder) (err error) {
 		}
 	}
 
+	if r.Version >= 1 {
+		pe.putUVarint(0)
+	}
 	return nil
 }
 
 func (r *EndQuorumEpochResponse) decode(pd packetDecoder, version int16) (err error) {
 	r.Version = version
+	if r.Version >= 1 {
+		pd = FlexibleDecoderFrom(pd)
+	}
 	if r.ErrorCode, err = pd.getInt16(); err != nil {
 		return err
 	}
@@ -146,6 +227,11 @@ func (r *EndQuorumEpochResponse) decode(pd packetDecoder, version int16) (err er
 		}
 	}
 
+	if r.Version >= 1 {
+		if _, err = pd.getEmptyTaggedFieldArray(); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -158,11 +244,14 @@ func (r *EndQuorumEpochResponse) GetVersion() int16 {
 }
 
 func (r *EndQuorumEpochResponse) GetHeaderVersion() int16 {
+	if r.Version >= 1 {
+		return 1
+	}
 	return 0
 }
 
 func (r *EndQuorumEpochResponse) IsValidVersion() bool {
-	return r.Version == 0
+	return r.Version >= 0 && r.Version <= 1
 }
 
 func (r *EndQuorumEpochResponse) GetRequiredVersion() int16 {

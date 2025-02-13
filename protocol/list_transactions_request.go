@@ -4,10 +4,12 @@ package protocol
 type ListTransactionsRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// StateFilters contains the transaction states to filter by: if empty, all transactions are returned; if non-empty, then only transactions matching one of the filtered states will be returned
+	// StateFilters contains the transaction states to filter by: if empty, all transactions are returned; if non-empty, then only transactions matching one of the filtered states will be returned.
 	StateFilters []string
-	// ProducerIdFilters contains the producerIds to filter by: if empty, all transactions will be returned; if non-empty, only transactions which match one of the filtered producerIds will be returned
+	// ProducerIdFilters contains the producerIds to filter by: if empty, all transactions will be returned; if non-empty, only transactions which match one of the filtered producerIds will be returned.
 	ProducerIdFilters []int64
+	// DurationFilter contains a Duration (in millis) to filter by: if < 0, all transactions will be returned; otherwise, only transactions running longer than this duration will be returned.
+	DurationFilter int64
 }
 
 func (r *ListTransactionsRequest) encode(pe packetEncoder) (err error) {
@@ -18,6 +20,10 @@ func (r *ListTransactionsRequest) encode(pe packetEncoder) (err error) {
 
 	if err := pe.putInt64Array(r.ProducerIdFilters); err != nil {
 		return err
+	}
+
+	if r.Version >= 1 {
+		pe.putInt64(r.DurationFilter)
 	}
 
 	pe.putUVarint(0)
@@ -33,6 +39,12 @@ func (r *ListTransactionsRequest) decode(pd packetDecoder, version int16) (err e
 
 	if r.ProducerIdFilters, err = pd.getInt64Array(); err != nil {
 		return err
+	}
+
+	if r.Version >= 1 {
+		if r.DurationFilter, err = pd.getInt64(); err != nil {
+			return err
+		}
 	}
 
 	if _, err = pd.getEmptyTaggedFieldArray(); err != nil {
@@ -54,7 +66,7 @@ func (r *ListTransactionsRequest) GetHeaderVersion() int16 {
 }
 
 func (r *ListTransactionsRequest) IsValidVersion() bool {
-	return r.Version == 0
+	return r.Version >= 0 && r.Version <= 1
 }
 
 func (r *ListTransactionsRequest) GetRequiredVersion() int16 {

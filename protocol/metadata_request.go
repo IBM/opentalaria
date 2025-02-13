@@ -178,7 +178,7 @@ func (r *MetadataRequest) GetHeaderVersion() int16 {
 }
 
 func (r *MetadataRequest) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 12
+	return r.Version >= 0 && r.Version <= 13
 }
 
 func (r *MetadataRequest) GetRequiredVersion() int16 {

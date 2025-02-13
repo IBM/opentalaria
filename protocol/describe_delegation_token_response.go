@@ -7,9 +7,9 @@ import "time"
 type DescribedDelegationTokenRenewer struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// PrincipalType contains the renewer principal type
+	// PrincipalType contains the renewer principal type.
 	PrincipalType string
-	// PrincipalName contains the renewer principal name
+	// PrincipalName contains the renewer principal name.
 	PrincipalName string
 }
 
@@ -275,7 +275,7 @@ func (r *DescribeDelegationTokenResponse) GetHeaderVersion() int16 {
 }
 
 func (r *DescribeDelegationTokenResponse) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 3
+	return r.Version >= 1 && r.Version <= 3
 }
 
 func (r *DescribeDelegationTokenResponse) GetRequiredVersion() int16 {

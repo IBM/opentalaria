@@ -71,7 +71,7 @@ func (r *RenewDelegationTokenResponse) GetHeaderVersion() int16 {
 }
 
 func (r *RenewDelegationTokenResponse) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 2
+	return r.Version >= 1 && r.Version <= 2
 }
 
 func (r *RenewDelegationTokenResponse) GetRequiredVersion() int16 {

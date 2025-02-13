@@ -25,7 +25,7 @@ func (p *OffsetDeleteRequestPartition) decode(pd packetDecoder, version int16) (
 	return nil
 }
 
-// OffsetDeleteRequestTopic contains the topics to delete offsets for
+// OffsetDeleteRequestTopic contains the topics to delete offsets for.
 type OffsetDeleteRequestTopic struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
@@ -82,7 +82,7 @@ type OffsetDeleteRequest struct {
 	Version int16
 	// GroupID contains the unique group identifier.
 	GroupID string
-	// Topics contains the topics to delete offsets for
+	// Topics contains the topics to delete offsets for.
 	Topics []OffsetDeleteRequestTopic
 }
 

@@ -51,7 +51,7 @@ func (a *ApiVersion) decode(pd packetDecoder, version int16) (err error) {
 	return nil
 }
 
-// SupportedFeatureKey contains a Features supported by the broker.
+// SupportedFeatureKey contains a Features supported by the broker. Note: in v0-v3, features with MinSupportedVersion = 0 are omitted.
 type SupportedFeatureKey struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
@@ -168,13 +168,13 @@ type ApiVersionsResponse struct {
 	ApiKeys []ApiVersion
 	// ThrottleTimeMs contains the duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
 	ThrottleTimeMs int32
-	// SupportedFeatures contains a Features supported by the broker.
+	// SupportedFeatures contains a Features supported by the broker. Note: in v0-v3, features with MinSupportedVersion = 0 are omitted.
 	SupportedFeatures []SupportedFeatureKey
 	// FinalizedFeaturesEpoch contains the monotonically increasing epoch for the finalized features information. Valid values are >= 0. A value of -1 is special and represents unknown epoch.
 	FinalizedFeaturesEpoch int64
 	// FinalizedFeatures contains the information is valid only if FinalizedFeaturesEpoch >= 0.
 	FinalizedFeatures []FinalizedFeatureKey
-	// ZkMigrationReady contains a Set by a KRaft controller if the required configurations for ZK migration are present
+	// ZkMigrationReady contains a Set by a KRaft controller if the required configurations for ZK migration are present.
 	ZkMigrationReady bool
 }
 
@@ -254,7 +254,7 @@ func (r *ApiVersionsResponse) GetHeaderVersion() int16 {
 }
 
 func (r *ApiVersionsResponse) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 3
+	return r.Version >= 0 && r.Version <= 4
 }
 
 func (r *ApiVersionsResponse) GetRequiredVersion() int16 {

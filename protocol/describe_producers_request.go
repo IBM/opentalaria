@@ -1,8 +1,8 @@
 // protocol has been generated from message format json - DO NOT EDIT
 package protocol
 
-// TopicRequest contains a
-type TopicRequest struct {
+// TopicRequest_DescribeProducersRequest contains the topics to list producers for.
+type TopicRequest_DescribeProducersRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
 	// Name contains the topic name.
@@ -11,7 +11,7 @@ type TopicRequest struct {
 	PartitionIndexes []int32
 }
 
-func (t *TopicRequest) encode(pe packetEncoder, version int16) (err error) {
+func (t *TopicRequest_DescribeProducersRequest) encode(pe packetEncoder, version int16) (err error) {
 	t.Version = version
 	if err := pe.putString(t.Name); err != nil {
 		return err
@@ -25,7 +25,7 @@ func (t *TopicRequest) encode(pe packetEncoder, version int16) (err error) {
 	return nil
 }
 
-func (t *TopicRequest) decode(pd packetDecoder, version int16) (err error) {
+func (t *TopicRequest_DescribeProducersRequest) decode(pd packetDecoder, version int16) (err error) {
 	t.Version = version
 	if t.Name, err = pd.getString(); err != nil {
 		return err
@@ -44,8 +44,8 @@ func (t *TopicRequest) decode(pd packetDecoder, version int16) (err error) {
 type DescribeProducersRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// Topics contains a
-	Topics []TopicRequest
+	// Topics contains the topics to list producers for.
+	Topics []TopicRequest_DescribeProducersRequest
 }
 
 func (r *DescribeProducersRequest) encode(pe packetEncoder) (err error) {
@@ -71,9 +71,9 @@ func (r *DescribeProducersRequest) decode(pd packetDecoder, version int16) (err 
 		return err
 	}
 	if numTopics > 0 {
-		r.Topics = make([]TopicRequest, numTopics)
+		r.Topics = make([]TopicRequest_DescribeProducersRequest, numTopics)
 		for i := 0; i < numTopics; i++ {
-			var block TopicRequest
+			var block TopicRequest_DescribeProducersRequest
 			if err := block.decode(pd, r.Version); err != nil {
 				return err
 			}

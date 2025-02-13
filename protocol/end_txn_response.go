@@ -10,6 +10,10 @@ type EndTxnResponse struct {
 	ThrottleTimeMs int32
 	// ErrorCode contains the error code, or 0 if there was no error.
 	ErrorCode int16
+	// ProducerID contains the producer ID.
+	ProducerID int64
+	// ProducerEpoch contains the current epoch associated with the producer.
+	ProducerEpoch int16
 }
 
 func (r *EndTxnResponse) encode(pe packetEncoder) (err error) {
@@ -19,6 +23,14 @@ func (r *EndTxnResponse) encode(pe packetEncoder) (err error) {
 	pe.putInt32(r.ThrottleTimeMs)
 
 	pe.putInt16(r.ErrorCode)
+
+	if r.Version >= 5 {
+		pe.putInt64(r.ProducerID)
+	}
+
+	if r.Version >= 5 {
+		pe.putInt16(r.ProducerEpoch)
+	}
 
 	if r.Version >= 3 {
 		pe.putUVarint(0)
@@ -37,6 +49,18 @@ func (r *EndTxnResponse) decode(pd packetDecoder, version int16) (err error) {
 
 	if r.ErrorCode, err = pd.getInt16(); err != nil {
 		return err
+	}
+
+	if r.Version >= 5 {
+		if r.ProducerID, err = pd.getInt64(); err != nil {
+			return err
+		}
+	}
+
+	if r.Version >= 5 {
+		if r.ProducerEpoch, err = pd.getInt16(); err != nil {
+			return err
+		}
 	}
 
 	if r.Version >= 3 {
@@ -63,7 +87,7 @@ func (r *EndTxnResponse) GetHeaderVersion() int16 {
 }
 
 func (r *EndTxnResponse) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 3
+	return r.Version >= 0 && r.Version <= 5
 }
 
 func (r *EndTxnResponse) GetRequiredVersion() int16 {

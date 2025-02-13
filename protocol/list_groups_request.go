@@ -4,8 +4,10 @@ package protocol
 type ListGroupsRequest struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// StatesFilter contains the states of the groups we want to list. If empty all groups are returned with their state.
+	// StatesFilter contains the states of the groups we want to list. If empty, all groups are returned with their state.
 	StatesFilter []string
+	// TypesFilter contains the types of the groups we want to list. If empty, all groups are returned with their type.
+	TypesFilter []string
 }
 
 func (r *ListGroupsRequest) encode(pe packetEncoder) (err error) {
@@ -14,6 +16,12 @@ func (r *ListGroupsRequest) encode(pe packetEncoder) (err error) {
 	}
 	if r.Version >= 4 {
 		if err := pe.putStringArray(r.StatesFilter); err != nil {
+			return err
+		}
+	}
+
+	if r.Version >= 5 {
+		if err := pe.putStringArray(r.TypesFilter); err != nil {
 			return err
 		}
 	}
@@ -31,6 +39,12 @@ func (r *ListGroupsRequest) decode(pd packetDecoder, version int16) (err error) 
 	}
 	if r.Version >= 4 {
 		if r.StatesFilter, err = pd.getStringArray(); err != nil {
+			return err
+		}
+	}
+
+	if r.Version >= 5 {
+		if r.TypesFilter, err = pd.getStringArray(); err != nil {
 			return err
 		}
 	}
@@ -59,7 +73,7 @@ func (r *ListGroupsRequest) GetHeaderVersion() int16 {
 }
 
 func (r *ListGroupsRequest) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 4
+	return r.Version >= 0 && r.Version <= 5
 }
 
 func (r *ListGroupsRequest) GetRequiredVersion() int16 {

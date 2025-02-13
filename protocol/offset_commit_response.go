@@ -185,7 +185,7 @@ func (r *OffsetCommitResponse) GetHeaderVersion() int16 {
 }
 
 func (r *OffsetCommitResponse) IsValidVersion() bool {
-	return r.Version >= 0 && r.Version <= 8
+	return r.Version >= 2 && r.Version <= 9
 }
 
 func (r *OffsetCommitResponse) GetRequiredVersion() int16 {

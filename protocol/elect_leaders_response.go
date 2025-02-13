@@ -3,11 +3,11 @@ package protocol
 
 import "time"
 
-// PartitionResult contains the results for each partition
-type PartitionResult struct {
+// PartitionResult_ElectLeadersResponse contains the results for each partition.
+type PartitionResult_ElectLeadersResponse struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// PartitionID contains the partition id
+	// PartitionID contains the partition id.
 	PartitionID int32
 	// ErrorCode contains the result error, or zero if there was no error.
 	ErrorCode int16
@@ -15,7 +15,7 @@ type PartitionResult struct {
 	ErrorMessage *string
 }
 
-func (p *PartitionResult) encode(pe packetEncoder, version int16) (err error) {
+func (p *PartitionResult_ElectLeadersResponse) encode(pe packetEncoder, version int16) (err error) {
 	p.Version = version
 	pe.putInt32(p.PartitionID)
 
@@ -31,7 +31,7 @@ func (p *PartitionResult) encode(pe packetEncoder, version int16) (err error) {
 	return nil
 }
 
-func (p *PartitionResult) decode(pd packetDecoder, version int16) (err error) {
+func (p *PartitionResult_ElectLeadersResponse) decode(pd packetDecoder, version int16) (err error) {
 	p.Version = version
 	if p.PartitionID, err = pd.getInt32(); err != nil {
 		return err
@@ -57,10 +57,10 @@ func (p *PartitionResult) decode(pd packetDecoder, version int16) (err error) {
 type ReplicaElectionResult struct {
 	// Version defines the protocol version to use for encode and decode
 	Version int16
-	// Topic contains the topic name
+	// Topic contains the topic name.
 	Topic string
-	// PartitionResult contains the results for each partition
-	PartitionResult []PartitionResult
+	// PartitionResult contains the results for each partition.
+	PartitionResult []PartitionResult_ElectLeadersResponse
 }
 
 func (r *ReplicaElectionResult) encode(pe packetEncoder, version int16) (err error) {
@@ -95,9 +95,9 @@ func (r *ReplicaElectionResult) decode(pd packetDecoder, version int16) (err err
 		return err
 	}
 	if numPartitionResult > 0 {
-		r.PartitionResult = make([]PartitionResult, numPartitionResult)
+		r.PartitionResult = make([]PartitionResult_ElectLeadersResponse, numPartitionResult)
 		for i := 0; i < numPartitionResult; i++ {
-			var block PartitionResult
+			var block PartitionResult_ElectLeadersResponse
 			if err := block.decode(pd, r.Version); err != nil {
 				return err
 			}
