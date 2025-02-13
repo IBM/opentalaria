@@ -1,9 +1,8 @@
 package postgresql
 
 import (
-	"log"
-
 	"github.com/spf13/viper"
+	"golang.org/x/exp/slog"
 )
 
 type Plugin struct {
@@ -12,8 +11,10 @@ type Plugin struct {
 
 type config struct {
 	Host     string `mapstructure:"host"`
+	Port     int    `mapstructure:"port"`
 	Username string `mapstructure:"username"`
 	Password string `mapstructure:"password"`
+	Database string `mapstructure:"database"`
 }
 
 func (p *Plugin) Init(env *viper.Viper) error {
@@ -25,6 +26,13 @@ func (p *Plugin) Init(env *viper.Viper) error {
 
 	p.config = *parsedConf["postgres"]
 
+	err = p.initConnection()
+	if err != nil {
+		return err
+	}
+
+	slog.Info("Postgres plugin initialized")
+
 	return nil
 }
 
@@ -34,5 +42,5 @@ func (p *Plugin) GetSetting(key string) string {
 }
 
 func (p *Plugin) Call() {
-	log.Println("===========> Call from plugin")
+	slog.Debug("===========> Call from plugin")
 }

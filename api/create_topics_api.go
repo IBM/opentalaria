@@ -1,8 +1,9 @@
 package api
 
 import (
-	"opentalaria/protocol"
-	"opentalaria/utils"
+	"github.com/ibm/opentalaria/utils"
+
+	"github.com/ibm/opentalaria/protocol"
 )
 
 type CreateTopicsAPI struct {

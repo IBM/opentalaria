@@ -2,9 +2,11 @@ package config
 
 import (
 	"log/slog"
+	"os"
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/ibm/opentalaria/logger"
 	"github.com/ibm/opentalaria/plugins"
 	"github.com/ibm/opentalaria/plugins/postgresql"
 	"github.com/ibm/opentalaria/utils"
@@ -55,6 +57,8 @@ func NewConfig(confFilename string) (*Config, error) {
 	config.LogFormat = env.GetString("log.format")
 	config.DebugServerPort = env.GetInt("debug.server.port")
 
+	initLogger(&config)
+
 	broker, err := NewBroker(env)
 	if err != nil {
 		return &Config{}, err
@@ -103,6 +107,27 @@ func NewConfig(confFilename string) (*Config, error) {
 	}
 
 	return &config, nil
+}
+
+func initLogger(config *Config) {
+	// print the log level before setting the log level handler so we can see what is set in case warn or error are set.
+	logLevel := config.LogLevel
+	slog.Info("Setting log level to " + logLevel.String())
+
+	// initialize logger with level handler based on LOG_LEVEL env variable.
+	// The default log level is Warn, if no env is set or the value is invalid.
+	//
+	// JSON Handler might be better suited for a cloud environment. Set it with LOG_FORMAT=json env variable
+	var handler slog.Handler
+	if config.LogFormat == "json" {
+		handler = slog.NewJSONHandler(os.Stdout, nil)
+	} else {
+		handler = logger.NewCustomHandler(os.Stdout, nil)
+	}
+
+	logger := slog.New(logger.NewLevelHandler(logLevel, handler))
+
+	slog.SetDefault(logger)
 }
 
 // setDefaults sets the default values for properties that are not set.
