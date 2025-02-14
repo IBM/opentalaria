@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"net"
 
-	"github.com/ibm/opentalaria/config"
 	"github.com/ibm/opentalaria/protocol"
 )
 
@@ -21,7 +20,6 @@ type Request struct {
 	Header  protocol.RequestHeader
 	Message []byte
 	Conn    net.Conn
-	Config  *config.Config
 }
 
 func HandleResponse(api API) error {

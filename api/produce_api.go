@@ -3,12 +3,14 @@ package api
 import (
 	"log/slog"
 
+	"github.com/ibm/opentalaria/config"
 	"github.com/ibm/opentalaria/protocol"
 	"github.com/ibm/opentalaria/utils"
 )
 
 type ProduceAPI struct {
 	Request Request
+	Config  *config.Config
 }
 
 func (p ProduceAPI) Name() string {

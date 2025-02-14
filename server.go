@@ -170,7 +170,7 @@ Exit:
 				// If there is an error in the metadata exchange for example, we don't want to continue consuming the rest of the APIs.
 				break Exit
 			}
-			apiHandler = api.APIVersionsAPI{Request: req}
+			apiHandler = api.APIVersionsAPI{Request: req, Config: client.config}
 		case (&protocol.MetadataRequest{}).GetKey():
 			req, err := makeRequest(messageBytes,
 				client.conn,
@@ -180,7 +180,7 @@ Exit:
 				slog.Error("error creating request", "err", err)
 				break Exit
 			}
-			apiHandler = api.MetadataAPI{Request: req}
+			apiHandler = api.MetadataAPI{Request: req, Config: client.config}
 		case (&protocol.ProduceRequest{}).GetKey():
 			req, err := makeRequest(messageBytes,
 				client.conn,
@@ -190,7 +190,7 @@ Exit:
 				slog.Error("error creating request", "err", err)
 				break Exit
 			}
-			apiHandler = api.ProduceAPI{Request: req}
+			apiHandler = api.ProduceAPI{Request: req, Config: client.config}
 		case (&protocol.CreateTopicsRequest{}).GetKey():
 			req, err := makeRequest(messageBytes,
 				client.conn,
@@ -200,7 +200,7 @@ Exit:
 				slog.Error("error creating request", "err", err)
 				break Exit
 			}
-			apiHandler = api.CreateTopicsAPI{Request: req}
+			apiHandler = api.CreateTopicsAPI{Request: req, Config: client.config}
 		default:
 			slog.Error("Unknown API key", "key", header.RequestApiKey)
 		}
@@ -225,6 +225,5 @@ func makeRequest(msg []byte, conn net.Conn, headerVersion int16, config *config.
 		Header:  *header,
 		Message: msg[headerSize:],
 		Conn:    conn,
-		Config:  config,
 	}, nil
 }

@@ -1,12 +1,15 @@
 package postgresql
 
 import (
+	"database/sql"
+
 	"github.com/spf13/viper"
 	"golang.org/x/exp/slog"
 )
 
 type Plugin struct {
 	config config
+	db     *sql.DB
 }
 
 type config struct {
@@ -36,11 +39,10 @@ func (p *Plugin) Init(env *viper.Viper) error {
 	return nil
 }
 
-func (p *Plugin) GetSetting(key string) string {
-
-	return ""
+func (p *Plugin) GetSetting(key string) (string, error) {
+	return "", nil
 }
 
-func (p *Plugin) Call() {
-	slog.Debug("===========> Call from plugin")
+func (p *Plugin) SetSetting(key, value string) error {
+	return nil
 }

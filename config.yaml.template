@@ -33,4 +33,3 @@ plugins:
     port: 5432
     username: postgres
     password: secret
-    database: opentalaria

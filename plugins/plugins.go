@@ -1,9 +1,20 @@
 package plugins
 
-import "github.com/spf13/viper"
+import (
+	"github.com/ibm/opentalaria/protocol"
+	"github.com/spf13/viper"
+)
 
 type PluginInterface interface {
 	Init(env *viper.Viper) error
-	GetSetting(key string) string
-	Call()
+
+	// settings
+	GetSetting(key string) (string, error)
+	SetSetting(key, value string) error
+
+	// topics
+	AddTopic(topic protocol.CreatableTopic) error
+}
+
+type TopicOptions struct {
 }

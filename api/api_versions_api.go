@@ -1,11 +1,13 @@
 package api
 
 import (
+	"github.com/ibm/opentalaria/config"
 	"github.com/ibm/opentalaria/protocol"
 )
 
 type APIVersionsAPI struct {
 	Request Request
+	Config  *config.Config
 }
 
 func (a APIVersionsAPI) Name() string {
@@ -17,9 +19,6 @@ func (a APIVersionsAPI) GetRequest() Request {
 }
 
 func (a APIVersionsAPI) GeneratePayload() ([]byte, error) {
-	// TODO: Remove this test call from here.
-	a.Request.Config.Plugin.Call()
-
 	// handle response
 	apiVersionRequest := protocol.ApiVersionsRequest{}
 	_, err := protocol.VersionedDecode(a.Request.Message, &apiVersionRequest, a.Request.Header.RequestApiVersion)
