@@ -15,6 +15,3 @@ type PluginInterface interface {
 	// topics
 	AddTopic(topic protocol.CreatableTopic) error
 }
-
-type TopicOptions struct {
-}
