@@ -71,7 +71,8 @@ CREATE TABLE public.topics (
     topic_id uuid NOT NULL,
     topic_name character varying(255),
     num_partitions integer,
-    replication_factor integer
+    replication_factor integer,
+    is_internal boolean NOT NULL DEFAULT false
 );
 
 

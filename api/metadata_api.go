@@ -1,11 +1,10 @@
 package api
 
 import (
-	"time"
+	"log/slog"
 
 	"github.com/ibm/opentalaria/config"
 	"github.com/ibm/opentalaria/protocol"
-	"github.com/ibm/opentalaria/utils"
 )
 
 type MetadataAPI struct {
@@ -58,23 +57,13 @@ func (m MetadataAPI) GenerateMetadataResponse() *protocol.MetadataResponse {
 
 	response.ClusterID = &m.Config.Cluster.ClusterID
 	response.ControllerID = m.Config.Broker.BrokerID
-	topicName := "test-topic"
 
-	response.Topics = append(response.Topics, protocol.MetadataResponseTopic{
-		ErrorCode:  int16(utils.ErrNoError),
-		Name:       &topicName,
-		IsInternal: false,
-		Partitions: []protocol.MetadataResponsePartition{{
-			ErrorCode:       int16(utils.ErrNoError),
-			PartitionIndex:  0,
-			LeaderID:        1,
-			LeaderEpoch:     int32(time.Now().Unix()),
-			ReplicaNodes:    []int32{0},
-			IsrNodes:        []int32{0},
-			OfflineReplicas: []int32{0},
-		}},
-		TopicAuthorizedOperations: 0,
-	})
+	topics, err := m.Config.Plugin.ListTopics()
+	if err != nil {
+		slog.Error("error listing topics", "err", err)
+	}
+
+	response.Topics = topics
 	response.ClusterAuthorizedOperations = 0
 
 	return &response
