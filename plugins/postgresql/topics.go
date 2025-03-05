@@ -5,9 +5,11 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/ibm/opentalaria/protocol"
+	"github.com/ibm/opentalaria/utils"
+	"github.com/lib/pq"
 )
 
-func (p *Plugin) AddTopic(topic protocol.CreatableTopic) error {
+func (p *Plugin) AddTopic(topic protocol.CreatableTopic) utils.KError {
 	slog.Debug("Create", "topic", topic.Name, "configs", topic.Configs)
 
 	statement := `
@@ -16,5 +18,17 @@ func (p *Plugin) AddTopic(topic protocol.CreatableTopic) error {
 
 	_, err := p.db.Exec(statement, uuid.New(), topic.Name, topic.NumPartitions, topic.ReplicationFactor)
 
-	return err
+	returnErr := utils.ErrNoError
+
+	if err, ok := err.(*pq.Error); ok {
+		// 23505 is a unique constraint violation. In our case the topic already exists
+		// https://www.postgresql.org/docs/9.3/errcodes-appendix.html
+		if err.Code == "23505" {
+			returnErr = utils.ErrTopicAlreadyExists
+		} else {
+			returnErr = utils.ErrInvalidRequest
+		}
+	}
+
+	return returnErr
 }

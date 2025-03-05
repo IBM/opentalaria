@@ -2,6 +2,7 @@ package plugins
 
 import (
 	"github.com/ibm/opentalaria/protocol"
+	"github.com/ibm/opentalaria/utils"
 	"github.com/spf13/viper"
 )
 
@@ -13,5 +14,5 @@ type PluginInterface interface {
 	SetSetting(key, value string) error
 
 	// topics
-	AddTopic(topic protocol.CreatableTopic) error
+	AddTopic(topic protocol.CreatableTopic) utils.KError
 }

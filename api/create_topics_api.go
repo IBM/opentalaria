@@ -1,10 +1,7 @@
 package api
 
 import (
-	"log/slog"
-
 	"github.com/ibm/opentalaria/config"
-	"github.com/ibm/opentalaria/utils"
 
 	"github.com/ibm/opentalaria/protocol"
 )
@@ -45,16 +42,10 @@ func (m CreateTopicsAPI) GenerateCreateTopicsResponse(version int16, req protoco
 	for _, topic := range req.Topics {
 		err := m.Config.Plugin.AddTopic(topic)
 
-		errorCode := int16(utils.ErrNoError)
-		if err != nil {
-			slog.Error(err.Error())
-			errorCode = int16(utils.ErrInvalidRequest)
-		}
-
 		response.Topics = append(response.Topics, protocol.CreatableTopicResult{
 			Version:   req.Version,
 			Name:      topic.Name,
-			ErrorCode: errorCode,
+			ErrorCode: int16(err),
 		})
 	}
 
