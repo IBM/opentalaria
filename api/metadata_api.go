@@ -1,14 +1,15 @@
 package api
 
 import (
-	"opentalaria/config"
-	"opentalaria/protocol"
-	"opentalaria/utils"
-	"time"
+	"log/slog"
+
+	"github.com/ibm/opentalaria/config"
+	"github.com/ibm/opentalaria/protocol"
 )
 
 type MetadataAPI struct {
 	Request Request
+	Config  *config.Config
 }
 
 func (m MetadataAPI) Name() string {
@@ -30,49 +31,39 @@ func (m MetadataAPI) GeneratePayload() ([]byte, error) {
 		return nil, err
 	}
 
-	response := GenerateMetadataResponse(m.GetRequest().Header.RequestApiVersion, m.Request.Config)
+	response := m.GenerateMetadataResponse()
 	return protocol.Encode(response)
 }
 
-func GenerateMetadataResponse(version int16, config *config.Config) *protocol.MetadataResponse {
+func (m MetadataAPI) GenerateMetadataResponse() *protocol.MetadataResponse {
 	// For now the returned data is mock, just so we can continue developing the rest of the APIs.
 	// Once we have a more robust project architecture, this struct will be populated with the real
 	// cluster metadata.
 	response := protocol.MetadataResponse{}
 
-	response.Version = version
+	response.Version = m.GetRequest().Header.RequestApiVersion
 	// TODO: handle throttle time
 	response.ThrottleTimeMs = 0
 
 	// TODO: we will have to handle multiple advertised listeners, this implementation is very naive and assumes OpenTalaria won't be run in cluster mode
 	// Since cluster mode is not supported for now, we take the first AdvertisedListener as broker config.
-	listener := config.Broker.AdvertisedListeners[0]
+	listener := m.Config.Broker.AdvertisedListeners[0]
 	response.Brokers = append(response.Brokers, protocol.MetadataResponseBroker{
-		NodeID: config.Broker.BrokerID,
+		NodeID: m.Config.Broker.BrokerID,
 		Host:   listener.Host,
 		Port:   listener.Port,
 		Rack:   nil, // for now OpenTalaria does not support rack awareness.
 	})
 
-	response.ClusterID = &config.Cluster.ClusterID
-	response.ControllerID = config.Broker.BrokerID
-	topicName := "test-topic"
+	response.ClusterID = &m.Config.Cluster.ClusterID
+	response.ControllerID = m.Config.Broker.BrokerID
 
-	response.Topics = append(response.Topics, protocol.MetadataResponseTopic{
-		ErrorCode:  int16(utils.ErrNoError),
-		Name:       &topicName,
-		IsInternal: false,
-		Partitions: []protocol.MetadataResponsePartition{{
-			ErrorCode:       int16(utils.ErrNoError),
-			PartitionIndex:  0,
-			LeaderID:        1,
-			LeaderEpoch:     int32(time.Now().Unix()),
-			ReplicaNodes:    []int32{0},
-			IsrNodes:        []int32{0},
-			OfflineReplicas: []int32{0},
-		}},
-		TopicAuthorizedOperations: 0,
-	})
+	topics, err := m.Config.Plugin.ListTopics()
+	if err != nil {
+		slog.Error("error listing topics", "err", err)
+	}
+
+	response.Topics = topics
 	response.ClusterAuthorizedOperations = 0
 
 	return &response
