@@ -21,12 +21,13 @@ func (p *Plugin) AddTopic(topic protocol.CreatableTopic) utils.KError {
 
 	returnErr := utils.ErrNoError
 
-	if err, ok := err.(*pq.Error); ok {
+	if err1, ok := err.(*pq.Error); ok {
 		// 23505 is a unique constraint violation. In our case it means the topic already exists
 		// https://www.postgresql.org/docs/9.3/errcodes-appendix.html
-		if err.Code == "23505" {
+		if err1.Code == "23505" {
 			returnErr = utils.ErrTopicAlreadyExists
 		} else {
+			slog.Error("error creating topic", "err", err)
 			returnErr = utils.ErrInvalidRequest
 		}
 	}
