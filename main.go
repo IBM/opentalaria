@@ -10,7 +10,7 @@ import (
 	"github.com/ibm/opentalaria/config"
 	// We start a web server only in localdev mode, which should't expose any sensitive information.
 	// If we add some web APIs one day, this functionality has to be reviewed.
-	// _ "expvar"
+	_ "expvar"
 )
 
 func main() {
