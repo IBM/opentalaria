@@ -21,7 +21,7 @@ This list will be updated as new APIs get implemented. For implementation detail
 - [ ] ListGroups (16)
 - [ ] SaslHandshake (17)
 - [x] ApiVersions (18)
-- [ ] CreateTopics (19)
+- [x] CreateTopics (19)
 - [ ] DeleteTopics (20)
 - [ ] DeleteRecords (21)
 - [ ] InitProducerId (22)
