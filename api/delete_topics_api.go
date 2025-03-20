@@ -39,12 +39,13 @@ func (m DeleteTopicsAPI) GenerateDeleteTopicsResponse(version int16, req protoco
 	// TODO: handle throttle time
 	response.ThrottleTimeMs = 0
 
-	for _, topic := range req.Topics {
-		err := m.Config.Plugin.DeleteTopic(*topic.Name)
+	// v5< specific code. In v6+ we have to iterate over req.Topics
+	for _, topic := range req.TopicNames {
+		err := m.Config.Plugin.DeleteTopic(topic)
 
 		response.Responses = append(response.Responses, protocol.DeletableTopicResult{
 			Version:   req.Version,
-			Name:      *&topic.Name,
+			Name:      &topic,
 			ErrorCode: int16(err),
 		})
 	}
