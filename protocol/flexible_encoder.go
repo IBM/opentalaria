@@ -88,7 +88,11 @@ func (fe *flexibleEncoder) putNullableString(in *string) error {
 }
 
 func (fe *flexibleEncoder) putStringArray(in []string) error {
-	return fe.parent.putStringArray(in)
+	return fe.parent.putCompactStringArray(in)
+}
+
+func (fe *flexibleEncoder) putCompactStringArray(in []string) error {
+	return fe.parent.putCompactStringArray(in)
 }
 
 func (fe *flexibleEncoder) putCompactInt8Array(in []int8) error {

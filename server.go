@@ -201,6 +201,16 @@ Exit:
 				break Exit
 			}
 			apiHandler = api.CreateTopicsAPI{Request: req, Config: client.config}
+		case (&protocol.DeleteTopicsRequest{}).GetKey():
+			req, err := makeRequest(messageBytes,
+				client.conn,
+				(&protocol.DeleteTopicsRequest{Version: header.RequestApiVersion}).GetHeaderVersion(),
+				client.config)
+			if err != nil {
+				slog.Error("error creating request", "err", err)
+				break Exit
+			}
+			apiHandler = api.DeleteTopicsAPI{Request: req, Config: client.config}
 		default:
 			slog.Error("Unknown API key", "key", header.RequestApiKey)
 		}

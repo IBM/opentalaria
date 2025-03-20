@@ -30,6 +30,7 @@ type packetEncoder interface {
 	putString(in string) error
 	putNullableString(in *string) error
 	putStringArray(in []string) error
+	putCompactStringArray(in []string) error
 	putCompactInt8Array(in []int8) error
 	putCompactInt16Array(in []int16) error
 	putCompactInt32Array(in []int32) error

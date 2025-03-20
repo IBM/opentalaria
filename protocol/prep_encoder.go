@@ -158,6 +158,21 @@ func (pe *prepEncoder) putStringArray(in []string) error {
 	return nil
 }
 
+func (pe *prepEncoder) putCompactStringArray(in []string) error {
+	err := pe.putCompactArrayLength(len(in))
+	if err != nil {
+		return err
+	}
+
+	for _, str := range in {
+		if err := pe.putCompactString(str); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (pe *prepEncoder) putCompactInt8Array(in []int8) error {
 	if in == nil {
 		return errors.New("expected int8 array to be non null")

@@ -501,6 +501,31 @@ func (rd *realDecoder) getStringArray() ([]string, error) {
 	return ret, nil
 }
 
+func (rd *realDecoder) getCompactStringArray() ([]string, error) {
+	n, err := rd.getUVarint()
+	if err != nil {
+		return nil, err
+	}
+
+	if n == 0 {
+		return nil, nil
+	}
+
+	arrayLength := int(n) - 1
+
+	ret := make([]string, arrayLength)
+
+	for i := range ret {
+		str, err := rd.getCompactString()
+		if err != nil {
+			return nil, err
+		}
+
+		ret[i] = str
+	}
+	return ret, nil
+}
+
 func (rd *realDecoder) getUUID() (uuid.UUID, error) {
 	return uuid.UUID{}, nil
 }
