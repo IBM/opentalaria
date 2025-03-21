@@ -40,6 +40,7 @@ func getAPIVersions() []protocol.ApiVersion {
 		{ApiKey: (&protocol.MetadataRequest{}).GetKey(), MinVersion: 0, MaxVersion: 8},
 		{ApiKey: (&protocol.ProduceRequest{}).GetKey(), MinVersion: 0, MaxVersion: 8},
 		{ApiKey: (&protocol.CreateTopicsRequest{}).GetKey(), MinVersion: 0, MaxVersion: 4},
+		{ApiKey: (&protocol.DeleteTopicsRequest{}).GetKey(), MinVersion: 0, MaxVersion: 4},
 		// {APIKey: FetchKey, MinVersion: 0, MaxVersion: 3},
 		// {APIKey: OffsetsKey, MinVersion: 0, MaxVersion: 2},
 		// {APIKey: LeaderAndISRKey, MinVersion: 0, MaxVersion: 1},

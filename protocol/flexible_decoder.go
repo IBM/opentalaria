@@ -122,7 +122,11 @@ func (fd *flexibleDecoder) getInt64Array() ([]int64, error) {
 }
 
 func (fd *flexibleDecoder) getStringArray() ([]string, error) {
-	return fd.parent.getStringArray()
+	return fd.parent.getCompactStringArray()
+}
+
+func (fd *flexibleDecoder) getCompactStringArray() ([]string, error) {
+	return fd.parent.getCompactStringArray()
 }
 
 func (fd *flexibleDecoder) getUUID() (uuid.UUID, error) {

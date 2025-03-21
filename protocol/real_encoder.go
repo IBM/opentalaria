@@ -150,6 +150,21 @@ func (re *realEncoder) putStringArray(in []string) error {
 	return nil
 }
 
+func (re *realEncoder) putCompactStringArray(in []string) error {
+	err := re.putCompactArrayLength(len(in))
+	if err != nil {
+		return err
+	}
+
+	for _, val := range in {
+		if err := re.putCompactString(val); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (re *realEncoder) putCompactInt8Array(in []int8) error {
 	if in == nil {
 		return errors.New("expected int8 array to be non null")

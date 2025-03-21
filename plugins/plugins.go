@@ -16,4 +16,5 @@ type PluginInterface interface {
 	// topics
 	ListTopics() ([]protocol.MetadataResponseTopic, error)
 	AddTopic(topic protocol.CreatableTopic) utils.KError
+	DeleteTopic(topic string) utils.KError
 }

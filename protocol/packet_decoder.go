@@ -38,6 +38,7 @@ type packetDecoder interface {
 	getInt32Array() ([]int32, error)
 	getInt64Array() ([]int64, error)
 	getStringArray() ([]string, error)
+	getCompactStringArray() ([]string, error)
 	getUUID() (uuid.UUID, error)
 	getUUIDArray() ([]uuid.UUID, error)
 

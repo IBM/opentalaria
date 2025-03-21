@@ -35,6 +35,24 @@ func (p *Plugin) AddTopic(topic protocol.CreatableTopic) utils.KError {
 	return returnErr
 }
 
+func (p *Plugin) DeleteTopic(topic string) utils.KError {
+	slog.Debug("delete topic", "name", topic)
+
+	statement := `
+		DELETE FROM topics
+		where topic_name = $1
+	`
+	returnErr := utils.ErrNoError
+
+	_, err := p.db.Exec(statement, topic)
+	if err != nil {
+		slog.Error("error deleting topic", "err", err)
+		returnErr = utils.ErrInvalidRequest
+	}
+
+	return returnErr
+}
+
 func (p *Plugin) ListTopics() ([]protocol.MetadataResponseTopic, error) {
 	statement := "SELECT * from topics"
 
