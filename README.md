@@ -9,7 +9,7 @@ The project is still a work in progress, please see the [list](docs/apis.md) of 
 ## Running the project
 The project is still in early stages of development, so there are no scheduled releases. To build from source you will need the Go compiler v1.21 or later and Make. To build run the following command `make build`. This will generate the binary `bin/opentalaria`. Note that debug information is stripped from the resulting binary. If you wish to debug the project, you can run it with `make run`. 
 
-To run the binary, call it with an optional flag `-c` to specify a configuration file `bin/opentalaria -c server.properties`. If no configuration file is provided, the broker will look for a file named `server.properties` in the current directory. If the file does not exist the broker falls back on environment variables. Please see the [documentation](docs/configuration.md) for more info.
+To run the binary, call it with an optional flag `-c` to specify a configuration file `bin/opentalaria -c config.yaml`. If no configuration file is provided, the broker will look for a file named `config.yaml` in the current directory. If the file does not exist the broker falls back on environment variables. Please see the [documentation](docs/configuration.md) for more info.
 
 ## Contributing
 
