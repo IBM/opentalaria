@@ -22,7 +22,7 @@ This list will be updated as new APIs get implemented. For implementation detail
 - [ ] SaslHandshake (17)
 - [x] ApiVersions (18)
 - [x] CreateTopics (19)
-- [ ] DeleteTopics (20)
+- [x] DeleteTopics (20)
 - [ ] DeleteRecords (21)
 - [ ] InitProducerId (22)
 - [ ] OffsetForLeaderEpoch (23)
