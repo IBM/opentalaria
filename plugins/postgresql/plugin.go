@@ -3,8 +3,9 @@ package postgresql
 import (
 	"database/sql"
 
+	"log/slog"
+
 	"github.com/spf13/viper"
-	"golang.org/x/exp/slog"
 )
 
 type Plugin struct {
