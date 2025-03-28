@@ -1,4 +1,4 @@
-package main
+package kafka
 
 import (
 	"context"
@@ -162,8 +162,7 @@ Exit:
 		case (&protocol.ApiVersionsRequest{}).GetKey():
 			req, err := makeRequest(messageBytes,
 				client.conn,
-				(&protocol.ApiVersionsRequest{Version: header.RequestApiVersion}).GetHeaderVersion(),
-				client.config)
+				(&protocol.ApiVersionsRequest{Version: header.RequestApiVersion}).GetHeaderVersion())
 			if err != nil {
 				slog.Error("error creating request", "err", err)
 				// This break exits the outer for loop and closes the socket connection.
@@ -174,8 +173,7 @@ Exit:
 		case (&protocol.MetadataRequest{}).GetKey():
 			req, err := makeRequest(messageBytes,
 				client.conn,
-				(&protocol.MetadataRequest{Version: header.RequestApiVersion}).GetHeaderVersion(),
-				client.config)
+				(&protocol.MetadataRequest{Version: header.RequestApiVersion}).GetHeaderVersion())
 			if err != nil {
 				slog.Error("error creating request", "err", err)
 				break Exit
@@ -184,8 +182,7 @@ Exit:
 		case (&protocol.ProduceRequest{}).GetKey():
 			req, err := makeRequest(messageBytes,
 				client.conn,
-				(&protocol.ProduceRequest{Version: header.RequestApiVersion}).GetHeaderVersion(),
-				client.config)
+				(&protocol.ProduceRequest{Version: header.RequestApiVersion}).GetHeaderVersion())
 			if err != nil {
 				slog.Error("error creating request", "err", err)
 				break Exit
@@ -194,8 +191,7 @@ Exit:
 		case (&protocol.CreateTopicsRequest{}).GetKey():
 			req, err := makeRequest(messageBytes,
 				client.conn,
-				(&protocol.CreateTopicsRequest{Version: header.RequestApiVersion}).GetHeaderVersion(),
-				client.config)
+				(&protocol.CreateTopicsRequest{Version: header.RequestApiVersion}).GetHeaderVersion())
 			if err != nil {
 				slog.Error("error creating request", "err", err)
 				break Exit
@@ -204,8 +200,7 @@ Exit:
 		case (&protocol.DeleteTopicsRequest{}).GetKey():
 			req, err := makeRequest(messageBytes,
 				client.conn,
-				(&protocol.DeleteTopicsRequest{Version: header.RequestApiVersion}).GetHeaderVersion(),
-				client.config)
+				(&protocol.DeleteTopicsRequest{Version: header.RequestApiVersion}).GetHeaderVersion())
 			if err != nil {
 				slog.Error("error creating request", "err", err)
 				break Exit
@@ -223,7 +218,7 @@ Exit:
 	}
 }
 
-func makeRequest(msg []byte, conn net.Conn, headerVersion int16, config *config.Config) (api.Request, error) {
+func makeRequest(msg []byte, conn net.Conn, headerVersion int16) (api.Request, error) {
 	// parse the full header, based on API key and version
 	header := &protocol.RequestHeader{}
 	headerSize, err := protocol.VersionedDecode(msg, header, headerVersion)
