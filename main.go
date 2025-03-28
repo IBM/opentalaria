@@ -8,6 +8,8 @@ import (
 	"os"
 
 	"github.com/ibm/opentalaria/config"
+	"github.com/ibm/opentalaria/kafka"
+
 	// We start a web server only in localdev mode, which should't expose any sensitive information.
 	// If we add some web APIs one day, this functionality has to be reviewed.
 	_ "expvar"
@@ -30,6 +32,6 @@ func main() {
 		go http.ListenAndServe(fmt.Sprintf(":%d", conf.DebugServerPort), nil)
 	}
 
-	server := NewServer(conf)
+	server := kafka.NewServer(conf)
 	server.Run()
 }
