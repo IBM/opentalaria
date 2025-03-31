@@ -224,6 +224,7 @@ Exit:
 	}
 }
 
+// RegisterAPI registers a new Kafka API with the socket server.
 func (s *Server) RegisterAPI(api protocol.API, minVersion, maxVersion int16, handlerFunc func(req config.Request, apiVersion int16, opts ...any) ([]byte, int16, error)) {
 	if s.apis == nil {
 		s.apis = make(map[int16]config.ApiDefinition)
