@@ -39,6 +39,10 @@ func (r *DescribeTransactionsRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *DescribeTransactionsRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *DescribeTransactionsRequest) GetHeaderVersion() int16 {
 	return 2
 }

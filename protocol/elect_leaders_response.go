@@ -195,6 +195,10 @@ func (r *ElectLeadersResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *ElectLeadersResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *ElectLeadersResponse) GetHeaderVersion() int16 {
 	if r.Version >= 2 {
 		return 1

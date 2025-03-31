@@ -107,6 +107,10 @@ func (r *DescribeLogDirsRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *DescribeLogDirsRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *DescribeLogDirsRequest) GetHeaderVersion() int16 {
 	if r.Version >= 2 {
 		return 2

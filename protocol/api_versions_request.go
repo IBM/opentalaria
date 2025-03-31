@@ -65,6 +65,10 @@ func (r *ApiVersionsRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *ApiVersionsRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *ApiVersionsRequest) GetHeaderVersion() int16 {
 	if r.Version >= 3 {
 		return 2

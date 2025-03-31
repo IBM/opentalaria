@@ -487,6 +487,10 @@ func (r *DescribeQuorumResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *DescribeQuorumResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *DescribeQuorumResponse) GetHeaderVersion() int16 {
 	return 1
 }

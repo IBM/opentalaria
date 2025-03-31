@@ -16,7 +16,6 @@ import (
 
 	"github.com/ibm/opentalaria/protocol"
 
-	"github.com/ibm/opentalaria/api"
 	"golang.org/x/sync/semaphore"
 )
 
@@ -24,11 +23,19 @@ type Server struct {
 	host   string
 	port   string
 	config *config.Config
+
+	// holds registered apis with the socket server where the key is the API Key as defined by the kafka protocol.
+	apis           map[int16]config.ApiDefinition
+	registeredAPIs []config.RegisteredAPI
 }
 
 type Client struct {
 	conn   net.Conn
 	config *config.Config
+
+	// copied field from Server struct
+	apis           map[int16]config.ApiDefinition
+	registeredAPIs []config.RegisteredAPI
 }
 
 func NewServer(config *config.Config) *Server {
@@ -101,8 +108,10 @@ func (server *Server) Run() {
 		}
 
 		client := &Client{
-			conn:   conn,
-			config: server.config,
+			conn:           conn,
+			config:         server.config,
+			apis:           server.apis,
+			registeredAPIs: server.registeredAPIs,
 		}
 
 		if err := sem.Acquire(ctx, 1); err != nil {
@@ -157,76 +166,94 @@ Exit:
 
 		slog.Debug(header.String())
 
-		var apiHandler api.API
-		switch header.RequestApiKey {
-		case (&protocol.ApiVersionsRequest{}).GetKey():
-			req, err := makeRequest(messageBytes,
-				client.conn,
-				(&protocol.ApiVersionsRequest{Version: header.RequestApiVersion}).GetHeaderVersion())
+		if definition, ok := client.apis[header.RequestApiKey]; ok {
+			definition.ApiRequest.SetVersion(header.RequestApiVersion)
+			req, err := makeRequest(messageBytes, client.conn, definition.ApiRequest.GetHeaderVersion())
 			if err != nil {
 				slog.Error("error creating request", "err", err)
 				// This break exits the outer for loop and closes the socket connection.
 				// If there is an error in the metadata exchange for example, we don't want to continue consuming the rest of the APIs.
 				break Exit
 			}
-			apiHandler = api.APIVersionsAPI{Request: req, Config: client.config}
-		case (&protocol.MetadataRequest{}).GetKey():
-			req, err := makeRequest(messageBytes,
-				client.conn,
-				(&protocol.MetadataRequest{Version: header.RequestApiVersion}).GetHeaderVersion())
-			if err != nil {
-				slog.Error("error creating request", "err", err)
-				break Exit
-			}
-			apiHandler = api.MetadataAPI{Request: req, Config: client.config}
-		case (&protocol.ProduceRequest{}).GetKey():
-			req, err := makeRequest(messageBytes,
-				client.conn,
-				(&protocol.ProduceRequest{Version: header.RequestApiVersion}).GetHeaderVersion())
-			if err != nil {
-				slog.Error("error creating request", "err", err)
-				break Exit
-			}
-			apiHandler = api.ProduceAPI{Request: req, Config: client.config}
-		case (&protocol.CreateTopicsRequest{}).GetKey():
-			req, err := makeRequest(messageBytes,
-				client.conn,
-				(&protocol.CreateTopicsRequest{Version: header.RequestApiVersion}).GetHeaderVersion())
-			if err != nil {
-				slog.Error("error creating request", "err", err)
-				break Exit
-			}
-			apiHandler = api.CreateTopicsAPI{Request: req, Config: client.config}
-		case (&protocol.DeleteTopicsRequest{}).GetKey():
-			req, err := makeRequest(messageBytes,
-				client.conn,
-				(&protocol.DeleteTopicsRequest{Version: header.RequestApiVersion}).GetHeaderVersion())
-			if err != nil {
-				slog.Error("error creating request", "err", err)
-				break Exit
-			}
-			apiHandler = api.DeleteTopicsAPI{Request: req, Config: client.config}
-		default:
-			slog.Error("Unknown API key", "key", header.RequestApiKey)
-		}
 
-		err = api.HandleResponse(apiHandler)
-		if err != nil {
-			slog.Error("error handling response", "err", err)
-			break
+			var opts any
+
+			// API 18 is a special case where we want to return all supported apis.
+			// We pass all registered APIs and min/max version as optional parameters.
+			if header.RequestApiKey == 18 {
+				opts = client.registeredAPIs
+			}
+
+			resp, respHeaderVersion, err := definition.HandlerFunc(req, header.RequestApiVersion, opts)
+			if err != nil {
+				slog.Error("error executing handler func", "err", err)
+				break Exit
+			}
+
+			// write response
+			payload := make([]byte, 0)
+
+			resHeader := protocol.ResponseHeader{
+				Version:       respHeaderVersion,
+				CorrelationID: req.Header.CorrelationID,
+			}
+
+			resHeaderBytes, err := protocol.Encode(&resHeader)
+			if err != nil {
+				slog.Error("error executing handler func", "err", err)
+				break Exit
+			}
+			// TODO: calculate the payload size before merging the header with the message payload, to avoid the append operation
+			payload = append(payload, resHeaderBytes...)
+
+			payload = append(payload, resp...)
+
+			// prepend payload size to the final byte array that will be sent back via the wire
+			result := make([]byte, 0)
+			result = binary.BigEndian.AppendUint32(result, uint32(len(payload)))
+			result = append(result, payload...)
+
+			slog.Debug(fmt.Sprintf("writing %d bytes", len(result)), "api", definition.ApiRequest.GetKey())
+
+			_, err = client.conn.Write(result)
+			if err != nil {
+				slog.Error("error writing response", "err", err)
+				break Exit
+			}
 		}
 	}
 }
 
-func makeRequest(msg []byte, conn net.Conn, headerVersion int16) (api.Request, error) {
+func (s *Server) RegisterAPI(api protocol.API, minVersion, maxVersion int16, handlerFunc func(req config.Request, apiVersion int16, opts ...any) ([]byte, int16, error)) {
+	if s.apis == nil {
+		s.apis = make(map[int16]config.ApiDefinition)
+	}
+
+	apiKey := api.GetKey()
+
+	if _, ok := s.apis[apiKey]; !ok {
+		s.apis[apiKey] = config.ApiDefinition{
+			ApiRequest:  api,
+			HandlerFunc: handlerFunc,
+		}
+
+		s.registeredAPIs = append(s.registeredAPIs, config.RegisteredAPI{
+			ApiKey:     apiKey,
+			MinVersion: minVersion,
+			MaxVersion: maxVersion,
+		})
+	}
+}
+
+func makeRequest(msg []byte, conn net.Conn, headerVersion int16) (config.Request, error) {
 	// parse the full header, based on API key and version
 	header := &protocol.RequestHeader{}
 	headerSize, err := protocol.VersionedDecode(msg, header, headerVersion)
 	if err != nil {
-		return api.Request{}, err
+		return config.Request{}, err
 	}
 
-	return api.Request{
+	return config.Request{
 		Header:  *header,
 		Message: msg[headerSize:],
 		Conn:    conn,

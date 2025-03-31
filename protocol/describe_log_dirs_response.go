@@ -293,6 +293,10 @@ func (r *DescribeLogDirsResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *DescribeLogDirsResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *DescribeLogDirsResponse) GetHeaderVersion() int16 {
 	if r.Version >= 2 {
 		return 1

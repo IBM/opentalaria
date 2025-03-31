@@ -59,6 +59,10 @@ func (r *EnvelopeRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *EnvelopeRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *EnvelopeRequest) GetHeaderVersion() int16 {
 	return 2
 }

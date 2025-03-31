@@ -47,6 +47,10 @@ func (r *EnvelopeResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *EnvelopeResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *EnvelopeResponse) GetHeaderVersion() int16 {
 	return 1
 }

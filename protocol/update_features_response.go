@@ -135,6 +135,10 @@ func (r *UpdateFeaturesResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *UpdateFeaturesResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *UpdateFeaturesResponse) GetHeaderVersion() int16 {
 	return 1
 }

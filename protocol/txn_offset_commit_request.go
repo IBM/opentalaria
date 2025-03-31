@@ -261,6 +261,10 @@ func (r *TxnOffsetCommitRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *TxnOffsetCommitRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *TxnOffsetCommitRequest) GetHeaderVersion() int16 {
 	if r.Version >= 3 {
 		return 2

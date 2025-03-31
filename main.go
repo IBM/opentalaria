@@ -7,8 +7,10 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/ibm/opentalaria/api"
 	"github.com/ibm/opentalaria/config"
 	"github.com/ibm/opentalaria/kafka"
+	"github.com/ibm/opentalaria/protocol"
 
 	// We start a web server only in localdev mode, which should't expose any sensitive information.
 	// If we add some web APIs one day, this functionality has to be reviewed.
@@ -33,5 +35,9 @@ func main() {
 	}
 
 	server := kafka.NewServer(conf)
+
+	server.RegisterAPI(&protocol.ApiVersionsRequest{}, 0, 3, api.HandleAPIVersionsRequest)
+	// server.RegisterAPI(&protocol.MetadataRequest{}, 0, 8)
+
 	server.Run()
 }

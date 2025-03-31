@@ -241,6 +241,10 @@ func (r *AlterClientQuotasRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *AlterClientQuotasRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *AlterClientQuotasRequest) GetHeaderVersion() int16 {
 	if r.Version >= 1 {
 		return 2

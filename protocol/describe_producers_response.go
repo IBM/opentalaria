@@ -261,6 +261,10 @@ func (r *DescribeProducersResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *DescribeProducersResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *DescribeProducersResponse) GetHeaderVersion() int16 {
 	return 1
 }

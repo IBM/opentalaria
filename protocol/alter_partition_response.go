@@ -232,6 +232,10 @@ func (r *AlterPartitionResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *AlterPartitionResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *AlterPartitionResponse) GetHeaderVersion() int16 {
 	return 1
 }

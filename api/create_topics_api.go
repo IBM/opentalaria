@@ -1,53 +1,30 @@
 package api
 
-import (
-	"github.com/ibm/opentalaria/config"
+// func (m CreateTopicsAPI) GeneratePayload() ([]byte, error) {
+// 	req := protocol.CreateTopicsRequest{}
+// 	_, err := protocol.VersionedDecode(m.GetRequest().Message, &req, m.GetRequest().Header.RequestApiVersion)
 
-	"github.com/ibm/opentalaria/protocol"
-)
+// 	resp := m.GenerateCreateTopicsResponse(m.GetRequest().Header.RequestApiVersion, req, err)
 
-type CreateTopicsAPI struct {
-	Request Request
-	Config  *config.Config
-}
+// 	return protocol.Encode(resp)
+// }
 
-func (m CreateTopicsAPI) Name() string {
-	return "CreateTopics"
-}
+// func (m CreateTopicsAPI) GenerateCreateTopicsResponse(version int16, req protocol.CreateTopicsRequest, err error) *protocol.CreateTopicsResponse {
+// 	response := protocol.CreateTopicsResponse{}
 
-func (m CreateTopicsAPI) GetRequest() Request {
-	return m.Request
-}
+// 	response.Version = version
+// 	// TODO: handle throttle time
+// 	response.ThrottleTimeMs = 0
 
-func (m CreateTopicsAPI) GetHeaderVersion(requestVersion int16) int16 {
-	return (&protocol.CreateTopicsResponse{Version: requestVersion}).GetHeaderVersion()
-}
+// 	for _, topic := range req.Topics {
+// 		err := m.Config.Plugin.AddTopic(topic)
 
-func (m CreateTopicsAPI) GeneratePayload() ([]byte, error) {
-	req := protocol.CreateTopicsRequest{}
-	_, err := protocol.VersionedDecode(m.GetRequest().Message, &req, m.GetRequest().Header.RequestApiVersion)
+// 		response.Topics = append(response.Topics, protocol.CreatableTopicResult{
+// 			Version:   req.Version,
+// 			Name:      topic.Name,
+// 			ErrorCode: int16(err),
+// 		})
+// 	}
 
-	resp := m.GenerateCreateTopicsResponse(m.GetRequest().Header.RequestApiVersion, req, err)
-
-	return protocol.Encode(resp)
-}
-
-func (m CreateTopicsAPI) GenerateCreateTopicsResponse(version int16, req protocol.CreateTopicsRequest, err error) *protocol.CreateTopicsResponse {
-	response := protocol.CreateTopicsResponse{}
-
-	response.Version = version
-	// TODO: handle throttle time
-	response.ThrottleTimeMs = 0
-
-	for _, topic := range req.Topics {
-		err := m.Config.Plugin.AddTopic(topic)
-
-		response.Topics = append(response.Topics, protocol.CreatableTopicResult{
-			Version:   req.Version,
-			Name:      topic.Name,
-			ErrorCode: int16(err),
-		})
-	}
-
-	return &response
-}
+// 	return &response
+// }

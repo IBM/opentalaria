@@ -946,6 +946,10 @@ func (r *StreamsGroupDescribeResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *StreamsGroupDescribeResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *StreamsGroupDescribeResponse) GetHeaderVersion() int16 {
 	return 1
 }

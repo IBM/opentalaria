@@ -249,6 +249,10 @@ func (r *ApiVersionsResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *ApiVersionsResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *ApiVersionsResponse) GetHeaderVersion() int16 {
 	return 0
 }

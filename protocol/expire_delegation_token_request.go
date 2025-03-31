@@ -55,6 +55,10 @@ func (r *ExpireDelegationTokenRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *ExpireDelegationTokenRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *ExpireDelegationTokenRequest) GetHeaderVersion() int16 {
 	if r.Version >= 2 {
 		return 2

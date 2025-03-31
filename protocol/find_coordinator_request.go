@@ -77,6 +77,10 @@ func (r *FindCoordinatorRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *FindCoordinatorRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *FindCoordinatorRequest) GetHeaderVersion() int16 {
 	if r.Version >= 3 {
 		return 2

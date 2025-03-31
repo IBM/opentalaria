@@ -57,6 +57,10 @@ func (r *ControllerRegistrationResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *ControllerRegistrationResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *ControllerRegistrationResponse) GetHeaderVersion() int16 {
 	return 1
 }

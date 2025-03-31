@@ -99,6 +99,10 @@ func (r *UpdateRaftVoterResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *UpdateRaftVoterResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *UpdateRaftVoterResponse) GetHeaderVersion() int16 {
 	return 1
 }

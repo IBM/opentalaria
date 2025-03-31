@@ -71,6 +71,10 @@ func (r *BrokerHeartbeatResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *BrokerHeartbeatResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *BrokerHeartbeatResponse) GetHeaderVersion() int16 {
 	return 1
 }

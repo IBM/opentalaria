@@ -45,6 +45,10 @@ func (r *AllocateProducerIdsRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *AllocateProducerIdsRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *AllocateProducerIdsRequest) GetHeaderVersion() int16 {
 	return 2
 }

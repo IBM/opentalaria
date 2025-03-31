@@ -415,6 +415,10 @@ func (r *ProduceResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *ProduceResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *ProduceResponse) GetHeaderVersion() int16 {
 	if r.Version >= 9 {
 		return 1

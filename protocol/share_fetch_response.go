@@ -418,6 +418,10 @@ func (r *ShareFetchResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *ShareFetchResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *ShareFetchResponse) GetHeaderVersion() int16 {
 	return 1
 }

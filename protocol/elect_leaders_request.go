@@ -127,6 +127,10 @@ func (r *ElectLeadersRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *ElectLeadersRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *ElectLeadersRequest) GetHeaderVersion() int16 {
 	if r.Version >= 2 {
 		return 2

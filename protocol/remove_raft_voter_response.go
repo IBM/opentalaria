@@ -57,6 +57,10 @@ func (r *RemoveRaftVoterResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *RemoveRaftVoterResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *RemoveRaftVoterResponse) GetHeaderVersion() int16 {
 	return 1
 }

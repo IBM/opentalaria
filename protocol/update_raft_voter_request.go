@@ -189,6 +189,10 @@ func (r *UpdateRaftVoterRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *UpdateRaftVoterRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *UpdateRaftVoterRequest) GetHeaderVersion() int16 {
 	return 2
 }

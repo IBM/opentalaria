@@ -225,6 +225,10 @@ func (r *FetchSnapshotRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *FetchSnapshotRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *FetchSnapshotRequest) GetHeaderVersion() int16 {
 	return 2
 }

@@ -303,6 +303,10 @@ func (r *BeginQuorumEpochRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *BeginQuorumEpochRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *BeginQuorumEpochRequest) GetHeaderVersion() int16 {
 	if r.Version >= 1 {
 		return 2

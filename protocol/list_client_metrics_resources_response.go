@@ -103,6 +103,10 @@ func (r *ListClientMetricsResourcesResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *ListClientMetricsResourcesResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *ListClientMetricsResourcesResponse) GetHeaderVersion() int16 {
 	return 1
 }

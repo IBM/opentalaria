@@ -544,6 +544,10 @@ func (r *FetchResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *FetchResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *FetchResponse) GetHeaderVersion() int16 {
 	if r.Version >= 12 {
 		return 1

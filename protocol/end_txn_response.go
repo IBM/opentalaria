@@ -79,6 +79,10 @@ func (r *EndTxnResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *EndTxnResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *EndTxnResponse) GetHeaderVersion() int16 {
 	if r.Version >= 3 {
 		return 1

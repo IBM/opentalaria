@@ -191,6 +191,10 @@ func (r *IncrementalAlterConfigsRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *IncrementalAlterConfigsRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *IncrementalAlterConfigsRequest) GetHeaderVersion() int16 {
 	if r.Version >= 1 {
 		return 2

@@ -321,6 +321,10 @@ func (r *OffsetFetchRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *OffsetFetchRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *OffsetFetchRequest) GetHeaderVersion() int16 {
 	if r.Version >= 6 {
 		return 2

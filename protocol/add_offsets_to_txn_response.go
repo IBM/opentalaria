@@ -55,6 +55,10 @@ func (r *AddOffsetsToTxnResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *AddOffsetsToTxnResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *AddOffsetsToTxnResponse) GetHeaderVersion() int16 {
 	if r.Version >= 3 {
 		return 1

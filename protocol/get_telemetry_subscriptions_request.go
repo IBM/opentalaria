@@ -41,6 +41,10 @@ func (r *GetTelemetrySubscriptionsRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *GetTelemetrySubscriptionsRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *GetTelemetrySubscriptionsRequest) GetHeaderVersion() int16 {
 	return 2
 }

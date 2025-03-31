@@ -103,6 +103,10 @@ func (r *ListPartitionReassignmentsRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *ListPartitionReassignmentsRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *ListPartitionReassignmentsRequest) GetHeaderVersion() int16 {
 	return 2
 }

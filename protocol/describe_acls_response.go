@@ -231,6 +231,10 @@ func (r *DescribeAclsResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *DescribeAclsResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *DescribeAclsResponse) GetHeaderVersion() int16 {
 	if r.Version >= 2 {
 		return 1

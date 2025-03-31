@@ -177,6 +177,10 @@ func (r *OffsetCommitResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *OffsetCommitResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *OffsetCommitResponse) GetHeaderVersion() int16 {
 	if r.Version >= 8 {
 		return 1

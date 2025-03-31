@@ -211,6 +211,10 @@ func (r *ControllerRegistrationRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *ControllerRegistrationRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *ControllerRegistrationRequest) GetHeaderVersion() int16 {
 	return 2
 }

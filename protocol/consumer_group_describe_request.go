@@ -47,6 +47,10 @@ func (r *ConsumerGroupDescribeRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *ConsumerGroupDescribeRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *ConsumerGroupDescribeRequest) GetHeaderVersion() int16 {
 	return 2
 }

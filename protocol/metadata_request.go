@@ -170,6 +170,10 @@ func (r *MetadataRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *MetadataRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *MetadataRequest) GetHeaderVersion() int16 {
 	if r.Version >= 9 {
 		return 2
