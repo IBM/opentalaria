@@ -1,31 +1,34 @@
 package api
 
-// func (m DeleteTopicsAPI) GeneratePayload() ([]byte, error) {
-// 	req := protocol.DeleteTopicsRequest{}
-// 	_, err := protocol.VersionedDecode(m.GetRequest().Message, &req, m.GetRequest().Header.RequestApiVersion)
+import (
+	"github.com/ibm/opentalaria/config"
+	"github.com/ibm/opentalaria/protocol"
+)
 
-// 	resp := m.GenerateDeleteTopicsResponse(m.GetRequest().Header.RequestApiVersion, req, err)
+func HandleDeleteTopics(req config.Request, apiVersion int16, opts ...any) ([]byte, int16, error) {
+	deleteTopicsRequest := protocol.DeleteTopicsRequest{}
 
-// 	return protocol.Encode(resp)
-// }
+	_, err := protocol.VersionedDecode(req.Message, &deleteTopicsRequest, req.Header.RequestApiVersion)
+	if err != nil {
+		return nil, 0, err
+	}
 
-// func (m DeleteTopicsAPI) GenerateDeleteTopicsResponse(version int16, req protocol.DeleteTopicsRequest, err error) *protocol.DeleteTopicsResponse {
-// 	response := protocol.DeleteTopicsResponse{}
+	response := protocol.DeleteTopicsResponse{
+		Version: req.Header.RequestApiVersion,
+	}
 
-// 	response.Version = version
-// 	// TODO: handle throttle time
-// 	response.ThrottleTimeMs = 0
+	// v5< specific code. In v6+ we have to iterate over req.Topics
+	for _, topic := range deleteTopicsRequest.TopicNames {
+		err := req.Config.Plugin.DeleteTopic(topic)
 
-// 	// v5< specific code. In v6+ we have to iterate over req.Topics
-// 	for _, topic := range req.TopicNames {
-// 		err := m.Config.Plugin.DeleteTopic(topic)
+		response.Responses = append(response.Responses, protocol.DeletableTopicResult{
+			Version:   req.Header.RequestApiVersion,
+			Name:      &topic,
+			ErrorCode: int16(err),
+		})
+	}
 
-// 		response.Responses = append(response.Responses, protocol.DeletableTopicResult{
-// 			Version:   req.Version,
-// 			Name:      &topic,
-// 			ErrorCode: int16(err),
-// 		})
-// 	}
+	resp, err := protocol.Encode(&response)
 
-// 	return &response
-// }
+	return resp, response.GetHeaderVersion(), err
+}

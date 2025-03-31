@@ -37,7 +37,6 @@ func HandleMetadataRequest(req config.Request, apiVersion int16, opts ...any) ([
 	response.ClusterAuthorizedOperations = 0
 
 	resp, err := protocol.Encode(&response)
-	respHeaderVersion := (&protocol.MetadataResponse{Version: req.Header.RequestApiVersion}).GetHeaderVersion()
 
-	return resp, respHeaderVersion, err
+	return resp, response.GetHeaderVersion(), err
 }

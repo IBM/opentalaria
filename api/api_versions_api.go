@@ -34,7 +34,6 @@ func HandleAPIVersionsRequest(req config.Request, apiVersion int16, opts ...any)
 	}
 
 	message, err := protocol.Encode(&response)
-	responseHeaderVersion := (&protocol.ApiVersionsResponse{Version: req.Header.RequestApiVersion}).GetHeaderVersion()
 
-	return message, responseHeaderVersion, err
+	return message, response.GetHeaderVersion(), err
 }
