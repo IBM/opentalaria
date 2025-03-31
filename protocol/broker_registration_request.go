@@ -261,6 +261,10 @@ func (r *BrokerRegistrationRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *BrokerRegistrationRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *BrokerRegistrationRequest) GetHeaderVersion() int16 {
 	return 2
 }

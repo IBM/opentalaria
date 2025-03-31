@@ -59,6 +59,10 @@ func (r *DescribeGroupsRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *DescribeGroupsRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *DescribeGroupsRequest) GetHeaderVersion() int16 {
 	if r.Version >= 5 {
 		return 2

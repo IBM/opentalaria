@@ -271,6 +271,10 @@ func (r *CreateTopicsRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *CreateTopicsRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *CreateTopicsRequest) GetHeaderVersion() int16 {
 	if r.Version >= 5 {
 		return 2

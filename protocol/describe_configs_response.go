@@ -351,6 +351,10 @@ func (r *DescribeConfigsResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *DescribeConfigsResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *DescribeConfigsResponse) GetHeaderVersion() int16 {
 	if r.Version >= 4 {
 		return 1

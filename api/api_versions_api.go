@@ -5,63 +5,35 @@ import (
 	"github.com/ibm/opentalaria/protocol"
 )
 
-type APIVersionsAPI struct {
-	Request Request
-	Config  *config.Config
-}
-
-func (a APIVersionsAPI) Name() string {
-	return "API Versions"
-}
-
-func (a APIVersionsAPI) GetRequest() Request {
-	return a.Request
-}
-
-func (a APIVersionsAPI) GeneratePayload() ([]byte, error) {
+func HandleAPIVersionsRequest(req config.Request, apiVersion int16, opts ...any) ([]byte, int16, error) {
 	// handle response
 	apiVersionRequest := protocol.ApiVersionsRequest{}
-	_, err := protocol.VersionedDecode(a.Request.Message, &apiVersionRequest, a.Request.Header.RequestApiVersion)
+	_, err := protocol.VersionedDecode(req.Message, &apiVersionRequest, apiVersion)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	response := NewAPIVersionsResponse(a.GetRequest().Header.RequestApiVersion)
-	return protocol.Encode(response)
-}
+	registeredAPIs := make([]protocol.ApiVersion, 0)
 
-func (a APIVersionsAPI) GetHeaderVersion(requestVersion int16) int16 {
-	return (&protocol.ApiVersionsResponse{Version: requestVersion}).GetHeaderVersion()
-}
-
-func getAPIVersions() []protocol.ApiVersion {
-	return []protocol.ApiVersion{
-		{ApiKey: (&protocol.ApiVersionsRequest{}).GetKey(), MinVersion: 0, MaxVersion: 3},
-		{ApiKey: (&protocol.MetadataRequest{}).GetKey(), MinVersion: 0, MaxVersion: 8},
-		{ApiKey: (&protocol.ProduceRequest{}).GetKey(), MinVersion: 0, MaxVersion: 8},
-		{ApiKey: (&protocol.CreateTopicsRequest{}).GetKey(), MinVersion: 0, MaxVersion: 4},
-		{ApiKey: (&protocol.DeleteTopicsRequest{}).GetKey(), MinVersion: 0, MaxVersion: 4},
-		// {APIKey: FetchKey, MinVersion: 0, MaxVersion: 3},
-		// {APIKey: OffsetsKey, MinVersion: 0, MaxVersion: 2},
-		// {APIKey: LeaderAndISRKey, MinVersion: 0, MaxVersion: 1},
-		// {APIKey: StopReplicaKey, MinVersion: 0, MaxVersion: 0},
-		// {APIKey: FindCoordinatorKey, MinVersion: 0, MaxVersion: 1},
-		// {APIKey: JoinGroupKey, MinVersion: 0, MaxVersion: 1},
-		// {APIKey: HeartbeatKey, MinVersion: 0, MaxVersion: 1},
-		// {APIKey: LeaveGroupKey, MinVersion: 0, MaxVersion: 1},
-		// {APIKey: SyncGroupKey, MinVersion: 0, MaxVersion: 1},
-		// {APIKey: DescribeGroupsKey, MinVersion: 0, MaxVersion: 1},
-		// {APIKey: ListGroupsKey, MinVersion: 0, MaxVersion: 1},
-		// {APIKey: CreateTopicsKey, MinVersion: 0, MaxVersion: 1},
-		// {APIKey: DeleteTopicsKey, MinVersion: 0, MaxVersion: 1},
+	if len(opts) > 0 {
+		apis := opts[0].([]config.RegisteredAPI)
+		for _, api := range apis {
+			registeredAPIs = append(registeredAPIs, protocol.ApiVersion{
+				ApiKey:     api.ApiKey,
+				MinVersion: api.MinVersion,
+				MaxVersion: api.MaxVersion,
+			})
+		}
 	}
-}
 
-func NewAPIVersionsResponse(version int16) *protocol.ApiVersionsResponse {
-	return &protocol.ApiVersionsResponse{
-		Version:        version,
+	response := protocol.ApiVersionsResponse{
+		Version:        req.Header.RequestApiVersion,
 		ErrorCode:      0,
-		ApiKeys:        getAPIVersions(),
+		ApiKeys:        registeredAPIs,
 		ThrottleTimeMs: 0,
 	}
+
+	message, err := protocol.Encode(&response)
+
+	return message, response.GetHeaderVersion(), err
 }

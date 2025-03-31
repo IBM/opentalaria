@@ -241,6 +241,10 @@ func (r *ShareAcknowledgeRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *ShareAcknowledgeRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *ShareAcknowledgeRequest) GetHeaderVersion() int16 {
 	return 2
 }

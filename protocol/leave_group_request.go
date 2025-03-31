@@ -157,6 +157,10 @@ func (r *LeaveGroupRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *LeaveGroupRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *LeaveGroupRequest) GetHeaderVersion() int16 {
 	if r.Version >= 4 {
 		return 2

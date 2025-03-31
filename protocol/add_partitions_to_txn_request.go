@@ -283,6 +283,10 @@ func (r *AddPartitionsToTxnRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *AddPartitionsToTxnRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *AddPartitionsToTxnRequest) GetHeaderVersion() int16 {
 	if r.Version >= 3 {
 		return 2

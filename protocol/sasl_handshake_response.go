@@ -41,6 +41,10 @@ func (r *SaslHandshakeResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *SaslHandshakeResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *SaslHandshakeResponse) GetHeaderVersion() int16 {
 	return 0
 }

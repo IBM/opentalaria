@@ -294,6 +294,10 @@ func (r *CreateTopicsResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *CreateTopicsResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *CreateTopicsResponse) GetHeaderVersion() int16 {
 	if r.Version >= 5 {
 		return 1

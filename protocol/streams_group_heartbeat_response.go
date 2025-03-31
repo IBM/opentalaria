@@ -443,6 +443,10 @@ func (r *StreamsGroupHeartbeatResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *StreamsGroupHeartbeatResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *StreamsGroupHeartbeatResponse) GetHeaderVersion() int16 {
 	return 1
 }

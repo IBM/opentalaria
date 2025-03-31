@@ -55,6 +55,10 @@ func (r *BrokerRegistrationResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *BrokerRegistrationResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *BrokerRegistrationResponse) GetHeaderVersion() int16 {
 	return 1
 }

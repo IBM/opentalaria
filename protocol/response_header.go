@@ -45,6 +45,10 @@ func (r *ResponseHeader) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *ResponseHeader) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *ResponseHeader) GetHeaderVersion() int16 {
 	if r.Version >= 1 {
 		return 1

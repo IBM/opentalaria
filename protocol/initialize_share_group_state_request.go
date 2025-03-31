@@ -167,6 +167,10 @@ func (r *InitializeShareGroupStateRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *InitializeShareGroupStateRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *InitializeShareGroupStateRequest) GetHeaderVersion() int16 {
 	return 2
 }

@@ -213,6 +213,10 @@ func (r *AssignReplicasToDirsRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *AssignReplicasToDirsRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *AssignReplicasToDirsRequest) GetHeaderVersion() int16 {
 	return 2
 }

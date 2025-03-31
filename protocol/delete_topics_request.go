@@ -143,6 +143,10 @@ func (r *DeleteTopicsRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *DeleteTopicsRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *DeleteTopicsRequest) GetHeaderVersion() int16 {
 	if r.Version >= 4 {
 		return 2

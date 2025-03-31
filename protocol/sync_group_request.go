@@ -177,6 +177,10 @@ func (r *SyncGroupRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *SyncGroupRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *SyncGroupRequest) GetHeaderVersion() int16 {
 	if r.Version >= 4 {
 		return 2

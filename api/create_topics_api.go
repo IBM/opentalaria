@@ -2,52 +2,34 @@ package api
 
 import (
 	"github.com/ibm/opentalaria/config"
-
 	"github.com/ibm/opentalaria/protocol"
 )
 
-type CreateTopicsAPI struct {
-	Request Request
-	Config  *config.Config
-}
+func HandleCreateTopics(req config.Request, apiVersion int16, opts ...any) ([]byte, int16, error) {
+	createTopicsRequest := protocol.CreateTopicsRequest{}
+	_, err := protocol.VersionedDecode(req.Message, &createTopicsRequest, req.Header.RequestApiVersion)
+	if err != nil {
+		return nil, 0, err
+	}
 
-func (m CreateTopicsAPI) Name() string {
-	return "CreateTopics"
-}
+	response := protocol.CreateTopicsResponse{
+		Version: req.Header.RequestApiVersion,
+	}
 
-func (m CreateTopicsAPI) GetRequest() Request {
-	return m.Request
-}
-
-func (m CreateTopicsAPI) GetHeaderVersion(requestVersion int16) int16 {
-	return (&protocol.CreateTopicsResponse{Version: requestVersion}).GetHeaderVersion()
-}
-
-func (m CreateTopicsAPI) GeneratePayload() ([]byte, error) {
-	req := protocol.CreateTopicsRequest{}
-	_, err := protocol.VersionedDecode(m.GetRequest().Message, &req, m.GetRequest().Header.RequestApiVersion)
-
-	resp := m.GenerateCreateTopicsResponse(m.GetRequest().Header.RequestApiVersion, req, err)
-
-	return protocol.Encode(resp)
-}
-
-func (m CreateTopicsAPI) GenerateCreateTopicsResponse(version int16, req protocol.CreateTopicsRequest, err error) *protocol.CreateTopicsResponse {
-	response := protocol.CreateTopicsResponse{}
-
-	response.Version = version
 	// TODO: handle throttle time
 	response.ThrottleTimeMs = 0
 
-	for _, topic := range req.Topics {
-		err := m.Config.Plugin.AddTopic(topic)
+	for _, topic := range createTopicsRequest.Topics {
+		err := req.Config.Plugin.AddTopic(topic)
 
 		response.Topics = append(response.Topics, protocol.CreatableTopicResult{
-			Version:   req.Version,
+			Version:   createTopicsRequest.Version,
 			Name:      topic.Name,
 			ErrorCode: int16(err),
 		})
 	}
 
-	return &response
+	resp, err := protocol.Encode(&response)
+
+	return resp, response.GetHeaderVersion(), err
 }

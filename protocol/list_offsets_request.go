@@ -207,6 +207,10 @@ func (r *ListOffsetsRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *ListOffsetsRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *ListOffsetsRequest) GetHeaderVersion() int16 {
 	if r.Version >= 6 {
 		return 2

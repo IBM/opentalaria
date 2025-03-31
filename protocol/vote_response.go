@@ -235,6 +235,10 @@ func (r *VoteResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *VoteResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *VoteResponse) GetHeaderVersion() int16 {
 	return 1
 }

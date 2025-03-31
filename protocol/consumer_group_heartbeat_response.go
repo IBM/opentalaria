@@ -184,6 +184,10 @@ func (r *ConsumerGroupHeartbeatResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *ConsumerGroupHeartbeatResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *ConsumerGroupHeartbeatResponse) GetHeaderVersion() int16 {
 	return 1
 }

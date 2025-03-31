@@ -135,6 +135,10 @@ func (r *OffsetDeleteRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *OffsetDeleteRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *OffsetDeleteRequest) GetHeaderVersion() int16 {
 	return 1
 }

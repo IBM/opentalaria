@@ -187,6 +187,10 @@ func (r *OffsetForLeaderEpochRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *OffsetForLeaderEpochRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *OffsetForLeaderEpochRequest) GetHeaderVersion() int16 {
 	if r.Version >= 4 {
 		return 2

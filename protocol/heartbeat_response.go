@@ -59,6 +59,10 @@ func (r *HeartbeatResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *HeartbeatResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *HeartbeatResponse) GetHeaderVersion() int16 {
 	if r.Version >= 4 {
 		return 1

@@ -221,6 +221,10 @@ func (r *WriteTxnMarkersResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *WriteTxnMarkersResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *WriteTxnMarkersResponse) GetHeaderVersion() int16 {
 	if r.Version >= 1 {
 		return 1

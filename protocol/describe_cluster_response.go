@@ -189,6 +189,10 @@ func (r *DescribeClusterResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *DescribeClusterResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *DescribeClusterResponse) GetHeaderVersion() int16 {
 	return 1
 }

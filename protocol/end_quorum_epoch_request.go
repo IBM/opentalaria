@@ -371,6 +371,10 @@ func (r *EndQuorumEpochRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *EndQuorumEpochRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *EndQuorumEpochRequest) GetHeaderVersion() int16 {
 	if r.Version >= 1 {
 		return 2

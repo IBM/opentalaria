@@ -125,6 +125,10 @@ func (r *CreatePartitionsResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *CreatePartitionsResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *CreatePartitionsResponse) GetHeaderVersion() int16 {
 	if r.Version >= 2 {
 		return 1

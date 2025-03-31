@@ -169,6 +169,10 @@ func (r *DeleteTopicsResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *DeleteTopicsResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *DeleteTopicsResponse) GetHeaderVersion() int16 {
 	if r.Version >= 4 {
 		return 1

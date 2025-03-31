@@ -71,6 +71,10 @@ func (r *EndTxnRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *EndTxnRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *EndTxnRequest) GetHeaderVersion() int16 {
 	if r.Version >= 3 {
 		return 2

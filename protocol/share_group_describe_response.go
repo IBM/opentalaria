@@ -372,6 +372,10 @@ func (r *ShareGroupDescribeResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *ShareGroupDescribeResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *ShareGroupDescribeResponse) GetHeaderVersion() int16 {
 	return 1
 }

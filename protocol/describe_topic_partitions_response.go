@@ -310,6 +310,10 @@ func (r *DescribeTopicPartitionsResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *DescribeTopicPartitionsResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *DescribeTopicPartitionsResponse) GetHeaderVersion() int16 {
 	return 1
 }

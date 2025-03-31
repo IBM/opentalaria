@@ -439,6 +439,10 @@ func (r *MetadataResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *MetadataResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *MetadataResponse) GetHeaderVersion() int16 {
 	if r.Version >= 9 {
 		return 1

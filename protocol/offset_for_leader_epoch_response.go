@@ -197,6 +197,10 @@ func (r *OffsetForLeaderEpochResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *OffsetForLeaderEpochResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *OffsetForLeaderEpochResponse) GetHeaderVersion() int16 {
 	if r.Version >= 4 {
 		return 1

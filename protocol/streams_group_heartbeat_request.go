@@ -761,6 +761,10 @@ func (r *StreamsGroupHeartbeatRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *StreamsGroupHeartbeatRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *StreamsGroupHeartbeatRequest) GetHeaderVersion() int16 {
 	return 2
 }

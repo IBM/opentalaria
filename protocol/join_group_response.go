@@ -228,6 +228,10 @@ func (r *JoinGroupResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *JoinGroupResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *JoinGroupResponse) GetHeaderVersion() int16 {
 	if r.Version >= 6 {
 		return 1

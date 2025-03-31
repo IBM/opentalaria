@@ -113,6 +113,10 @@ func (r *AlterUserScramCredentialsResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *AlterUserScramCredentialsResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *AlterUserScramCredentialsResponse) GetHeaderVersion() int16 {
 	return 1
 }

@@ -416,6 +416,10 @@ func (r *ConsumerGroupDescribeResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *ConsumerGroupDescribeResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *ConsumerGroupDescribeResponse) GetHeaderVersion() int16 {
 	return 1
 }

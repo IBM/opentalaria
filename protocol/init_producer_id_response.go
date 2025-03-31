@@ -95,6 +95,10 @@ func (r *InitProducerIdResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *InitProducerIdResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *InitProducerIdResponse) GetHeaderVersion() int16 {
 	if r.Version >= 2 {
 		return 1

@@ -147,6 +147,10 @@ func (r *CreateDelegationTokenResponse) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *CreateDelegationTokenResponse) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *CreateDelegationTokenResponse) GetHeaderVersion() int16 {
 	if r.Version >= 2 {
 		return 1

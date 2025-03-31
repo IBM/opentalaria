@@ -47,6 +47,10 @@ func (r *DeleteGroupsRequest) GetVersion() int16 {
 	return r.Version
 }
 
+func (r *DeleteGroupsRequest) SetVersion(version int16) {
+	r.Version = version
+}
+
 func (r *DeleteGroupsRequest) GetHeaderVersion() int16 {
 	if r.Version >= 2 {
 		return 2
