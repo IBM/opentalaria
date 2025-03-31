@@ -168,7 +168,7 @@ Exit:
 
 		if definition, ok := client.apis[header.RequestApiKey]; ok {
 			definition.ApiRequest.SetVersion(header.RequestApiVersion)
-			req, err := makeRequest(messageBytes, client.conn, definition.ApiRequest.GetHeaderVersion())
+			req, err := makeRequest(messageBytes, client.config, client.conn, definition.ApiRequest.GetHeaderVersion())
 			if err != nil {
 				slog.Error("error creating request", "err", err)
 				// This break exits the outer for loop and closes the socket connection.
@@ -245,7 +245,7 @@ func (s *Server) RegisterAPI(api protocol.API, minVersion, maxVersion int16, han
 	}
 }
 
-func makeRequest(msg []byte, conn net.Conn, headerVersion int16) (config.Request, error) {
+func makeRequest(msg []byte, conf *config.Config, conn net.Conn, headerVersion int16) (config.Request, error) {
 	// parse the full header, based on API key and version
 	header := &protocol.RequestHeader{}
 	headerSize, err := protocol.VersionedDecode(msg, header, headerVersion)
@@ -255,6 +255,7 @@ func makeRequest(msg []byte, conn net.Conn, headerVersion int16) (config.Request
 
 	return config.Request{
 		Header:  *header,
+		Config:  conf,
 		Message: msg[headerSize:],
 		Conn:    conn,
 	}, nil

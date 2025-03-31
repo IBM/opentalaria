@@ -37,7 +37,7 @@ func main() {
 	server := kafka.NewServer(conf)
 
 	server.RegisterAPI(&protocol.ApiVersionsRequest{}, 0, 3, api.HandleAPIVersionsRequest)
-	// server.RegisterAPI(&protocol.MetadataRequest{}, 0, 8)
+	server.RegisterAPI(&protocol.MetadataRequest{}, 0, 8, api.HandleMetadataRequest)
 
 	server.Run()
 }
