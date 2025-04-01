@@ -34,7 +34,7 @@ This list will be updated as new APIs get implemented. For implementation detail
 - [ ] DescribeAcls (29)
 - [ ] CreateAcls (30)
 - [ ] DeleteAcls (31)
-- [ ] DescribeConfigs (32)
+- [x] DescribeConfigs (32)
 - [ ] AlterConfigs (33)
 - [ ] AlterReplicaLogDirs (34)
 - [ ] DescribeLogDirs (35)
