@@ -36,10 +36,10 @@ func main() {
 
 	server := kafka.NewServer(conf)
 
-	server.RegisterAPI(&protocol.ApiVersionsRequest{}, 0, 3, api.HandleAPIVersionsRequest)
+	server.RegisterAPI(&protocol.ApiVersionsRequest{}, 0, 2, api.HandleAPIVersionsRequest)
 	server.RegisterAPI(&protocol.MetadataRequest{}, 0, 8, api.HandleMetadataRequest)
-	server.RegisterAPI(&protocol.CreateTopicsRequest{}, 0, 4, api.HandleCreateTopics)
-	server.RegisterAPI(&protocol.DeleteTopicsRequest{}, 0, 4, api.HandleDeleteTopics)
+	server.RegisterAPI(&protocol.CreateTopicsRequest{}, 0, 3, api.HandleCreateTopics)
+	server.RegisterAPI(&protocol.DeleteTopicsRequest{}, 0, 3, api.HandleDeleteTopics)
 
 	server.Run()
 }
