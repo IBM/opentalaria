@@ -4,7 +4,7 @@
 OpenTalaria is a lightweight message broker that implements the Kafka protocol and persists messages in different storage systems like PostgreSQL, SQLite and more.
 
 ## Supported APIs
-The project is still a work in progress, please see the [list](docs/apis.md) of currently supported APIs which is updated when new APIs are implemented.
+The project is still a work in progress, please see the [list](docs/apis.md) of currently supported APIs which is updated when new APIs are implemented. Currently the OpenTalaria broker supports Apache Kafka [APIs](https://cwiki.apache.org/confluence/display/KAFKA/Kafka+APIs) for **v2.3** broker version of the Apache Kafka project.
 
 ## Running the project
 The project is still in early stages of development, so there are no scheduled releases. To build from source you will need the Go compiler v1.21 or later and Make. To build run the following command `make build`. This will generate the binary `bin/opentalaria`. Note that debug information is stripped from the resulting binary. If you wish to debug the project, you can run it with `make run`. 
