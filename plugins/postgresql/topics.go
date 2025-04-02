@@ -1,6 +1,7 @@
 package postgresql
 
 import (
+	"database/sql"
 	"log/slog"
 	"time"
 
@@ -53,10 +54,25 @@ func (p *Plugin) DeleteTopic(topic string) utils.KError {
 	return returnErr
 }
 
-func (p *Plugin) ListTopics() ([]protocol.MetadataResponseTopic, error) {
-	statement := "SELECT * from topics"
+func (p *Plugin) ListTopics(topicName []string) ([]protocol.MetadataResponseTopic, error) {
 
-	rows, err := p.db.Query(statement)
+	var rows *sql.Rows
+	var err error
+
+	query := "SELECT * from topics"
+
+	if topicName != nil {
+		query += " WHERE topic_name = ANY($1)"
+
+		stmt, err := p.db.Prepare(query)
+		if err != nil {
+			return nil, err
+		}
+
+		rows, err = stmt.Query(pq.Array(topicName))
+	} else {
+		rows, err = p.db.Query(query)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -89,8 +105,9 @@ func (p *Plugin) ListTopics() ([]protocol.MetadataResponseTopic, error) {
 			partitions[i].PartitionIndex = int32(i)
 			partitions[i].LeaderID = 1
 			partitions[i].LeaderEpoch = int32(time.Now().Unix())
-			partitions[i].ReplicaNodes = []int32{0}
-			partitions[i].IsrNodes = []int32{0}
+			// Replicas and isr are currently mocked. We just return whatever value was set when creating the topic.
+			partitions[i].ReplicaNodes = []int32{int32(replication_factor)}
+			partitions[i].IsrNodes = []int32{int32(replication_factor)}
 			partitions[i].OfflineReplicas = []int32{0}
 		}
 

@@ -8,6 +8,12 @@ import (
 )
 
 func HandleMetadataRequest(req config.Request, apiVersion int16, opts ...any) ([]byte, int16, error) {
+	metadataRequest := protocol.MetadataRequest{}
+	_, err := protocol.VersionedDecode(req.Message, &metadataRequest, req.Header.RequestApiVersion)
+	if err != nil {
+		return nil, 0, err
+	}
+
 	response := protocol.MetadataResponse{}
 
 	response.Version = req.Header.RequestApiVersion
@@ -28,7 +34,17 @@ func HandleMetadataRequest(req config.Request, apiVersion int16, opts ...any) ([
 	response.ClusterID = &req.Config.Cluster.ClusterID
 	response.ControllerID = req.Config.Broker.BrokerID
 
-	topics, err := req.Config.Plugin.ListTopics()
+	var topicNames []string
+
+	for i, topic := range metadataRequest.Topics {
+		if topicNames == nil {
+			topicNames = make([]string, len(metadataRequest.Topics))
+		}
+
+		topicNames[i] = *topic.Name
+	}
+
+	topics, err := req.Config.Plugin.ListTopics(topicNames)
 	if err != nil {
 		slog.Error("error listing topics", "err", err)
 	}

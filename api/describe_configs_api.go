@@ -7,6 +7,12 @@ import (
 )
 
 func HandleDescribeConfigsRequest(req config.Request, apiVersion int16, opts ...any) ([]byte, int16, error) {
+	describeConfigsRequest := protocol.DescribeConfigsRequest{}
+	_, err := protocol.VersionedDecode(req.Message, &describeConfigsRequest, req.Header.RequestApiVersion)
+	if err != nil {
+		return nil, 0, err
+	}
+
 	response := protocol.DescribeConfigsResponse{}
 
 	response.Version = req.Header.RequestApiVersion
@@ -15,7 +21,15 @@ func HandleDescribeConfigsRequest(req config.Request, apiVersion int16, opts ...
 	response.ThrottleTimeMs = 0
 
 	// Add the topics to the config response
-	topics, err := req.Config.Plugin.ListTopics()
+	var topicNames []string
+
+	for _, resource := range describeConfigsRequest.Resources {
+		if resource.ResourceType == int8(utils.TOPIC_CONFIG_TYPE) {
+			topicNames = append(topicNames, resource.ResourceName)
+		}
+	}
+
+	topics, err := req.Config.Plugin.ListTopics(topicNames)
 	if err != nil {
 		return nil, 0, err
 	}

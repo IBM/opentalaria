@@ -481,7 +481,9 @@ func (rd *realDecoder) getStringArray() ([]string, error) {
 	n := int(binary.BigEndian.Uint32(rd.raw[rd.off:]))
 	rd.off += 4
 
-	if n == 0 {
+	// some API requests send array length as MaxUint32 even though the array is empty.
+	// This workaround should not be permanent. https://github.com/IBM/opentalaria/issues/52
+	if n == 0 || n == math.MaxUint32 {
 		return nil, nil
 	}
 
