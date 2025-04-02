@@ -17,4 +17,7 @@ type PluginInterface interface {
 	ListTopics(topicName []string) ([]protocol.MetadataResponseTopic, error)
 	AddTopic(topic protocol.CreatableTopic) utils.KError
 	DeleteTopic(topic string) utils.KError
+
+	// partitions
+	CreatePartitions(topicName string, partitionCount int) error
 }

@@ -39,7 +39,7 @@ This list will be updated as new APIs get implemented. For implementation detail
 - [ ] AlterReplicaLogDirs (34)
 - [ ] DescribeLogDirs (35)
 - [ ] SaslAuthenticate (36)
-- [ ] CreatePartitions (37)
+- [x] CreatePartitions (37)
 - [ ] CreateDelegationToken (38)
 - [ ] RenewDelegationToken (39)
 - [ ] ExpireDelegationToken (40)

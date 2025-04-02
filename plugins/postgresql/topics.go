@@ -55,7 +55,6 @@ func (p *Plugin) DeleteTopic(topic string) utils.KError {
 }
 
 func (p *Plugin) ListTopics(topicName []string) ([]protocol.MetadataResponseTopic, error) {
-
 	var rows *sql.Rows
 	var err error
 
