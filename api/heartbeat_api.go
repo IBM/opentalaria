@@ -1,9 +1,13 @@
 package api
 
-import "opentalaria/protocol"
+import (
+	"github.com/ibm/opentalaria/config"
+	"github.com/ibm/opentalaria/protocol"
+)
 
 type HeartbeatAPI struct {
 	Request Request
+	Config  *config.Config
 }
 
 func (h HeartbeatAPI) Name() string {
