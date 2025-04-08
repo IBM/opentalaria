@@ -14,6 +14,40 @@ const (
 	CompressionZstd
 )
 
+func (c CompressionType) String() string {
+	switch c {
+	case CompressionNone:
+		return "na"
+	case CompressionGzip:
+		return "gzip"
+	case CompressionSnappy:
+		return "snappy"
+	case CompressionLz4:
+		return "lz4"
+	case CompressionZstd:
+		return "zstd"
+	default:
+		return "unknown"
+	}
+}
+
+func ParseCompressionType(t string) CompressionType {
+	switch t {
+	case "na":
+		return CompressionNone
+	case "gzip":
+		return CompressionGzip
+	case "snappy":
+		return CompressionSnappy
+	case "lz4":
+		return CompressionLz4
+	case "zstd":
+		return CompressionZstd
+	default:
+		return CompressionNone
+	}
+}
+
 type TimestampType int8
 
 const (
