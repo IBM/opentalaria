@@ -1,39 +1,51 @@
 package api
 
-// // TODO: this is a placeholder function for now. We need to implement a backend that handles cluster topology in order to implement the API correctly and consume the messages.
-// func (p ProduceAPI) GeneratePayload() ([]byte, error) {
-// 	req := protocol.ProduceRequest{}
-// 	_, err := protocol.VersionedDecode(p.GetRequest().Message, &req, p.GetRequest().Header.RequestApiVersion)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+import (
+	"fmt"
+	"log/slog"
 
-// 	resp := protocol.ProduceResponse{
-// 		Version: p.GetRequest().Header.RequestApiVersion,
-// 	}
+	"github.com/ibm/opentalaria/config"
+	"github.com/ibm/opentalaria/protocol"
+	"github.com/ibm/opentalaria/utils"
+)
 
-// 	for _, topic := range req.TopicData {
-// 		topicResponse := protocol.TopicProduceResponse{}
-// 		topicResponse.Version = resp.Version
-// 		topicResponse.Name = topic.Name
+func HandleProduceRequest(req config.Request, apiVersion int16, opts ...any) ([]byte, int16, error) {
+	produceRequest := protocol.ProduceRequest{}
+	_, err := protocol.VersionedDecode(req.Message, &produceRequest, req.Header.RequestApiVersion)
+	if err != nil {
+		return nil, 0, err
+	}
 
-// 		for _, partition := range topic.PartitionData {
-// 			slog.Debug("Received records", "records", partition.Records)
+	response := protocol.ProduceResponse{}
 
-// 			topicResponse.PartitionResponses = append(topicResponse.PartitionResponses, protocol.PartitionProduceResponse{
-// 				Version:    resp.Version,
-// 				Index:      partition.Index,
-// 				ErrorCode:  int16(utils.ErrNoError),
-// 				BaseOffset: partition.Records.BaseOffset,
-// 				// TODO: this needs to be implemented, see documentation for details
-// 				LogAppendTimeMs: -1,
-// 				LogStartOffset:  0,
-// 				// TODO: Don't forget to handle errors when the protocol is fully implemented
-// 			})
-// 		}
+	response.Version = req.Header.RequestApiVersion
 
-// 		resp.Responses = append(resp.Responses, topicResponse)
-// 	}
+	// TODO: handle throttle time
+	response.ThrottleTimeMs = 0
 
-// 	return protocol.Encode(&resp)
-// }
+	for _, topic := range produceRequest.TopicData {
+		topicResponse := protocol.TopicProduceResponse{}
+		topicResponse.Version = response.Version
+		topicResponse.Name = topic.Name
+
+		for _, partition := range topic.PartitionData {
+			slog.Debug("Received records", "records", fmt.Sprintf("%+v", partition.Records))
+
+			topicResponse.PartitionResponses = append(topicResponse.PartitionResponses, protocol.PartitionProduceResponse{
+				Version:    response.Version,
+				Index:      partition.Index,
+				ErrorCode:  int16(utils.ErrNoError),
+				BaseOffset: partition.Records.BaseOffset,
+				// TODO: this needs to be implemented, see documentation for details
+				LogAppendTimeMs: -1,
+				LogStartOffset:  0,
+				// TODO: Don't forget to handle errors when the protocol is fully implemented
+			})
+		}
+
+		response.Responses = append(response.Responses, topicResponse)
+	}
+
+	resp, err := protocol.Encode(&response)
+	return resp, response.GetHeaderVersion(), err
+}
