@@ -5,7 +5,7 @@
 -- Dumped from database version 17.2 (Debian 17.2-1.pgdg120+1)
 -- Dumped by pg_dump version 17.0
 
--- Started on 2025-02-14 17:36:17 GMT
+-- Started on 2025-04-09 14:16:03 IST
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -18,6 +18,25 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
+
+--
+-- TOC entry 4 (class 2615 OID 2200)
+-- Name: public; Type: SCHEMA; Schema: -; Owner: pg_database_owner
+--
+
+CREATE SCHEMA public;
+
+
+ALTER SCHEMA public OWNER TO pg_database_owner;
+
+--
+-- TOC entry 3388 (class 0 OID 0)
+-- Dependencies: 4
+-- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: pg_database_owner
+--
+
+COMMENT ON SCHEMA public IS 'standard public schema';
+
 
 SET default_tablespace = '';
 
@@ -34,6 +53,21 @@ CREATE TABLE public.migrations (
 
 
 ALTER TABLE public.migrations OWNER TO postgres;
+
+--
+-- TOC entry 221 (class 1259 OID 16493)
+-- Name: partitions; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.partitions (
+    partition_id uuid NOT NULL,
+    topic_id uuid,
+    current_offset bigint,
+    partition_ix bigint
+);
+
+
+ALTER TABLE public.partitions OWNER TO postgres;
 
 --
 -- TOC entry 217 (class 1259 OID 16456)
@@ -70,16 +104,25 @@ ALTER TABLE public.topic_settings OWNER TO postgres;
 CREATE TABLE public.topics (
     topic_id uuid NOT NULL,
     topic_name character varying(255),
-    num_partitions integer,
+    num_partitions integer DEFAULT 0,
     replication_factor integer,
-    is_internal boolean NOT NULL DEFAULT false
+    is_internal boolean DEFAULT false NOT NULL
 );
 
 
 ALTER TABLE public.topics OWNER TO postgres;
 
 --
--- TOC entry 3218 (class 2606 OID 16470)
+-- TOC entry 3234 (class 2606 OID 16497)
+-- Name: partitions partitions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.partitions
+    ADD CONSTRAINT partitions_pkey PRIMARY KEY (partition_id);
+
+
+--
+-- TOC entry 3228 (class 2606 OID 16470)
 -- Name: settings settings_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -88,7 +131,7 @@ ALTER TABLE ONLY public.settings
 
 
 --
--- TOC entry 3220 (class 2606 OID 16472)
+-- TOC entry 3230 (class 2606 OID 16472)
 -- Name: topics topics_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -97,7 +140,7 @@ ALTER TABLE ONLY public.topics
 
 
 --
--- TOC entry 3222 (class 2606 OID 16489)
+-- TOC entry 3232 (class 2606 OID 16489)
 -- Name: topics uc_topic_name; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -106,7 +149,7 @@ ALTER TABLE ONLY public.topics
 
 
 --
--- TOC entry 3223 (class 2606 OID 16473)
+-- TOC entry 3235 (class 2606 OID 16473)
 -- Name: topic_settings fk_settings_key; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -115,7 +158,7 @@ ALTER TABLE ONLY public.topic_settings
 
 
 --
--- TOC entry 3224 (class 2606 OID 16478)
+-- TOC entry 3236 (class 2606 OID 16478)
 -- Name: topic_settings fk_topic_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -123,7 +166,16 @@ ALTER TABLE ONLY public.topic_settings
     ADD CONSTRAINT fk_topic_id FOREIGN KEY (topic_id) REFERENCES public.topics(topic_id) NOT VALID;
 
 
--- Completed on 2025-02-14 17:36:17 GMT
+--
+-- TOC entry 3237 (class 2606 OID 16498)
+-- Name: partitions topics_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.partitions
+    ADD CONSTRAINT topics_fk FOREIGN KEY (topic_id) REFERENCES public.topics(topic_id) NOT VALID;
+
+
+-- Completed on 2025-04-09 14:16:03 IST
 
 --
 -- PostgreSQL database dump complete
