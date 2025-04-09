@@ -5,19 +5,20 @@ import (
 	"github.com/ibm/opentalaria/protocol"
 )
 
-type HeartbeatAPI struct {
-	Request Request
-	Config  *config.Config
-}
+func HandleHeartbeatRequest(req config.Request, apiVersion int16, opts ...any) ([]byte, int16, error) {
+	apiVer := req.Header.RequestApiKey
+	heartbeatRequest := protocol.MetadataRequest{}
+	_, err := protocol.VersionedDecode(req.Message, &heartbeatRequest, apiVer)
+	if err != nil {
+		return nil, 0, err
+	}
 
-func (h HeartbeatAPI) Name() string {
-	return "Heartbeat"
-}
+	response := protocol.MetadataResponse{}
+	response.Version = apiVer
 
-func (h HeartbeatAPI) GetRequest() Request {
-	return h.Request
-}
+	// TODO: handle throttle time
+	response.ThrottleTimeMs = 0
 
-func (h HeartbeatAPI) GetHeaderVersion(requestVersion int16) int16 {
-	return (&protocol.MetadataResponse{Version: requestVersion}).GetHeaderVersion()
+	resp, err := protocol.Encode(&response)
+	return resp, response.GetHeaderVersion(), err
 }
