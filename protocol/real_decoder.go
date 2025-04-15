@@ -420,7 +420,7 @@ func (rd *realDecoder) getInt32Array() ([]int32, error) {
 		rd.off = len(rd.raw)
 		return nil, ErrInsufficientData
 	}
-	n := int(binary.BigEndian.Uint32(rd.raw[rd.off:]))
+	n := int(int32(binary.BigEndian.Uint32(rd.raw[rd.off:])))
 	rd.off += 4
 
 	if rd.remaining() < 4*n {
@@ -449,7 +449,7 @@ func (rd *realDecoder) getInt64Array() ([]int64, error) {
 		rd.off = len(rd.raw)
 		return nil, ErrInsufficientData
 	}
-	n := int(binary.BigEndian.Uint32(rd.raw[rd.off:]))
+	n := int(int32(binary.BigEndian.Uint32(rd.raw[rd.off:])))
 	rd.off += 4
 
 	if rd.remaining() < 8*n {
@@ -478,7 +478,7 @@ func (rd *realDecoder) getStringArray() ([]string, error) {
 		rd.off = len(rd.raw)
 		return nil, ErrInsufficientData
 	}
-	n := int32(binary.BigEndian.Uint32(rd.raw[rd.off:]))
+	n := int(int32(binary.BigEndian.Uint32(rd.raw[rd.off:])))
 	rd.off += 4
 
 	if n == 0 || n == -1 {
