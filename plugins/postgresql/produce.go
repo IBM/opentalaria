@@ -27,6 +27,7 @@ func (p *Plugin) Produce(req protocol.ProduceRequest) (protocol.ProduceResponse,
 
 			newOffset, err := p.writeRecords(partition.Records, topicObject, int(partition.Index))
 			if err != nil {
+				slog.Error("error producing message", "err", err)
 				errResponse = utils.ErrInvalidRequest
 			}
 
@@ -56,11 +57,11 @@ func (p *Plugin) writeRecords(recordBatch protocol.RecordBatch, topic protocol.M
 
 	startingOffset := partition.CurrentOffset
 
-	query := `INSERT INTO records (record_id, 
-	topic_id, 
-	offset, 
-	base_offset, 
-	batch_length, 
+	query := `INSERT INTO records (record_id,
+	topic_id,
+	current_offset,
+	base_offset,
+	batch_length,
 	partition_leader_epoch,
 	magic,
 	crc,
@@ -77,7 +78,7 @@ func (p *Plugin) writeRecords(recordBatch protocol.RecordBatch, topic protocol.M
 	base_sequence,
 	records_len,
 	records,
-	partition_id) 
+	partition_id)
 	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)`
 
 	_, err = p.db.Exec(query,

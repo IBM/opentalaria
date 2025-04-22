@@ -11,18 +11,22 @@ import (
 
 const DB_NAME = "opentalaria"
 
-func (p *Plugin) initConnection() error {
-	// TODO: using plaintext connection to postgres for now, this needs to be configurable
-	// connect to the real OpenTalaria database here
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=%s sslmode=disable",
+func (p *Plugin) getConnectionString(db string) string {
+	return fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable binary_parameters=yes",
 		p.config.Host,
 		p.config.Port,
 		p.config.Username,
 		p.config.Password,
-		DB_NAME)
+		db)
 
-	db, err := sql.Open("postgres", psqlInfo)
+}
+
+func (p *Plugin) initConnection() error {
+	// TODO: using plaintext connection to postgres for now, this needs to be configurable
+	// connect to the real OpenTalaria database here
+
+	db, err := sql.Open("postgres", p.getConnectionString(DB_NAME))
 	if err != nil {
 		return err
 	}
@@ -49,12 +53,7 @@ var f embed.FS
 func (p *Plugin) createDb() error {
 	// TODO: using plaintext connection to postgres for now, this needs to be configurable
 	// connect to the default postgres database first to check if we need to create the OpenTalaria database and tables
-	dbInit, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=postgres sslmode=disable",
-		p.config.Host,
-		p.config.Port,
-		p.config.Username,
-		p.config.Password))
+	dbInit, err := sql.Open("postgres", p.getConnectionString("postgres"))
 	if err != nil {
 		return err
 	}
@@ -72,13 +71,7 @@ func (p *Plugin) createDb() error {
 
 	// TODO: using plaintext connection to postgres for now, this needs to be configurable
 	// connect to the opentalaria postgres database and run the migration scripts
-	dbMigration, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		p.config.Host,
-		p.config.Port,
-		p.config.Username,
-		p.config.Password,
-		DB_NAME))
+	dbMigration, err := sql.Open("postgres", p.getConnectionString(DB_NAME))
 	if err != nil {
 		return err
 	}
