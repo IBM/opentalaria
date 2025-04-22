@@ -181,3 +181,34 @@ ALTER TABLE ONLY public.partitions
 -- PostgreSQL database dump complete
 --
 
+CREATE TABLE IF NOT EXISTS public.records
+(
+    record_id uuid NOT NULL,
+    topic_id uuid,
+    "offset" bigint,
+    base_offset bigint,
+    batch_length bigint,
+    partition_leader_epoch integer,
+    magic smallint,
+    crc integer,
+    compression_type smallint,
+    timestamp_type smallint,
+    is_transactional boolean,
+    is_control_batch boolean,
+    has_delete_horizon_ms boolean,
+    last_offset_delta integer,
+    base_timestamp timestamp without time zone,
+    max_timestamp timestamp without time zone,
+    producer_id bigint,
+    producer_epoch integer,
+    base_sequence integer,
+    records_len bigint,
+    records bytea[],
+    partition_id uuid,
+    CONSTRAINT records_pkey PRIMARY KEY (id),
+    CONSTRAINT topics_fk FOREIGN KEY (topic_id)
+        REFERENCES public.topics (topic_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+)

@@ -21,4 +21,7 @@ type PluginInterface interface {
 
 	// partitions
 	CreatePartitions(topicName string, partitionCount int) error
+
+	// Produce
+	Produce(req protocol.ProduceRequest) (protocol.ProduceResponse, error)
 }
