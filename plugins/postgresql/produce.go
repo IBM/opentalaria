@@ -105,8 +105,12 @@ func (p *Plugin) writeRecords(recordBatch protocol.RecordBatch, topic protocol.M
 		recordBatch.Records,
 		partition.PartitionId,
 	)
+	if err != nil {
+		return -1, err
+	}
 
 	// update the partition offset
+	err = p.updatePartitionOffset(partition.PartitionId)
 
 	return startingOffset, err
 }

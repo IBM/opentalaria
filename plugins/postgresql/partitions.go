@@ -73,3 +73,12 @@ WHERE t.topic_name = $1 AND p.partition_ix = $2`
 
 	return partition, nil
 }
+
+func (p *Plugin) updatePartitionOffset(partitionId uuid.UUID) error {
+	statement := `UPDATE partitions SET current_offset = current_offset + 1 
+				WHERE partition_id = $1`
+
+	_, err := p.db.Exec(statement, partitionId)
+
+	return err
+}
