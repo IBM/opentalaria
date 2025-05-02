@@ -5,24 +5,24 @@ import (
 	"log/slog"
 
 	"github.com/google/uuid"
+	"github.com/ibm/opentalaria/models"
 	"github.com/ibm/opentalaria/protocol"
 	"github.com/ibm/opentalaria/utils"
 )
 
-func (p *Plugin) Produce(req protocol.ProduceRequest) (protocol.ProduceResponse, error) {
-	response := protocol.ProduceResponse{}
+func (p *Plugin) Produce(req protocol.ProduceRequest) (map[string][]models.ProducePartitionResponse, error) {
+	response := make(map[string][]models.ProducePartitionResponse)
 
 	for _, topic := range req.TopicData {
-		topicResponse := protocol.TopicProduceResponse{}
-		topicResponse.Name = topic.Name
 		errResponse := utils.ErrNoError
+		response[topic.Name] = make([]models.ProducePartitionResponse, len(topic.PartitionData))
 
 		topicObject, err := p.GetTopic(topic.Name)
 		if err != nil {
 			errResponse = utils.ErrInvalidRequest
 		}
 
-		for _, partition := range topic.PartitionData {
+		for i, partition := range topic.PartitionData {
 			slog.Debug("Received records", "records", fmt.Sprintf("%+v", partition.Records))
 
 			newOffset, err := p.writeRecords(partition.Records, topicObject, int(partition.Index))
@@ -31,19 +31,12 @@ func (p *Plugin) Produce(req protocol.ProduceRequest) (protocol.ProduceResponse,
 				errResponse = utils.ErrInvalidRequest
 			}
 
-			topicResponse.PartitionResponses = append(topicResponse.PartitionResponses, protocol.PartitionProduceResponse{
-				Version:    response.Version,
-				Index:      partition.Index,
-				ErrorCode:  int16(errResponse),
-				BaseOffset: int64(newOffset),
-				// TODO: this needs to be implemented, see documentation for details
-				LogAppendTimeMs: -1,
-				LogStartOffset:  0,
-				// TODO: Don't forget to handle errors when the protocol is fully implemented
-			})
+			response[topic.Name][i] = models.ProducePartitionResponse{
+				BaseOffset:     newOffset,
+				Error:          errResponse,
+				PartitionIndex: partition.Index,
+			}
 		}
-
-		response.Responses = append(response.Responses, topicResponse)
 	}
 
 	return response, nil
