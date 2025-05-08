@@ -2,7 +2,7 @@ module github.com/ibm/opentalaria
 
 go 1.23.0
 
-toolchain go1.24.1
+toolchain go1.24.3
 
 require (
 	github.com/google/uuid v1.6.0
