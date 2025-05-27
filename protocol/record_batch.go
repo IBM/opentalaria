@@ -1,7 +1,11 @@
 package protocol
 
 import (
+	"hash/crc32"
+	"log/slog"
 	"time"
+
+	"github.com/ibm/opentalaria/utils"
 )
 
 type CompressionType int8
@@ -13,6 +17,40 @@ const (
 	CompressionLz4
 	CompressionZstd
 )
+
+func (c CompressionType) String() string {
+	switch c {
+	case CompressionNone:
+		return "na"
+	case CompressionGzip:
+		return "gzip"
+	case CompressionSnappy:
+		return "snappy"
+	case CompressionLz4:
+		return "lz4"
+	case CompressionZstd:
+		return "zstd"
+	default:
+		return "unknown"
+	}
+}
+
+func ParseCompressionType(t string) CompressionType {
+	switch t {
+	case "na":
+		return CompressionNone
+	case "gzip":
+		return CompressionGzip
+	case "snappy":
+		return CompressionSnappy
+	case "lz4":
+		return CompressionLz4
+	case "zstd":
+		return CompressionZstd
+	default:
+		return CompressionNone
+	}
+}
 
 type TimestampType int8
 
@@ -103,6 +141,12 @@ func (r *RecordBatch) decode(pd packetDecoder, version int16) (err error) {
 		return err
 	}
 
+	// validate CRC here and return an error if content CRC does not match the one submitted by the producer
+	err = r.validateCrc(pd)
+	if err != nil {
+		return err
+	}
+
 	if r.attributes, err = pd.getInt16(); err != nil {
 		return err
 	}
@@ -156,4 +200,27 @@ func (r *RecordBatch) decode(pd packetDecoder, version int16) (err error) {
 	r.Records = remainingBytes
 
 	return err
+}
+
+// validateCrc calculates the Castagnoli crc checksum for all bytes after the CRC field in the RecordBatch.
+// It then compares the calculated sum to the value sent by the producer and if they don't match, an error is thrown.
+func (r *RecordBatch) validateCrc(pd packetDecoder) error {
+	crcPayload, err := pd.peek(0, pd.remaining())
+	if err != nil {
+		slog.Error("error peek", "err", err)
+		return utils.ErrInvalidMessage
+	}
+
+	payloadBytes, err := crcPayload.getRawBytes(crcPayload.remaining())
+	if err != nil {
+		slog.Error("error peek", "err", err)
+		return utils.ErrInvalidMessage
+	}
+	crc32q := crc32.MakeTable(crc32.Castagnoli)
+
+	if crc32.Checksum(payloadBytes, crc32q) != r.CRC {
+		return utils.ErrInvalidMessage
+	}
+
+	return nil
 }

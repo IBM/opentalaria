@@ -71,7 +71,8 @@ func (p *Plugin) ListTopics(topicName []string) ([]protocol.MetadataResponseTopi
 	if topicName != nil {
 		query += " WHERE topic_name = ANY($1)"
 
-		stmt, err := p.db.Prepare(query)
+		var stmt *sql.Stmt
+		stmt, err = p.db.Prepare(query)
 		if err != nil {
 			return nil, err
 		}
@@ -134,9 +135,8 @@ func getTopicMetadata(topic_id, topic_name string, num_partitions, replication_f
 		kErr = utils.ErrInvalidTopic
 	}
 
-	// TODO: partitions are currently mocked
 	partitions := make([]protocol.MetadataResponsePartition, num_partitions)
-	for i := 0; i < num_partitions; i++ {
+	for i := range num_partitions {
 		partitions[i].ErrorCode = int16(utils.ErrNoError)
 		partitions[i].PartitionIndex = int32(i)
 		partitions[i].LeaderID = 1

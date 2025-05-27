@@ -1,6 +1,7 @@
 package plugins
 
 import (
+	"github.com/ibm/opentalaria/models"
 	"github.com/ibm/opentalaria/protocol"
 	"github.com/ibm/opentalaria/utils"
 	"github.com/spf13/viper"
@@ -21,4 +22,7 @@ type PluginInterface interface {
 
 	// partitions
 	CreatePartitions(topicName string, partitionCount int) error
+
+	// Produce
+	Produce(req protocol.ProduceRequest) (map[string][]models.ProducePartitionResponse, error)
 }

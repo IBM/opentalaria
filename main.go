@@ -42,6 +42,7 @@ func main() {
 	server.RegisterAPI(&protocol.DeleteTopicsRequest{}, 0, 3, api.HandleDeleteTopics)
 	server.RegisterAPI(&protocol.DescribeConfigsRequest{}, 0, 2, api.HandleDescribeConfigsRequest)
 	server.RegisterAPI(&protocol.CreatePartitionsRequest{}, 0, 1, api.HandleCreatePartitionsRequest)
+	server.RegisterAPI(&protocol.ProduceRequest{}, 0, 7, api.HandleProduceRequest)
 
 	server.Run()
 }
