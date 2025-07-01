@@ -2,7 +2,7 @@
 
 This list will be updated as new APIs get implemented. For implementation details please see the [api](api/) directory. 
 
-- [ ] Produce (0) - In progress
+- [x] Produce (0)
 - [ ] Fetch	(1)
 - [ ] ListOffsets (2)
 - [x] Metadata (3)
