@@ -145,7 +145,12 @@ func (rd *realDecoder) getCompactArrayLength() (int, error) {
 		return 0, nil
 	}
 
-	return int(n) - 1, nil
+	if n-1 > uint64(rd.remaining()) {
+		rd.off = len(rd.raw)
+		return -1, ErrInsufficientData
+	}
+
+	return int(n - 1), nil
 }
 
 func (rd *realDecoder) getBool() (bool, error) {
@@ -268,10 +273,14 @@ func (rd *realDecoder) getCompactString() (string, error) {
 		return "", err
 	}
 
-	length := int(n - 1)
-	if length < 0 {
+	if n == 0 {
 		return "", errInvalidByteSliceLength
 	}
+	if n-1 > uint64(rd.remaining()) {
+		rd.off = len(rd.raw)
+		return "", ErrInsufficientData
+	}
+	length := int(n - 1)
 	tmpStr := string(rd.raw[rd.off : rd.off+length])
 	rd.off += length
 	return tmpStr, nil
@@ -283,15 +292,19 @@ func (rd *realDecoder) getCompactNullableString() (*string, error) {
 		return nil, err
 	}
 
-	length := int(n - 1)
-
-	if length < 0 {
-		return nil, err
+	if n == 0 {
+		return nil, nil
 	}
 
+	if n-1 > uint64(rd.remaining()) {
+		rd.off = len(rd.raw)
+		return nil, ErrInsufficientData
+	}
+
+	length := int(n - 1)
 	tmpStr := string(rd.raw[rd.off : rd.off+length])
 	rd.off += length
-	return &tmpStr, err
+	return &tmpStr, nil
 }
 
 func (rd *realDecoder) getCompactInt8Array() ([]int8, error) {
@@ -304,8 +317,12 @@ func (rd *realDecoder) getCompactInt8Array() ([]int8, error) {
 		return nil, nil
 	}
 
-	arrayLength := int(n) - 1
+	if n-1 > uint64(rd.remaining()) {
+		rd.off = len(rd.raw)
+		return nil, ErrInsufficientData
+	}
 
+	arrayLength := int(n - 1)
 	ret := make([]int8, arrayLength)
 
 	for i := range ret {
@@ -325,8 +342,12 @@ func (rd *realDecoder) getCompactInt16Array() ([]int16, error) {
 		return nil, nil
 	}
 
-	arrayLength := int(n) - 1
+	if n-1 > uint64(rd.remaining()/2) {
+		rd.off = len(rd.raw)
+		return nil, ErrInsufficientData
+	}
 
+	arrayLength := int(n - 1)
 	ret := make([]int16, arrayLength)
 
 	for i := range ret {
@@ -346,8 +367,12 @@ func (rd *realDecoder) getCompactInt32Array() ([]int32, error) {
 		return nil, nil
 	}
 
-	arrayLength := int(n) - 1
+	if n-1 > uint64(rd.remaining()/4) {
+		rd.off = len(rd.raw)
+		return nil, ErrInsufficientData
+	}
 
+	arrayLength := int(n - 1)
 	ret := make([]int32, arrayLength)
 
 	for i := range ret {
@@ -489,6 +514,11 @@ func (rd *realDecoder) getStringArray() ([]string, error) {
 		return nil, errInvalidArrayLength
 	}
 
+	if n > rd.remaining() {
+		rd.off = len(rd.raw)
+		return nil, ErrInsufficientData
+	}
+
 	ret := make([]string, n)
 	for i := range ret {
 		str, err := rd.getString()
@@ -511,8 +541,12 @@ func (rd *realDecoder) getCompactStringArray() ([]string, error) {
 		return nil, nil
 	}
 
-	arrayLength := int(n) - 1
+	if n-1 > uint64(rd.remaining()) {
+		rd.off = len(rd.raw)
+		return nil, ErrInsufficientData
+	}
 
+	arrayLength := int(n - 1)
 	ret := make([]string, arrayLength)
 
 	for i := range ret {

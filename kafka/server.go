@@ -146,6 +146,10 @@ Exit:
 			break
 		}
 		size := binary.BigEndian.Uint32(sizeBytes)
+		if size == 0 || size > uint32(protocol.MaxRequestSize) {
+			slog.Error("invalid message size", "size", size)
+			break
+		}
 
 		// read the rest of the message into the buffer.
 		messageBytes := make([]byte, size)

@@ -80,3 +80,36 @@ func TestServer_Run(t *testing.T) {
 	cancel()
 	time.Sleep(100 * time.Millisecond)
 }
+
+// TestHandleRequest_OversizedFrameRejected verifies that oversized request frames
+// (> protocol.MaxRequestSize / 0xFFFFFFFF) are rejected before allocating memory.
+func TestHandleRequest_OversizedFrameRejected(t *testing.T) {
+	serverConn, clientConn := net.Pipe()
+	defer clientConn.Close()
+
+	client := &Client{
+		conn: serverConn,
+	}
+
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		client.handleRequest()
+	}()
+
+	// Send 4-byte header declaring size = 0xFFFFFFFF (~4 GiB)
+	_, err := clientConn.Write([]byte{0xff, 0xff, 0xff, 0xff})
+	if err != nil {
+		t.Fatalf("failed to write frame header: %v", err)
+	}
+
+	// Server should reject oversized frame immediately and close the connection without allocating and blocking
+	select {
+	case <-done:
+		// Succeeded: server rejected frame and closed connection
+	case <-time.After(500 * time.Millisecond):
+		clientConn.Close()
+		serverConn.Close()
+		t.Fatal("server did not reject oversized frame and remained blocked in read loop")
+	}
+}
